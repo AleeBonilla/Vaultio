@@ -19,3 +19,22 @@ Este frontend debe cumplir como minimo:
 - Botones icon-only con nombre accesible.
 - Estados anunciables para errores y acciones importantes.
 - Contraste WCAG AA.
+
+## Estructura
+
+```txt
+src/app/
+  components/
+    comments/     # Comentarios y reseñas
+    filters/      # Paneles y controles de filtrado
+    layout/       # Sidebar, top nav y layout principal
+    resources/    # Tarjetas y componentes de recursos
+    ui/           # Componentes base compartidos
+  pages/
+    auth/         # Login y registro
+    courses/      # Carreras, cursos y recursos por curso
+    home/         # Landing y dashboard
+    library/      # Guardados
+    profile/      # Perfil y edicion
+    resources/    # Listado, detalle y subida de recursos
+```

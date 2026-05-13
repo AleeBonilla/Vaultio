@@ -1,8 +1,8 @@
 import { CheckCircle, FileText, Upload } from 'lucide-react';
 import { useId, useState } from 'react';
-import { Badge } from '../components/ui/Badge';
-import { Button } from '../components/ui/Button';
-import { Input } from '../components/ui/Input';
+import { Badge } from '../../components/ui/Badge';
+import { Button } from '../../components/ui/Button';
+import { Input } from '../../components/ui/Input';
 
 export function UploadResource() {
   const [step, setStep] = useState(1);

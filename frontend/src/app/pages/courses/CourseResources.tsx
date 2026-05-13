@@ -1,9 +1,9 @@
 import { SlidersHorizontal, Grid, List, ChevronRight, ArrowLeft, BookOpen } from 'lucide-react';
 import { useState } from 'react';
 import { useParams, Link } from 'react-router';
-import { ResourceCard } from '../components/ResourceCard';
-import { FilterPanel } from '../components/FilterPanel';
-import { Button } from '../components/ui/Button';
+import { ResourceCard } from '../../components/resources/ResourceCard';
+import { FilterPanel } from '../../components/filters/FilterPanel';
+import { Button } from '../../components/ui/Button';
 
 export function CourseResources() {
   const { careerId, courseId } = useParams();

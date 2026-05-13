@@ -1,6 +1,6 @@
 import { FileText, Download, Bookmark, Eye } from 'lucide-react';
-import { Badge } from './ui/Badge';
-import { RatingStars } from './ui/RatingStars';
+import { Badge } from '../ui/Badge';
+import { RatingStars } from '../ui/RatingStars';
 import { Link } from 'react-router';
 
 interface ResourceCardProps {

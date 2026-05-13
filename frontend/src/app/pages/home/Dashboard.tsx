@@ -1,7 +1,7 @@
 import { TrendingUp, Clock, Star, BookOpen, ChevronRight, FileText } from 'lucide-react';
-import { SearchBar } from '../components/ui/SearchBar';
-import { ResourceCard } from '../components/ResourceCard';
-import { Badge } from '../components/ui/Badge';
+import { SearchBar } from '../../components/ui/SearchBar';
+import { ResourceCard } from '../../components/resources/ResourceCard';
+import { Badge } from '../../components/ui/Badge';
 import { Link } from 'react-router';
 
 export function Dashboard() {

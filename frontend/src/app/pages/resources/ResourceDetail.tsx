@@ -1,8 +1,8 @@
 import { Download, Bookmark, Share2, FileText, Calendar, User, Tag, ThumbsUp, MessageSquare } from 'lucide-react';
-import { Button } from '../components/ui/Button';
-import { Badge } from '../components/ui/Badge';
-import { RatingStars } from '../components/ui/RatingStars';
-import { CommentBlock } from '../components/CommentBlock';
+import { Button } from '../../components/ui/Button';
+import { Badge } from '../../components/ui/Badge';
+import { RatingStars } from '../../components/ui/RatingStars';
+import { CommentBlock } from '../../components/comments/CommentBlock';
 import { Link } from 'react-router';
 
 export function ResourceDetail() {

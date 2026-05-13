@@ -1,7 +1,7 @@
 import { Mail, BookOpen, Upload, Star, Calendar, Edit } from 'lucide-react';
-import { Button } from '../components/ui/Button';
-import { Badge } from '../components/ui/Badge';
-import { ResourceCard } from '../components/ResourceCard';
+import { Button } from '../../components/ui/Button';
+import { Badge } from '../../components/ui/Badge';
+import { ResourceCard } from '../../components/resources/ResourceCard';
 import { Link } from 'react-router';
 
 export function UserProfile() {

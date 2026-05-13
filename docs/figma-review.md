@@ -88,3 +88,5 @@ Usar Figma como base visual y de flujos, pero construir el frontend final con co
 ## Migracion inicial
 
 Se creo `frontend/` a partir del prototipo de `figma/`. La carpeta `figma/` queda como referencia del export original; el trabajo de implementacion debe continuar en `frontend/`.
+
+La primera reorganizacion agrupo paginas por dominio (`auth`, `courses`, `home`, `library`, `profile`, `resources`) y componentes por responsabilidad (`layout`, `resources`, `filters`, `comments`, `ui`).

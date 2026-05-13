@@ -1,17 +1,17 @@
 import { createBrowserRouter } from "react-router";
-import { LandingPage } from "./pages/LandingPage";
-import { LoginPage } from "./pages/LoginPage";
-import { RegisterPage } from "./pages/RegisterPage";
-import { MainLayout } from "./components/layouts/MainLayout";
-import { Dashboard } from "./pages/Dashboard";
-import { CourseNavigation } from "./pages/CourseNavigation";
-import { ResourceListing } from "./pages/ResourceListing";
-import { CourseResources } from "./pages/CourseResources";
-import { ResourceDetail } from "./pages/ResourceDetail";
-import { UploadResource } from "./pages/UploadResource";
-import { UserProfile } from "./pages/UserProfile";
-import { EditProfile } from "./pages/EditProfile";
-import { SavedResources } from "./pages/SavedResources";
+import { MainLayout } from "./components/layout/MainLayout";
+import { LoginPage } from "./pages/auth/LoginPage";
+import { RegisterPage } from "./pages/auth/RegisterPage";
+import { CourseNavigation } from "./pages/courses/CourseNavigation";
+import { CourseResources } from "./pages/courses/CourseResources";
+import { Dashboard } from "./pages/home/Dashboard";
+import { LandingPage } from "./pages/home/LandingPage";
+import { SavedResources } from "./pages/library/SavedResources";
+import { EditProfile } from "./pages/profile/EditProfile";
+import { UserProfile } from "./pages/profile/UserProfile";
+import { ResourceDetail } from "./pages/resources/ResourceDetail";
+import { ResourceListing } from "./pages/resources/ResourceListing";
+import { UploadResource } from "./pages/resources/UploadResource";
 
 export const router = createBrowserRouter([
   {

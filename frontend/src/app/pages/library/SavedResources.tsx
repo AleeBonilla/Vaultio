@@ -1,6 +1,6 @@
 import { Bookmark, Trash2 } from 'lucide-react';
-import { ResourceCard } from '../components/ResourceCard';
-import { Button } from '../components/ui/Button';
+import { ResourceCard } from '../../components/resources/ResourceCard';
+import { Button } from '../../components/ui/Button';
 
 export function SavedResources() {
   const savedResources = [

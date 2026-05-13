@@ -1,5 +1,5 @@
 import { ThumbsUp } from 'lucide-react';
-import { RatingStars } from './ui/RatingStars';
+import { RatingStars } from '../ui/RatingStars';
 
 interface CommentBlockProps {
   author: string;

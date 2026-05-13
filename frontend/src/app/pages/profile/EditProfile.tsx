@@ -1,8 +1,8 @@
 import { ArrowLeft, Upload, User } from 'lucide-react';
 import { Link } from 'react-router';
-import { Button } from '../components/ui/Button';
-import { Input } from '../components/ui/Input';
-import { Badge } from '../components/ui/Badge';
+import { Button } from '../../components/ui/Button';
+import { Input } from '../../components/ui/Input';
+import { Badge } from '../../components/ui/Badge';
 
 export function EditProfile() {
   return (

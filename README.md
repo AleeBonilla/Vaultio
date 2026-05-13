@@ -39,6 +39,8 @@ El objetivo es que una persona del equipo pueda clonar el repo, levantar Postgre
 frontend/
   src/
     app/
+      components/
+      pages/
     styles/
 apps/
   api/
