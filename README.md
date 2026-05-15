@@ -12,7 +12,8 @@ El proyecto se desarrollara primero para funcionar de forma local, ya que sera p
 - Frontend objetivo si se decide escalar: Next.js, React, TypeScript, Tailwind CSS, shadcn/ui.
 - Backend: NestJS, TypeScript, Prisma.
 - Base de datos: PostgreSQL local con Docker.
-- Archivos: carpeta local `uploads/` servida por el backend.
+- Auth: Firebase Auth con OAuth; el backend valida tokens con Firebase Admin.
+- Archivos: Firebase Storage para la primera etapa; PostgreSQL guarda la metadata logica del recurso.
 - Gestion de paquetes local: npm por ahora; pnpm workspaces puede incorporarse cuando se agregue el backend.
 - Contenedores: Docker y Docker Compose para levantar servicios locales.
 
@@ -44,7 +45,6 @@ frontend/
     styles/
 apps/
   api/
-    uploads/
 packages/
   db/
   shared/

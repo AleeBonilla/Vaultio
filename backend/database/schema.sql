@@ -40,8 +40,7 @@ CREATE TABLE IF NOT EXISTS careers (
     institution_id  INTEGER         NOT NULL,
 
     PRIMARY KEY (id),
-    CONSTRAINT uq_careers_plan_per_institution UNIQUE (institution_id, study_plan),
-    CONSTRAINT uq_careers_code                 UNIQUE (code)
+    CONSTRAINT uq_careers_institution_code_plan UNIQUE (institution_id, code, study_plan)
 );
 
 
@@ -140,7 +139,7 @@ CREATE TABLE IF NOT EXISTS identities (
     user_id         UUID            NOT NULL,
 
     PRIMARY KEY (id),
-    CONSTRAINT uq_identities_provider_uid UNIQUE (provider_uid)
+    CONSTRAINT uq_identities_provider_uid UNIQUE (provider_name, provider_uid)
 );
 
 
@@ -210,10 +209,18 @@ CREATE TABLE IF NOT EXISTS resources (
     title               VARCHAR(80)     NOT NULL,
     description         TEXT            NOT NULL,
     tags                VARCHAR(60)     ARRAY,
-    file_url            TEXT            NOT NULL,
+    storage_provider    VARCHAR(30)     NOT NULL DEFAULT 'firebase_storage',
+    storage_bucket      VARCHAR(255)    NOT NULL,
+    storage_key         TEXT            NOT NULL,
+    original_filename   VARCHAR(255)    NOT NULL,
+    mime_type           VARCHAR(120)    NOT NULL,
+    checksum_sha256     CHAR(64),
+    upload_status       VARCHAR(20)     NOT NULL DEFAULT 'ready',
+    file_url            TEXT,
     file_size           BIGINT,
     file_extension      VARCHAR(10),
     views_count         BIGINT          NOT NULL DEFAULT 0,
+    downloads_count     BIGINT          NOT NULL DEFAULT 0,
     created_at          TIMESTAMPTZ     NOT NULL DEFAULT NOW(),
     updated_at          TIMESTAMPTZ     NOT NULL DEFAULT NOW(),
     is_active           BOOLEAN         NOT NULL DEFAULT TRUE,
@@ -221,11 +228,21 @@ CREATE TABLE IF NOT EXISTS resources (
     user_id             UUID            NOT NULL,
     academic_period_id  INTEGER,
     course_id           INTEGER         NOT NULL,
-    resource_type_id    INTEGER         NOT NULL,
+    resource_type_id    SMALLINT        NOT NULL,
 
     PRIMARY KEY (id),
+    CONSTRAINT uq_resources_storage_object  UNIQUE (storage_provider, storage_bucket, storage_key),
     CONSTRAINT chk_resources_file_size      CHECK (file_size > 0),
-    CONSTRAINT chk_resources_views_count    CHECK (views_count >= 0)
+    CONSTRAINT chk_resources_views_count    CHECK (views_count >= 0),
+    CONSTRAINT chk_resources_downloads_count CHECK (downloads_count >= 0),
+    CONSTRAINT chk_resources_storage_provider CHECK (storage_provider IN ('firebase_storage', 'minio', 'local', 's3')),
+    CONSTRAINT chk_resources_storage_bucket CHECK (LENGTH(TRIM(storage_bucket)) > 0),
+    CONSTRAINT chk_resources_storage_key    CHECK (LENGTH(TRIM(storage_key)) > 0),
+    CONSTRAINT chk_resources_upload_status  CHECK (upload_status IN ('pending', 'ready', 'failed', 'deleted')),
+    CONSTRAINT chk_resources_checksum_sha256 CHECK (
+        checksum_sha256 IS NULL
+        OR checksum_sha256 ~ '^[0-9a-f]{64}$'
+    )
 );
 
 
@@ -310,10 +327,10 @@ CREATE TABLE IF NOT EXISTS reports (
     CONSTRAINT chk_reports_status CHECK (
         status IN ('pending', 'reviewing', 'resolved', 'dismissed')
     ),
-    CONSTRAINT chk_reports_has_target CHECK (
-        reported_user_id IS NOT NULL
-        OR resource_id IS NOT NULL
-        OR comment_id IS NOT NULL
+    CONSTRAINT chk_reports_single_target CHECK (
+        ((reported_user_id IS NOT NULL)::INTEGER
+        + (resource_id IS NOT NULL)::INTEGER
+        + (comment_id IS NOT NULL)::INTEGER) = 1
     )
 );
 
@@ -556,6 +573,7 @@ CREATE INDEX idx_resources_course           ON resources(course_id);
 CREATE INDEX idx_resources_type             ON resources(resource_type_id);
 CREATE INDEX idx_resources_professor        ON resources(professor_id);
 CREATE INDEX idx_resources_period           ON resources(academic_period_id);
+CREATE INDEX idx_resources_storage_key      ON resources(storage_provider, storage_bucket, storage_key);
 CREATE INDEX idx_comments_resource          ON comments(resource_id);
 CREATE INDEX idx_comments_user              ON comments(user_id);
 CREATE INDEX idx_comments_parent            ON comments(parent_id);
@@ -576,6 +594,14 @@ CREATE INDEX idx_identities_email           ON identities(email);
 CREATE INDEX idx_courses_code               ON courses(code);
 CREATE INDEX idx_careers_code               ON careers(code);
 CREATE INDEX idx_resources_title            ON resources(title);
+CREATE INDEX idx_resources_search           ON resources USING GIN (
+    to_tsvector(
+        'spanish',
+        COALESCE(title, '') || ' ' ||
+        COALESCE(description, '') || ' ' ||
+        COALESCE(array_to_string(tags, ' '), '')
+    )
+);
 
 -- === Filtros frecuentes ===
 CREATE INDEX idx_resources_active           ON resources(is_active) WHERE is_active = TRUE;

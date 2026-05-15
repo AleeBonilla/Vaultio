@@ -19,13 +19,13 @@ La base de datos existente ya modela mas que un CRUD basico. Incluye institucion
 
 - **NestJS + TypeScript**: mas estructurado que Express para un proyecto academico que puede crecer. Facilita modulos, controladores, servicios, guards, pipes y pruebas.
 - **Prisma**: acelera CRUD y tipado contra PostgreSQL. Puede partir de la BD actual usando introspeccion.
-- **JWT + Google OAuth / correo institucional**: para el MVP se puede autenticar con Google y validar dominio `estudiantec.cr`. A futuro se puede extender con mas proveedores.
+- **Firebase Auth + OAuth**: para el MVP se puede autenticar con Google y validar dominio `estudiantec.cr` desde el backend despues de verificar el ID token con Firebase Admin. A futuro se puede extender con mas proveedores.
 
 ### Base de datos y archivos
 
 - **PostgreSQL 16**: ya esta elegido y el esquema aprovecha constraints, indices, triggers y funciones.
 - **Docker Compose**: ambiente reproducible para el equipo.
-- **Storage S3-compatible**: para archivos de recursos. En desarrollo puede usarse almacenamiento local o MinIO; en produccion, Supabase Storage, Cloudflare R2, AWS S3 o equivalente.
+- **Firebase Storage**: para la primera etapa conviene usarlo como almacenamiento de archivos, documentos y fotos, manteniendo PostgreSQL como base logica principal. MinIO/S3-compatible queda como alternativa posterior si se necesita self-hosting, portabilidad o compatibilidad S3.
 
 ### Herramientas
 
@@ -55,7 +55,7 @@ Vaultio/
 
 ## Modulos del backend
 
-- **AuthModule**: login, perfil de sesion, vinculacion con `identities`, validacion de dominio institucional.
+- **AuthModule**: verificacion de Firebase ID tokens, perfil de sesion, vinculacion con `identities`, validacion de dominio institucional.
 - **UsersModule**: perfil, carrera del usuario, reputacion.
 - **CatalogModule**: instituciones, carreras, cursos, profesores, periodos, tipos de recurso.
 - **ResourcesModule**: crear, listar, buscar, actualizar, soft-delete y descargar recursos.
@@ -94,13 +94,14 @@ Vaultio/
 - Moderacion compleja con colas, estados y historial detallado.
 - Multiinstitucion completa mas alla del modelo de datos.
 
-## Ajustes sugeridos a la base de datos
+## Ajustes aplicados a la base de datos
 
-- Agregar indice full-text sobre `resources.title`, `resources.description` y `tags`.
-- Separar `views_count` de descargas; actualmente el trigger incrementa vistas cuando se registra una descarga.
-- Revisar `uq_careers_plan_per_institution`: si una institucion tiene varias carreras con el mismo plan anual, esta restriccion puede bloquear datos validos. Probablemente deberia ser `UNIQUE (institution_id, code, study_plan)`.
-- Agregar `mime_type`, `storage_key` y `checksum` a `resources` para gestionar archivos de forma mas segura que solo `file_url`.
-- Definir si `users` representa usuario de aplicacion y `identities` representa login externo. Esa separacion esta bien, pero debe quedar clara en el backend.
+- Se agrego indice full-text sobre `resources.title`, `resources.description` y `tags`.
+- Se separo `views_count` de `downloads_count`; las descargas ya no incrementan vistas.
+- Se reemplazo la unicidad de carrera por `UNIQUE (institution_id, code, study_plan)`.
+- Se agrego metadata de storage a `resources`: `storage_provider`, `storage_bucket`, `storage_key`, `original_filename`, `mime_type`, `checksum_sha256` y `upload_status`.
+- Se ajusto `identities` para identificar logins externos por `(provider_name, provider_uid)`.
+- Se ajusto `reports` para que cada reporte apunte a un unico objetivo: usuario, recurso o comentario.
 
 ## Criterio de arquitectura
 

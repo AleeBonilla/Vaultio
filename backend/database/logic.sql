@@ -30,20 +30,20 @@ CREATE TRIGGER trg_comments_updated_at
     FOR EACH ROW EXECUTE FUNCTION trg_set_updated_at();
 
 
--- 2. Incrementar views_count al registrar descarga
-CREATE OR REPLACE FUNCTION trg_increment_views()
+-- 2. Incrementar downloads_count al registrar descarga
+CREATE OR REPLACE FUNCTION trg_increment_downloads()
 RETURNS TRIGGER AS $$
 BEGIN
     UPDATE resources
-        SET views_count = views_count + 1
+        SET downloads_count = downloads_count + 1
     WHERE id = NEW.resource_id;
     RETURN NEW;
 END;
 $$ LANGUAGE plpgsql;
 
-CREATE TRIGGER trg_user_downloads_views
+CREATE TRIGGER trg_user_downloads_count
     AFTER INSERT ON user_downloads
-    FOR EACH ROW EXECUTE FUNCTION trg_increment_views();
+    FOR EACH ROW EXECUTE FUNCTION trg_increment_downloads();
 
 
 -- 3. Prevenir que un usuario califique su propio recurso
