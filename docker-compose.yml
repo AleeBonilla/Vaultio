@@ -1,0 +1,18 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: vaultio-postgres
+    environment:
+      POSTGRES_DB: vaultio
+      POSTGRES_USER: vaultio
+      POSTGRES_PASSWORD: vaultio
+    ports:
+      - "5432:5432"
+    volumes:
+      - vaultio-postgres-data:/var/lib/postgresql/data
+      - ./backend/database/schema.sql:/docker-entrypoint-initdb.d/01-schema.sql:ro
+      - ./backend/database/logic.sql:/docker-entrypoint-initdb.d/02-logic.sql:ro
+      - ./backend/database/seed.sql:/docker-entrypoint-initdb.d/03-seed.sql:ro
+
+volumes:
+  vaultio-postgres-data:

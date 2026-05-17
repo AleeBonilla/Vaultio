@@ -20,14 +20,34 @@ El proyecto se desarrollara primero para funcionar de forma local, ya que sera p
 ## Ejecucion local esperada
 
 ```txt
-docker compose up -d
 npm install
-npm run db:migrate
-npm run db:seed
-npm run dev
+npm run dev:api
+npm run dev:web
 ```
 
-El objetivo es que una persona del equipo pueda clonar el repo, levantar PostgreSQL con Docker, cargar datos iniciales y ejecutar frontend/backend localmente.
+El API local de demo queda disponible en `http://localhost:4000` y el frontend Vite en el puerto que indique Vite.
+
+Credenciales de demo:
+
+```txt
+maria@estudiantec.cr / demo123
+carlos@estudiantec.cr / demo123
+```
+
+PostgreSQL tambien puede levantarse con Docker para validar los scripts SQL:
+
+```txt
+docker compose up -d
+```
+
+El objetivo es que una persona del equipo pueda clonar el repo, ejecutar API/frontend localmente y, si necesita validar la base relacional, levantar PostgreSQL con Docker.
+
+## Comandos utiles
+
+```txt
+npm run test:api
+npm run build:web
+```
 
 ## Documentacion
 

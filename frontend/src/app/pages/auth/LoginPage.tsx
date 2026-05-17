@@ -1,12 +1,30 @@
 import { BookOpen } from 'lucide-react';
-import { Link } from 'react-router';
+import { useState } from 'react';
+import { Link, useNavigate } from 'react-router';
 import { Button } from '../../components/ui/Button';
 import { Input } from '../../components/ui/Input';
+import { authApi } from '../../lib/api';
 
 export function LoginPage() {
-  const handleSubmit = (e: React.FormEvent) => {
+  const navigate = useNavigate();
+  const [email, setEmail] = useState('maria@estudiantec.cr');
+  const [password, setPassword] = useState('demo123');
+  const [error, setError] = useState<string | null>(null);
+  const [submitting, setSubmitting] = useState(false);
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    window.location.href = '/app';
+    setSubmitting(true);
+    setError(null);
+
+    try {
+      await authApi.login({ email, password });
+      navigate('/app');
+    } catch (loginError) {
+      setError(loginError instanceof Error ? loginError.message : 'No se pudo iniciar sesion');
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   return (
@@ -20,21 +38,31 @@ export function LoginPage() {
             <span className="font-semibold text-2xl text-[#1a1a1a]">Vaultio</span>
           </Link>
           <h1 className="text-3xl font-bold text-[#1a1a1a] mb-3">Bienvenido de nuevo</h1>
-          <p className="text-[#666666]">Inicia sesión para acceder a tus recursos de estudio</p>
+          <p className="text-[#666666]">Inicia sesion para acceder a tus recursos de estudio</p>
         </div>
 
         <div className="bg-white rounded-lg border border-[#E0E0E0] p-8">
           <form onSubmit={handleSubmit} className="space-y-5">
+            {error && (
+              <div className="rounded-md border border-red-200 bg-red-50 p-3 text-sm text-red-700" role="alert">
+                {error}
+              </div>
+            )}
+
             <Input
-              label="Correo Electrónico"
+              label="Correo Electronico"
               type="email"
-              placeholder="Su correo bro"
+              value={email}
+              onChange={(event) => setEmail(event.target.value)}
+              placeholder="maria@estudiantec.cr"
               required
             />
             <Input
-              label="Contraseña"
+              label="Contrasena"
               type="password"
-              placeholder="Ingresa tu contraseña"
+              value={password}
+              onChange={(event) => setPassword(event.target.value)}
+              placeholder="Ingresa tu contrasena"
               required
             />
 
@@ -46,20 +74,18 @@ export function LoginPage() {
                 />
                 <span className="text-[#666666]">Recordarme</span>
               </label>
-              <a href="#" className="text-[#0066CC] hover:text-[#004A99] font-medium transition-colors">
-                ¿Olvidaste tu contraseña?
-              </a>
+              <span className="text-[#666666]">Demo local</span>
             </div>
 
-            <Button type="submit" variant="primary" className="w-full mt-6">
-              Iniciar Sesión
+            <Button type="submit" variant="primary" className="w-full mt-6" disabled={submitting}>
+              {submitting ? 'Iniciando...' : 'Iniciar Sesion'}
             </Button>
           </form>
 
           <div className="mt-8 text-center text-sm text-[#666666]">
-            ¿No tienes una cuenta?{' '}
+            No tienes una cuenta?{' '}
             <Link to="/register" className="text-[#0066CC] hover:text-[#004A99] font-semibold transition-colors">
-              Regístrate
+              Registrate
             </Link>
           </div>
         </div>
