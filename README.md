@@ -53,6 +53,7 @@ npm run build:web
 
 - [Plan tecnico inicial](docs/plan-tecnico.md)
 - [Revision inicial de Figma](docs/figma-review.md)
+- [Pendientes del proyecto](docs/pendientes.md)
 
 ## Estructura objetivo
 
