@@ -1,0 +1,359 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+model academic_periods {
+  id             Int           @id @default(autoincrement())
+  name           String        @db.VarChar(40)
+  year           Int?
+  institution_id Int?
+  institutions   institutions? @relation(fields: [institution_id], references: [id], map: "fk_academic_periods_institution")
+  resources      resources[]
+
+  @@index([institution_id], map: "idx_academic_periods_inst")
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+model audit_log {
+  id         BigInt   @id @default(autoincrement())
+  table_name String   @db.VarChar(60)
+  record_id  String
+  action     String   @db.VarChar(10)
+  old_data   Json?
+  new_data   Json?
+  changed_by String?  @db.Uuid
+  changed_at DateTime @default(now()) @db.Timestamptz(6)
+}
+
+model careers {
+  id             Int              @id @default(autoincrement())
+  code           String           @db.VarChar(20)
+  name           String           @db.VarChar(80)
+  study_plan     String           @db.VarChar(20)
+  is_active      Boolean          @default(true)
+  institution_id Int
+  institutions   institutions     @relation(fields: [institution_id], references: [id], map: "fk_careers_institution")
+  course_careers course_careers[]
+  user_careers   user_careers[]
+
+  @@unique([institution_id, code, study_plan], map: "uq_careers_institution_code_plan")
+  @@index([code], map: "idx_careers_code")
+  @@index([institution_id], map: "idx_careers_institution")
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+model comment_votes {
+  user_id    String   @db.Uuid
+  comment_id String   @db.Uuid
+  vote_type  Int      @db.SmallInt
+  created_at DateTime @default(now()) @db.Timestamptz(6)
+  comments   comments @relation(fields: [comment_id], references: [id], onDelete: Cascade, map: "fk_comment_votes_comment")
+  users      users    @relation(fields: [user_id], references: [id], onDelete: Cascade, map: "fk_comment_votes_user")
+
+  @@id([user_id, comment_id])
+  @@index([comment_id], map: "idx_comment_votes_comment")
+}
+
+model comments {
+  id             String          @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  content        String          @db.VarChar(512)
+  resource_id    String          @db.Uuid
+  created_at     DateTime        @default(now()) @db.Timestamptz(6)
+  updated_at     DateTime        @default(now()) @db.Timestamptz(6)
+  is_active      Boolean         @default(true)
+  user_id        String          @db.Uuid
+  parent_id      String?         @db.Uuid
+  comment_votes  comment_votes[]
+  comments       comments?       @relation("commentsTocomments", fields: [parent_id], references: [id], onDelete: Cascade, map: "fk_comments_parent")
+  other_comments comments[]      @relation("commentsTocomments")
+  resources      resources       @relation(fields: [resource_id], references: [id], onDelete: Cascade, map: "fk_comments_resource")
+  users          users           @relation(fields: [user_id], references: [id], onDelete: Cascade, map: "fk_comments_user")
+  reports        reports[]
+
+  @@index([parent_id], map: "idx_comments_parent")
+  @@index([resource_id], map: "idx_comments_resource")
+  @@index([user_id], map: "idx_comments_user")
+}
+
+model course_careers {
+  course_id Int
+  career_id Int
+  careers   careers @relation(fields: [career_id], references: [id], onDelete: Cascade, map: "fk_course_careers_career")
+  courses   courses @relation(fields: [course_id], references: [id], onDelete: Cascade, map: "fk_course_careers_course")
+
+  @@id([course_id, career_id])
+  @@index([career_id], map: "idx_course_careers_career")
+  @@index([course_id], map: "idx_course_careers_course")
+}
+
+model courses {
+  id                Int                 @id @default(autoincrement())
+  code              String              @unique(map: "uq_courses_code") @db.VarChar(20)
+  name              String              @db.VarChar(80)
+  is_active         Boolean             @default(true)
+  course_careers    course_careers[]
+  professor_courses professor_courses[]
+  resources         resources[]
+
+  @@index([code], map: "idx_courses_code")
+}
+
+model identities {
+  id            String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  provider_name String   @db.VarChar(60)
+  provider_uid  String   @db.VarChar(255)
+  email         String   @db.VarChar(255)
+  last_login    DateTime @default(now()) @db.Timestamptz(6)
+  created_at    DateTime @default(now()) @db.Timestamptz(6)
+  is_active     Boolean  @default(true)
+  user_id       String   @db.Uuid
+  users         users    @relation(fields: [user_id], references: [id], onDelete: Cascade, map: "fk_identities_user")
+
+  @@unique([provider_name, provider_uid], map: "uq_identities_provider_uid")
+  @@index([email], map: "idx_identities_email")
+  @@index([user_id], map: "idx_identities_user")
+}
+
+model institutions {
+  id               Int                @id @default(autoincrement())
+  name             String             @unique(map: "uq_institutions_name") @db.VarChar(80)
+  acronym          String?            @db.VarChar(20)
+  email_domain     String?            @unique(map: "uq_institutions_email_domain") @db.VarChar(40)
+  logo_url         String?
+  is_active        Boolean            @default(true)
+  academic_periods academic_periods[]
+  careers          careers[]
+}
+
+model permissions {
+  id               Int                @id @default(autoincrement())
+  code             String             @unique(map: "uq_permissions_code") @db.VarChar(30)
+  is_active        Boolean            @default(true)
+  role_permissions role_permissions[]
+  user_permissions user_permissions[]
+}
+
+model professor_courses {
+  professor_id Int
+  course_id    Int
+  is_active    Boolean    @default(true)
+  courses      courses    @relation(fields: [course_id], references: [id], onDelete: Cascade, map: "fk_professor_courses_course")
+  professors   professors @relation(fields: [professor_id], references: [id], onDelete: Cascade, map: "fk_professor_courses_professor")
+
+  @@id([professor_id, course_id])
+  @@index([course_id], map: "idx_professor_courses_course")
+  @@index([professor_id], map: "idx_professor_courses_prof")
+}
+
+model professors {
+  id                Int                 @id @default(autoincrement())
+  first_name        String              @db.VarChar(60)
+  last_name         String              @db.VarChar(80)
+  is_active         Boolean             @default(true)
+  professor_courses professor_courses[]
+  resources         resources[]
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+model ratings {
+  id          String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  stars       Int       @db.SmallInt
+  resource_id String    @db.Uuid
+  user_id     String    @db.Uuid
+  created_at  DateTime  @default(now()) @db.Timestamptz(6)
+  resources   resources @relation(fields: [resource_id], references: [id], onDelete: Cascade, map: "fk_ratings_resource")
+  users       users     @relation(fields: [user_id], references: [id], onDelete: Cascade, map: "fk_ratings_user")
+
+  @@unique([user_id, resource_id], map: "uq_ratings_user_resource")
+  @@index([resource_id], map: "idx_ratings_resource")
+  @@index([user_id], map: "idx_ratings_user")
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+model reports {
+  id                                    String     @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  reason                                String     @db.VarChar(255)
+  status                                String     @default("pending") @db.VarChar(30)
+  created_at                            DateTime   @default(now()) @db.Timestamptz(6)
+  resolved_at                           DateTime?  @db.Timestamptz(6)
+  admin_notes                           String?    @db.VarChar(512)
+  reporter_id                           String     @db.Uuid
+  reported_user_id                      String?    @db.Uuid
+  resource_id                           String?    @db.Uuid
+  comment_id                            String?    @db.Uuid
+  comments                              comments?  @relation(fields: [comment_id], references: [id], map: "fk_reports_comment")
+  users_reports_reported_user_idTousers users?     @relation("reports_reported_user_idTousers", fields: [reported_user_id], references: [id], map: "fk_reports_reported_user")
+  users_reports_reporter_idTousers      users      @relation("reports_reporter_idTousers", fields: [reporter_id], references: [id], onDelete: Cascade, map: "fk_reports_reporter")
+  resources                             resources? @relation(fields: [resource_id], references: [id], map: "fk_reports_resource")
+
+  @@index([comment_id], map: "idx_reports_comment")
+  @@index([reported_user_id], map: "idx_reports_reported_user")
+  @@index([reporter_id], map: "idx_reports_reporter")
+  @@index([resource_id], map: "idx_reports_resource")
+}
+
+model resource_types {
+  id          Int         @id @default(autoincrement()) @db.SmallInt
+  name        String      @unique(map: "uq_resource_types_name") @db.VarChar(30)
+  description String?     @db.VarChar(255)
+  resources   resources[]
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+model resources {
+  id                 String            @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  title              String            @db.VarChar(80)
+  description        String
+  tags               String[]          @db.VarChar(60)
+  storage_provider   String            @default("minio") @db.VarChar(30)
+  storage_bucket     String            @db.VarChar(255)
+  storage_key        String
+  original_filename  String            @db.VarChar(255)
+  mime_type          String            @db.VarChar(120)
+  checksum_sha256    String?           @db.Char(64)
+  upload_status      String            @default("ready") @db.VarChar(20)
+  file_url           String?
+  file_size          BigInt?
+  file_extension     String?           @db.VarChar(10)
+  views_count        BigInt            @default(0)
+  downloads_count    BigInt            @default(0)
+  created_at         DateTime          @default(now()) @db.Timestamptz(6)
+  updated_at         DateTime          @default(now()) @db.Timestamptz(6)
+  is_active          Boolean           @default(true)
+  professor_id       Int?
+  user_id            String            @db.Uuid
+  academic_period_id Int?
+  course_id          Int
+  resource_type_id   Int               @db.SmallInt
+  comments           comments[]
+  ratings            ratings[]
+  reports            reports[]
+  academic_periods   academic_periods? @relation(fields: [academic_period_id], references: [id], map: "fk_resources_academic_period")
+  courses            courses           @relation(fields: [course_id], references: [id], map: "fk_resources_course")
+  professors         professors?       @relation(fields: [professor_id], references: [id], map: "fk_resources_professor")
+  resource_types     resource_types    @relation(fields: [resource_type_id], references: [id], map: "fk_resources_resource_type")
+  users              users             @relation(fields: [user_id], references: [id], map: "fk_resources_user")
+  saved_resources    saved_resources[]
+  user_downloads     user_downloads[]
+
+  @@unique([storage_provider, storage_bucket, storage_key], map: "uq_resources_storage_object")
+  @@index([course_id], map: "idx_resources_course")
+  @@index([academic_period_id], map: "idx_resources_period")
+  @@index([professor_id], map: "idx_resources_professor")
+  @@index([storage_provider, storage_bucket, storage_key], map: "idx_resources_storage_key")
+  @@index([title], map: "idx_resources_title")
+  @@index([resource_type_id], map: "idx_resources_type")
+  @@index([user_id], map: "idx_resources_user")
+}
+
+model role_permissions {
+  permission_id Int
+  role_id       Int
+  permissions   permissions @relation(fields: [permission_id], references: [id], onDelete: Cascade, map: "fk_role_permissions_permission")
+  roles         roles       @relation(fields: [role_id], references: [id], onDelete: Cascade, map: "fk_role_permissions_role")
+
+  @@id([permission_id, role_id])
+  @@index([role_id], map: "idx_role_permissions_role")
+}
+
+model roles {
+  id               Int                @id @default(autoincrement())
+  name             String             @unique(map: "uq_roles_name") @db.VarChar(30)
+  is_active        Boolean            @default(true)
+  role_permissions role_permissions[]
+  user_roles       user_roles[]
+}
+
+model saved_resources {
+  user_id     String    @db.Uuid
+  resource_id String    @db.Uuid
+  created_at  DateTime  @default(now()) @db.Timestamptz(6)
+  resources   resources @relation(fields: [resource_id], references: [id], onDelete: Cascade, map: "fk_saved_resources_resource")
+  users       users     @relation(fields: [user_id], references: [id], onDelete: Cascade, map: "fk_saved_resources_user")
+
+  @@id([user_id, resource_id])
+  @@index([resource_id], map: "idx_saved_resources_resource")
+}
+
+model user_careers {
+  user_id   String  @db.Uuid
+  career_id Int
+  is_active Boolean @default(true)
+  careers   careers @relation(fields: [career_id], references: [id], onDelete: Cascade, map: "fk_user_careers_career")
+  users     users   @relation(fields: [user_id], references: [id], onDelete: Cascade, map: "fk_user_careers_user")
+
+  @@id([user_id, career_id])
+  @@index([career_id], map: "idx_user_careers_career")
+  @@index([user_id], map: "idx_user_careers_user")
+}
+
+model user_downloads {
+  id            BigInt    @id @default(autoincrement())
+  user_id       String    @db.Uuid
+  resource_id   String    @db.Uuid
+  downloaded_at DateTime  @default(now()) @db.Timestamptz(6)
+  resources     resources @relation(fields: [resource_id], references: [id], onDelete: Cascade, map: "fk_user_downloads_resource")
+  users         users     @relation(fields: [user_id], references: [id], onDelete: Cascade, map: "fk_user_downloads_user")
+
+  @@index([resource_id], map: "idx_user_downloads_resource")
+  @@index([user_id], map: "idx_user_downloads_user")
+}
+
+model user_permissions {
+  permission_id Int
+  user_id       String      @db.Uuid
+  created_at    DateTime    @default(now()) @db.Timestamptz(6)
+  is_active     Boolean     @default(true)
+  permissions   permissions @relation(fields: [permission_id], references: [id], onDelete: Cascade, map: "fk_user_permissions_permission")
+  users         users       @relation(fields: [user_id], references: [id], onDelete: Cascade, map: "fk_user_permissions_user")
+
+  @@id([permission_id, user_id])
+  @@index([user_id], map: "idx_user_permissions_user")
+}
+
+model user_roles {
+  role_id    Int
+  user_id    String   @db.Uuid
+  is_active  Boolean  @default(true)
+  created_at DateTime @default(now()) @db.Timestamptz(6)
+  roles      roles    @relation(fields: [role_id], references: [id], onDelete: Cascade, map: "fk_user_roles_role")
+  users      users    @relation(fields: [user_id], references: [id], onDelete: Cascade, map: "fk_user_roles_user")
+
+  @@id([role_id, user_id])
+  @@index([role_id], map: "idx_user_roles_role")
+  @@index([user_id], map: "idx_user_roles_user")
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+/// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
+model users {
+  id                                      String             @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  username                                String             @unique(map: "uq_users_username") @db.VarChar(30)
+  first_name                              String             @db.VarChar(30)
+  last_name                               String             @db.VarChar(255)
+  photo_url                               String?
+  bio                                     String?            @db.VarChar(255)
+  created_at                              DateTime           @default(now()) @db.Timestamptz(6)
+  updated_at                              DateTime           @default(now()) @db.Timestamptz(6)
+  is_active                               Boolean            @default(true)
+  reputation_score                        Int                @default(0)
+  comment_votes                           comment_votes[]
+  comments                                comments[]
+  identities                              identities[]
+  ratings                                 ratings[]
+  reports_reports_reported_user_idTousers reports[]          @relation("reports_reported_user_idTousers")
+  reports_reports_reporter_idTousers      reports[]          @relation("reports_reporter_idTousers")
+  resources                               resources[]
+  saved_resources                         saved_resources[]
+  user_careers                            user_careers[]
+  user_downloads                          user_downloads[]
+  user_permissions                        user_permissions[]
+  user_roles                              user_roles[]
+
+  @@index([username], map: "idx_users_username")
+}

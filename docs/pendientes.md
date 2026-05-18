@@ -4,36 +4,38 @@
 
 El proyecto ya tiene una primera version funcional para demo local:
 
-- API local en `apps/api`.
-- Seed inicial en memoria/persistencia JSON local.
+- API NestJS en `apps/api`.
+- Prisma Client generado desde el esquema PostgreSQL existente.
+- Seed inicial idempotente contra PostgreSQL para datos de demo.
 - Frontend conectado a la API en login, registro, carreras, cursos, listado, detalle y subida de recursos.
 - Pruebas automatizadas basicas del API.
 - Build del frontend validado.
 
-La API actual permite avanzar y presentar flujos reales sin configurar Firebase, Prisma ni credenciales externas. No reemplaza la arquitectura final propuesta.
+La API actual permite avanzar y presentar flujos reales sin credenciales externas. Todavia usa autenticacion demo temporal, pero ya corre sobre PostgreSQL/Prisma y tiene base S3-compatible para MinIO local.
 
 ## Pendientes prioritarios
 
-### 1. Conectar API a PostgreSQL
+### 1. Consolidar PostgreSQL/Prisma
 
-- Reemplazar la persistencia JSON local por PostgreSQL.
-- Definir si se usara Prisma o consultas SQL directas.
-- Convertir `backend/database/schema.sql`, `logic.sql` y `seed.sql` en un flujo reproducible de migraciones/seed.
-- Mapear los endpoints actuales contra el modelo relacional real.
+- Convertir `backend/database/schema.sql`, `logic.sql` y `seed.sql` en migraciones Prisma o en un flujo SQL versionado mas formal.
+- Decidir si Prisma sera la fuente declarativa principal del esquema o si los SQL manuales seguiran siendo la fuente primaria.
+- Completar los endpoints restantes contra el modelo relacional real.
+- Revisar indices/triggers cargados en volumenes existentes; si el volumen ya existia, Docker no vuelve a ejecutar automaticamente los scripts de init.
 - Mantener los contratos actuales del frontend para evitar rehacer pantallas.
 
 ### 2. Integrar Firebase Auth
 
-- Crear proyecto Firebase.
-- Configurar Google OAuth o proveedor elegido.
-- Validar ID tokens en el backend.
-- Vincular usuarios Firebase con `users` e `identities`.
-- Validar dominio institucional `estudiantec.cr`.
+- Configurar Google OAuth o proveedor elegido en el proyecto Firebase.
+- Configurar variables `VITE_FIREBASE_*` en el frontend local.
+- Validar flujo real desde UI con ID tokens de Firebase.
+- Revisar si se mantiene restriccion estricta del dominio `estudiantec.cr` en demo.
 - Reemplazar el login demo por autenticacion real.
+- El backend no debe manejar passwords reales; solo debe verificar tokens de Firebase y sincronizar usuario local.
 
-### 3. Integrar Firebase Storage
+### 3. Integrar MinIO / storage S3-compatible
 
-- Subir archivos reales desde el frontend.
+- Levantar MinIO local con Docker Compose.
+- Subir archivos reales desde el frontend usando URL presignada.
 - Guardar metadata en PostgreSQL:
   - `storage_provider`
   - `storage_bucket`
@@ -45,6 +47,7 @@ La API actual permite avanzar y presentar flujos reales sin configurar Firebase,
   - `upload_status`
 - Descargar archivos mediante URL firmada o ruta controlada del backend.
 - Validar tamano y tipo de archivo.
+- Mantener la capa de storage desacoplada para migrar luego a S3, R2, Supabase Storage u otro proveedor.
 
 ### 4. Completar interacciones
 
@@ -130,12 +133,12 @@ Para una entrega academica rapida:
 
 Para acercarse a la arquitectura final:
 
-1. Migrar API a PostgreSQL/Prisma.
+1. Formalizar migraciones/seed de PostgreSQL/Prisma.
 2. Integrar Firebase Auth.
-3. Integrar Firebase Storage.
+3. Completar flujo de upload con MinIO.
 4. Reforzar pruebas.
 5. Agregar moderacion.
 
 ## Nota tecnica
 
-La API local actual esta pensada como capa funcional de transicion. Sus endpoints sirven como contrato inicial entre frontend y backend. Al migrar a NestJS/Prisma/Firebase, conviene conservar esos contratos o cambiarlos de forma controlada para no rehacer el frontend.
+La API NestJS actual esta pensada como capa funcional de transicion hacia Firebase Auth y storage S3-compatible. Sus endpoints sirven como contrato inicial entre frontend y backend. Al integrar Firebase Auth y MinIO, conviene conservar esos contratos o cambiarlos de forma controlada para no rehacer el frontend.

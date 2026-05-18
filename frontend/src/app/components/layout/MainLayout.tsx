@@ -1,8 +1,11 @@
-import { Outlet } from 'react-router';
-import { Sidebar } from './Sidebar';
-import { TopNav } from './TopNav';
+import { useState } from "react";
+import { Outlet } from "react-router";
+import { Sidebar } from "./Sidebar";
+import { TopNav } from "./TopNav";
 
 export function MainLayout() {
+  const [mobileOpen, setMobileOpen] = useState(false);
+
   return (
     <div className="min-h-screen bg-[#FAFAFA]">
       <a
@@ -11,8 +14,8 @@ export function MainLayout() {
       >
         Saltar al contenido principal
       </a>
-      <Sidebar />
-      <TopNav />
+      <Sidebar mobileOpen={mobileOpen} onCloseMobile={() => setMobileOpen(false)} />
+      <TopNav onOpenMobileMenu={() => setMobileOpen(true)} />
       <main id="main-content" className="pt-16 lg:ml-64" tabIndex={-1}>
         <div className="p-4 sm:p-6 lg:p-8">
           <Outlet />

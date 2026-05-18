@@ -6,13 +6,17 @@
   "scripts": {
     "dev:api": "npm run dev --workspace apps/api",
     "start:api": "npm run start --workspace apps/api",
+    "build:api": "npm run build --workspace apps/api",
     "test:api": "npm run test --workspace apps/api",
     "dev:web": "npm run dev --prefix frontend",
     "build:web": "npm run build --prefix frontend",
     "test": "npm run test:api",
-    "build": "npm run build:web"
+    "build": "npm run build:api && npm run build:web"
   },
   "workspaces": [
     "apps/api"
-  ]
+  ],
+  "dependencies": {
+    "firebase-admin": "^13.10.0"
+  }
 }

@@ -19,13 +19,13 @@ La base de datos existente ya modela mas que un CRUD basico. Incluye institucion
 
 - **NestJS + TypeScript**: mas estructurado que Express para un proyecto academico que puede crecer. Facilita modulos, controladores, servicios, guards, pipes y pruebas.
 - **Prisma**: acelera CRUD y tipado contra PostgreSQL. Puede partir de la BD actual usando introspeccion.
-- **Firebase Auth + OAuth**: para el MVP se puede autenticar con Google y validar dominio `estudiantec.cr` desde el backend despues de verificar el ID token con Firebase Admin. A futuro se puede extender con mas proveedores.
+- **Firebase Auth + OAuth**: para el MVP se delega el login real a Firebase Auth. El backend solo verifica ID tokens con Firebase Admin, valida dominio `estudiantec.cr` y sincroniza `users`/`identities`.
 
 ### Base de datos y archivos
 
 - **PostgreSQL 16**: ya esta elegido y el esquema aprovecha constraints, indices, triggers y funciones.
 - **Docker Compose**: ambiente reproducible para el equipo.
-- **Firebase Storage**: para la primera etapa conviene usarlo como almacenamiento de archivos, documentos y fotos, manteniendo PostgreSQL como base logica principal. MinIO/S3-compatible queda como alternativa posterior si se necesita self-hosting, portabilidad o compatibilidad S3.
+- **MinIO local / S3-compatible storage**: para la demo local se usa MinIO en Docker. PostgreSQL sigue siendo la base logica principal y guarda la metadata; el proveedor definitivo de storage queda desacoplado mediante `storage_provider`, `storage_bucket` y `storage_key`.
 
 ### Herramientas
 
@@ -99,7 +99,7 @@ Vaultio/
 - Se agrego indice full-text sobre `resources.title`, `resources.description` y `tags`.
 - Se separo `views_count` de `downloads_count`; las descargas ya no incrementan vistas.
 - Se reemplazo la unicidad de carrera por `UNIQUE (institution_id, code, study_plan)`.
-- Se agrego metadata de storage a `resources`: `storage_provider`, `storage_bucket`, `storage_key`, `original_filename`, `mime_type`, `checksum_sha256` y `upload_status`.
+- Se agrego metadata de storage a `resources`: `storage_provider`, `storage_bucket`, `storage_key`, `original_filename`, `mime_type`, `checksum_sha256` y `upload_status`. Para la demo, `storage_provider` sera `minio`.
 - Se ajusto `identities` para identificar logins externos por `(provider_name, provider_uid)`.
 - Se ajusto `reports` para que cada reporte apunte a un unico objetivo: usuario, recurso o comentario.
 

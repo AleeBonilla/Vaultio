@@ -1,4 +1,4 @@
-const API_URL = import.meta.env.VITE_API_URL || "http://localhost:4000";
+const API_URL = (import.meta.env.VITE_API_URL as string | undefined) || "http://localhost:4000";
 
 export interface Career {
   id: number;
@@ -38,6 +38,17 @@ export interface ResourceSummary {
   fileSize?: number;
 }
 
+export interface ResourceComment {
+  id: string;
+  content: string;
+  createdAt: string;
+  author: {
+    id?: string;
+    firstName: string;
+    lastName: string;
+  } | null;
+}
+
 export interface ResourceDetail extends ResourceSummary {
   storageProvider: string;
   storageBucket: string;
@@ -46,15 +57,9 @@ export interface ResourceDetail extends ResourceSummary {
   mimeType: string;
   fileUrl: string;
   academicPeriod: { id: number; name: string; year: number; institutionId: number } | null;
-  comments: Array<{
-    id: string;
-    content: string;
-    createdAt: string;
-    author: {
-      firstName: string;
-      lastName: string;
-    } | null;
-  }>;
+  saved?: boolean;
+  userRating?: number | null;
+  comments: ResourceComment[];
 }
 
 export interface User {
@@ -66,6 +71,25 @@ export interface User {
   role: string;
   careerIds: number[];
   reputationScore: number;
+  photoUrl?: string | null;
+  bio?: string | null;
+}
+
+export interface UserStats {
+  uploads: number;
+  saved: number;
+  ratingsGiven: number;
+  avgRatingReceived: number;
+  ratingsReceived: number;
+  totalDownloads: number;
+  totalViews: number;
+}
+
+export interface PublicStats {
+  users: number;
+  resources: number;
+  courses: number;
+  careers: number;
 }
 
 export interface CreateResourceInput {
@@ -81,6 +105,12 @@ export interface CreateResourceInput {
   mimeType?: string;
 }
 
+export interface CreateUploadUrlInput {
+  originalFilename: string;
+  mimeType: string;
+  resourceId?: string;
+}
+
 interface ListResponse<T> {
   items: T[];
 }
@@ -89,125 +119,171 @@ interface ItemResponse<T> {
   item: T;
 }
 
+let tokenProvider: () => Promise<string | null> = async () => null;
+
+export function setApiTokenProvider(provider: () => Promise<string | null>) {
+  tokenProvider = provider;
+}
+
 async function apiFetch<T>(path: string, init?: RequestInit): Promise<T> {
+  const token = await tokenProvider().catch(() => null);
   const response = await fetch(`${API_URL}${path}`, {
     ...init,
     headers: {
       "content-type": "application/json",
+      ...(token ? { authorization: `Bearer ${token}` } : {}),
       ...(init?.headers || {}),
     },
   });
 
-  const payload = await response.json();
+  const payload = await response.json().catch(() => ({}));
   if (!response.ok) {
     throw new Error(payload?.error?.message || "Error al comunicarse con Vaultio API");
   }
-
   return payload as T;
 }
 
-export const authStorage = {
-  getToken() {
-    return window.localStorage.getItem("vaultio_token");
-  },
-
-  setSession(token: string, user: User) {
-    window.localStorage.setItem("vaultio_token", token);
-    window.localStorage.setItem("vaultio_user", JSON.stringify(user));
-  },
-
-  clear() {
-    window.localStorage.removeItem("vaultio_token");
-    window.localStorage.removeItem("vaultio_user");
+export const authApi = {
+  async me() {
+    return apiFetch<{ user: User }>("/auth/me");
   },
 };
 
-export const authApi = {
-  async login(input: { email: string; password: string }) {
-    const payload = await apiFetch<{ token: string; user: User }>("/auth/login", {
-      method: "POST",
-      body: JSON.stringify(input),
-    });
-    authStorage.setSession(payload.token, payload.user);
-    return payload;
+export const usersApi = {
+  async stats() {
+    return apiFetch<UserStats>("/users/me/stats");
   },
 
-  async register(input: {
-    firstName: string;
-    lastName: string;
-    email: string;
-    password: string;
-    careerId?: number;
-  }) {
-    const payload = await apiFetch<{ token: string; user: User }>("/auth/register", {
-      method: "POST",
+  async uploads() {
+    const { items } = await apiFetch<ListResponse<ResourceSummary>>("/users/me/resources");
+    return items;
+  },
+
+  async saved() {
+    const { items } = await apiFetch<ListResponse<ResourceSummary>>("/users/me/saved");
+    return items;
+  },
+
+  async updateMe(input: Partial<Pick<User, "firstName" | "lastName" | "bio">> & { careerIds?: number[] }) {
+    const { user } = await apiFetch<{ user: User }>("/users/me", {
+      method: "PATCH",
       body: JSON.stringify(input),
     });
-    authStorage.setSession(payload.token, payload.user);
-    return payload;
+    return user;
   },
 };
 
 export const catalogApi = {
   async careers() {
-    const payload = await apiFetch<ListResponse<Career>>("/catalog/careers");
-    return payload.items;
+    const { items } = await apiFetch<ListResponse<Career>>("/catalog/careers");
+    return items;
   },
 
   async coursesByCareer(careerId: string | number) {
-    const payload = await apiFetch<ListResponse<Course>>(`/catalog/careers/${careerId}/courses`);
-    return payload.items;
+    const { items } = await apiFetch<ListResponse<Course>>(`/catalog/careers/${careerId}/courses`);
+    return items;
   },
 
   async courses() {
-    const payload = await apiFetch<ListResponse<Course>>("/catalog/courses");
-    return payload.items;
+    const { items } = await apiFetch<ListResponse<Course>>("/catalog/courses");
+    return items;
   },
 
   async resourceTypes() {
-    const payload = await apiFetch<ListResponse<{ id: number; name: string; description: string }>>("/catalog/resource-types");
-    return payload.items;
+    const { items } = await apiFetch<ListResponse<{ id: number; name: string; description: string }>>(
+      "/catalog/resource-types",
+    );
+    return items;
   },
 
   async academicPeriods() {
-    const payload = await apiFetch<ListResponse<{ id: number; name: string; year: number; institutionId: number }>>("/catalog/academic-periods");
-    return payload.items;
+    const { items } = await apiFetch<ListResponse<{ id: number; name: string; year: number; institutionId: number }>>(
+      "/catalog/academic-periods",
+    );
+    return items;
   },
 
   async professors(courseId?: number) {
     const suffix = courseId ? `?courseId=${courseId}` : "";
-    const payload = await apiFetch<ListResponse<{ id: number; firstName: string; lastName: string; courseIds: number[] }>>(`/catalog/professors${suffix}`);
-    return payload.items;
+    const { items } = await apiFetch<ListResponse<{ id: number; firstName: string; lastName: string; courseIds: number[] }>>(
+      `/catalog/professors${suffix}`,
+    );
+    return items;
   },
 };
 
 export const resourcesApi = {
-  async list(params: { search?: string; careerId?: string; courseId?: string } = {}) {
+  async list(params: { search?: string; careerId?: string; courseId?: string; typeId?: string | number } = {}) {
     const search = new URLSearchParams();
     Object.entries(params).forEach(([key, value]) => {
-      if (value) search.set(key, value);
+      if (value !== undefined && value !== null && value !== "") search.set(key, String(value));
     });
     const suffix = search.toString() ? `?${search.toString()}` : "";
-    const payload = await apiFetch<ListResponse<ResourceSummary>>(`/resources${suffix}`);
-    return payload.items;
+    const { items } = await apiFetch<ListResponse<ResourceSummary>>(`/resources${suffix}`);
+    return items;
   },
 
   async detail(id: string) {
-    const payload = await apiFetch<ItemResponse<ResourceDetail>>(`/resources/${id}`);
-    return payload.item;
+    const { item } = await apiFetch<ItemResponse<ResourceDetail>>(`/resources/${id}`);
+    return item;
   },
 
   async create(input: CreateResourceInput) {
-    const token = authStorage.getToken();
-    if (!token) throw new Error("Debes iniciar sesion para subir recursos");
-
-    const payload = await apiFetch<ItemResponse<ResourceDetail>>("/resources", {
+    const { item } = await apiFetch<ItemResponse<ResourceDetail>>("/resources", {
       method: "POST",
-      headers: {
-        authorization: `Bearer ${token}`,
-      },
       body: JSON.stringify(input),
     });
-    return payload.item;
+    return item;
+  },
+
+  async download(id: string) {
+    return apiFetch<{ url: string; downloads: number }>(`/resources/${id}/download`, { method: "POST" });
+  },
+
+  async rate(id: string, stars: number) {
+    return apiFetch<{ item: { id: string; stars: number }; rating: number; ratingsCount: number }>(
+      `/resources/${id}/ratings`,
+      {
+        method: "POST",
+        body: JSON.stringify({ stars }),
+      },
+    );
+  },
+
+  async save(id: string) {
+    return apiFetch<{ saved: boolean }>(`/resources/${id}/save`, { method: "POST" });
+  },
+
+  async unsave(id: string) {
+    return apiFetch<{ saved: boolean }>(`/resources/${id}/save`, { method: "DELETE" });
+  },
+
+  async comment(id: string, content: string) {
+    return apiFetch<{ item: ResourceComment }>(`/resources/${id}/comments`, {
+      method: "POST",
+      body: JSON.stringify({ content }),
+    });
+  },
+};
+
+export const storageApi = {
+  async createUploadUrl(input: CreateUploadUrlInput) {
+    return apiFetch<{
+      provider: string;
+      bucket: string;
+      storageKey: string;
+      uploadUrl: string;
+      expiresIn: number;
+      publicUrl: string;
+    }>("/storage/uploads", {
+      method: "POST",
+      body: JSON.stringify(input),
+    });
+  },
+};
+
+export const publicApi = {
+  async stats() {
+    return apiFetch<PublicStats>("/stats");
   },
 };

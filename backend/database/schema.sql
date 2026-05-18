@@ -209,7 +209,7 @@ CREATE TABLE IF NOT EXISTS resources (
     title               VARCHAR(80)     NOT NULL,
     description         TEXT            NOT NULL,
     tags                VARCHAR(60)     ARRAY,
-    storage_provider    VARCHAR(30)     NOT NULL DEFAULT 'firebase_storage',
+    storage_provider    VARCHAR(30)     NOT NULL DEFAULT 'minio',
     storage_bucket      VARCHAR(255)    NOT NULL,
     storage_key         TEXT            NOT NULL,
     original_filename   VARCHAR(255)    NOT NULL,

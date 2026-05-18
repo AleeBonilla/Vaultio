@@ -1,154 +1,144 @@
-import { ArrowLeft, Upload, User } from 'lucide-react';
-import { Link } from 'react-router';
-import { Button } from '../../components/ui/Button';
-import { Input } from '../../components/ui/Input';
-import { Badge } from '../../components/ui/Badge';
+import { ArrowLeft } from "lucide-react";
+import { useEffect, useState } from "react";
+import { Link, useNavigate } from "react-router";
+import { toast } from "sonner";
+import { Button } from "../../components/ui/Button";
+import { Input } from "../../components/ui/Input";
+import { catalogApi, type Career } from "../../lib/api";
+import { useAuth } from "../../lib/auth-context";
 
 export function EditProfile() {
+  const navigate = useNavigate();
+  const { profile, updateProfile } = useAuth();
+  const [careers, setCareers] = useState<Career[]>([]);
+  const [firstName, setFirstName] = useState("");
+  const [lastName, setLastName] = useState("");
+  const [bio, setBio] = useState("");
+  const [careerId, setCareerId] = useState("");
+  const [submitting, setSubmitting] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    catalogApi.careers().then(setCareers).catch(() => setCareers([]));
+  }, []);
+
+  useEffect(() => {
+    if (profile) {
+      setFirstName(profile.firstName);
+      setLastName(profile.lastName);
+      setBio(profile.bio || "");
+      setCareerId(profile.careerIds[0] ? String(profile.careerIds[0]) : "");
+    }
+  }, [profile]);
+
+  if (!profile) return null;
+
+  const handleSubmit = async (event: React.FormEvent) => {
+    event.preventDefault();
+    setSubmitting(true);
+    setError(null);
+    try {
+      await updateProfile({
+        firstName: firstName.trim(),
+        lastName: lastName.trim(),
+        bio: bio.trim(),
+        careerIds: careerId ? [Number(careerId)] : [],
+      });
+      toast.success("Perfil actualizado");
+      navigate("/app/profile");
+    } catch (err) {
+      const message = err instanceof Error ? err.message : "No se pudo actualizar el perfil";
+      setError(message);
+      toast.error(message);
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
   return (
-    <div className="max-w-4xl mx-auto">
+    <div className="max-w-3xl mx-auto">
       <Link
         to="/app/profile"
         className="inline-flex items-center gap-2 text-[#0066CC] hover:text-[#004A99] mb-6 transition-colors"
       >
         <ArrowLeft className="w-4 h-4" />
-        Volver al Perfil
+        Volver al perfil
       </Link>
 
       <div className="bg-white border border-[#E0E0E0] rounded-xl p-8 shadow-sm">
-        <h1 className="text-3xl font-bold text-[#1a1a1a] mb-2">Editar Perfil</h1>
-        <p className="text-[#666666] mb-8">Actualiza tu información personal</p>
+        <h1 className="text-3xl font-bold text-[#1a1a1a] mb-2">Editar perfil</h1>
+        <p className="text-[#666666] mb-8">Actualizá tu información pública en Vaultio.</p>
 
-        <div className="space-y-8">
-          {/* Foto de Perfil */}
-          <div>
-            <label className="block text-sm font-medium text-[#1a1a1a] mb-4">
-              Foto de Perfil
-            </label>
-            <div className="flex items-center gap-6">
-              <div className="w-24 h-24 bg-gradient-to-br from-[#0066CC] to-[#004A99] rounded-full flex items-center justify-center text-white text-3xl font-bold shadow-md">
-                CR
-              </div>
-              <div>
-                <Button variant="secondary" className="flex items-center gap-2 mb-2">
-                  <Upload className="w-4 h-4" />
-                  Cambiar Foto
-                </Button>
-                <p className="text-xs text-[#666666]">JPG, PNG o GIF. Tamaño máximo 2MB</p>
-              </div>
+        <form onSubmit={handleSubmit} className="space-y-6">
+          {error && (
+            <div className="rounded-md border border-red-200 bg-red-50 p-3 text-sm text-red-700" role="alert">
+              {error}
             </div>
-          </div>
+          )}
 
-          {/* Información Personal */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <Input
-              label="Nombre Completo"
-              placeholder="Cristiano Ronaldo"
-              defaultValue="Cristiano Ronaldo"
+              label="Nombre"
+              value={firstName}
+              onChange={(event) => setFirstName(event.target.value)}
               required
             />
             <Input
-              label="Correo Electrónico"
-              type="email"
-              placeholder="cristiano.ronaldo@itcr.ac.cr"
-              defaultValue="cristiano.ronaldo@itcr.ac.cr"
+              label="Apellido"
+              value={lastName}
+              onChange={(event) => setLastName(event.target.value)}
               required
             />
           </div>
 
-          {/* Carrera */}
+          <Input label="Correo electrónico" type="email" value={profile.email} disabled readOnly />
+
           <div>
-            <label className="block text-sm font-medium text-[#1a1a1a] mb-2">
+            <label htmlFor="career" className="block text-sm font-medium text-[#1a1a1a] mb-2">
               Carrera
             </label>
-            <select className="w-full px-4 py-2.5 border border-[#E0E0E0] rounded-lg focus:outline-none focus:ring-2 focus:ring-[#0066CC] focus:border-[#0066CC] bg-white text-[#1a1a1a] transition-all">
-              <option>Ingeniería en Computación</option>
-              <option>Ingeniería Electrónica</option>
-              <option>Administración de Empresas</option>
-              <option>Ingeniería en Producción Industrial</option>
-              <option>Ingeniería en Diseño Industrial</option>
-              <option>Ingeniería en Construcción</option>
+            <select
+              id="career"
+              value={careerId}
+              onChange={(event) => setCareerId(event.target.value)}
+              className="w-full px-4 py-2.5 border border-[#E0E0E0] rounded-md focus:outline-none focus-visible:ring-2 focus-visible:ring-[#0066CC] focus-visible:border-[#0066CC] bg-white"
+            >
+              <option value="">Sin carrera asignada</option>
+              {careers.map((career) => (
+                <option key={career.id} value={career.id}>
+                  {career.name}
+                </option>
+              ))}
             </select>
           </div>
 
-          {/* Biografía */}
           <div>
-            <label className="block text-sm font-medium text-[#1a1a1a] mb-2">
+            <label htmlFor="bio" className="block text-sm font-medium text-[#1a1a1a] mb-2">
               Biografía
             </label>
             <textarea
-              className="w-full px-4 py-3 border border-[#E0E0E0] rounded-lg focus:outline-none focus:ring-2 focus:ring-[#0066CC] focus:border-[#0066CC] resize-none"
+              id="bio"
+              value={bio}
+              maxLength={280}
+              onChange={(event) => setBio(event.target.value)}
+              className="w-full px-4 py-3 border border-[#E0E0E0] rounded-md focus:outline-none focus-visible:ring-2 focus-visible:ring-[#0066CC] focus-visible:border-[#0066CC] resize-none"
               rows={4}
-              placeholder="Cuéntanos un poco sobre ti..."
+              placeholder="Contanos un poco sobre vos (opcional)"
             />
-            <p className="text-xs text-[#666666] mt-1">Máximo 200 caracteres</p>
+            <p className="text-xs text-[#666666] mt-1">{bio.length}/280 caracteres</p>
           </div>
 
-          {/* Notificaciones */}
-          <div>
-            <h3 className="text-lg font-semibold text-[#1a1a1a] mb-4">Preferencias de Notificación</h3>
-            <div className="space-y-3">
-              <label className="flex items-center gap-3 cursor-pointer">
-                <input
-                  type="checkbox"
-                  defaultChecked
-                  className="w-4 h-4 text-[#0066CC] border-[#E0E0E0] rounded focus:ring-[#0066CC]"
-                />
-                <span className="text-[#1a1a1a]">Notificarme cuando alguien comente en mis recursos</span>
-              </label>
-              <label className="flex items-center gap-3 cursor-pointer">
-                <input
-                  type="checkbox"
-                  defaultChecked
-                  className="w-4 h-4 text-[#0066CC] border-[#E0E0E0] rounded focus:ring-[#0066CC]"
-                />
-                <span className="text-[#1a1a1a]">Notificarme sobre nuevos recursos en mis cursos</span>
-              </label>
-              <label className="flex items-center gap-3 cursor-pointer">
-                <input
-                  type="checkbox"
-                  className="w-4 h-4 text-[#0066CC] border-[#E0E0E0] rounded focus:ring-[#0066CC]"
-                />
-                <span className="text-[#1a1a1a]">Recibir boletín semanal de recursos destacados</span>
-              </label>
-            </div>
-          </div>
-
-          {/* Privacidad */}
-          <div>
-            <h3 className="text-lg font-semibold text-[#1a1a1a] mb-4">Configuración de Privacidad</h3>
-            <div className="space-y-3">
-              <label className="flex items-center gap-3 cursor-pointer">
-                <input
-                  type="checkbox"
-                  defaultChecked
-                  className="w-4 h-4 text-[#0066CC] border-[#E0E0E0] rounded focus:ring-[#0066CC]"
-                />
-                <span className="text-[#1a1a1a]">Mostrar mi perfil públicamente</span>
-              </label>
-              <label className="flex items-center gap-3 cursor-pointer">
-                <input
-                  type="checkbox"
-                  defaultChecked
-                  className="w-4 h-4 text-[#0066CC] border-[#E0E0E0] rounded focus:ring-[#0066CC]"
-                />
-                <span className="text-[#1a1a1a]">Permitir que otros estudiantes me contacten</span>
-              </label>
-            </div>
-          </div>
-
-          {/* Botones de Acción */}
-          <div className="flex gap-3 pt-6 border-t border-[#E0E0E0]">
+          <div className="flex gap-3 pt-4 border-t border-[#E0E0E0]">
             <Link to="/app/profile" className="flex-1">
-              <Button variant="secondary" className="w-full">
+              <Button type="button" variant="secondary" className="w-full">
                 Cancelar
               </Button>
             </Link>
-            <Button variant="primary" className="flex-1">
-              Guardar Cambios
+            <Button type="submit" variant="primary" className="flex-1" disabled={submitting}>
+              {submitting ? "Guardando..." : "Guardar cambios"}
             </Button>
           </div>
-        </div>
+        </form>
       </div>
     </div>
   );
