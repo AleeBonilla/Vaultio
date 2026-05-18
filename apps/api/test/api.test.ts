@@ -38,7 +38,7 @@ describe("Vaultio API", () => {
   before(async () => {
     const [{ createNestApp }, { PrismaService }] = await Promise.all([
       import("../src/main.js"),
-      import("../src/prisma.service.js"),
+      import("../src/prisma/prisma.service.js"),
     ]);
     PrismaServiceToken = PrismaService;
     app = await createNestApp();

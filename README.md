@@ -15,6 +15,61 @@ Plataforma académica del **Instituto Tecnológico de Costa Rica (TEC)** para ce
 | Storage       | MinIO S3-compatible (Docker)                        |
 | Toasts        | `sonner`                                            |
 
+## Estructura del repo
+
+```text
+vaultio/
+├── apps/
+│   ├── api/                  # Backend NestJS
+│   │   ├── prisma/
+│   │   │   └── schema.prisma
+│   │   ├── src/
+│   │   │   ├── main.ts
+│   │   │   ├── app.module.ts
+│   │   │   ├── config.ts
+│   │   │   ├── auth/         # auth.controller, auth.service, auth.util
+│   │   │   ├── catalog/      # carreras, cursos, profesores, periodos
+│   │   │   ├── common/       # errors, exception filter, serializers
+│   │   │   ├── firebase/     # firebase-admin.service
+│   │   │   ├── health/       # /health
+│   │   │   ├── prisma/       # prisma.service
+│   │   │   ├── resources/    # CRUD recursos, ratings, save, comments
+│   │   │   ├── seed/         # bootstrap data seed
+│   │   │   ├── stats/        # /stats publicos
+│   │   │   ├── storage/      # MinIO presigned URLs
+│   │   │   └── users/        # /users/me
+│   │   ├── test/
+│   │   │   └── api.test.ts   # 12 tests integrales
+│   │   ├── package.json
+│   │   ├── prisma.config.ts
+│   │   └── tsconfig.json
+│   └── web/                  # Frontend Vite + React
+│       ├── public/
+│       ├── src/
+│       │   ├── app/
+│       │   │   ├── App.tsx
+│       │   │   ├── routes.tsx
+│       │   │   ├── components/  # layout, comments, filters, resources, ui
+│       │   │   ├── lib/         # firebase, auth-context, RequireAuth, api
+│       │   │   └── pages/       # auth, courses, home, library, profile, resources
+│       │   └── styles/
+│       ├── index.html
+│       ├── package.json
+│       ├── tsconfig.json
+│       ├── vite.config.ts
+│       └── .env.example
+├── database/                 # SQL de inicio (montados por docker-compose)
+│   ├── schema.sql
+│   ├── logic.sql
+│   └── seed.sql
+├── docs/
+│   └── plan-tecnico.md
+├── docker-compose.yml        # Postgres + MinIO
+├── package.json              # workspaces apps/*
+├── README.md
+└── CONTEXT.md
+```
+
 ## Requisitos
 
 - Node.js 20+
@@ -24,7 +79,7 @@ Plataforma académica del **Instituto Tecnológico de Costa Rica (TEC)** para ce
 
 ## Setup
 
-### 1. Servicios locales (Postgres + MinIO)
+### 1. Levantar servicios locales (Postgres + MinIO)
 
 ```bash
 docker compose up -d
@@ -32,14 +87,14 @@ docker compose up -d
 
 Esto levanta:
 
-- **Postgres**: `localhost:5432`, base `vaultio` (usuario `vaultio` / contraseña `vaultio`). Los scripts `backend/database/*.sql` se ejecutan automáticamente la primera vez.
+- **Postgres**: `localhost:5432`, base `vaultio` (usuario `vaultio` / contraseña `vaultio`). Los scripts `database/*.sql` se ejecutan automáticamente la primera vez.
 - **MinIO**: API en `localhost:9000`, consola en `localhost:9001` (usuario `vaultio` / contraseña `vaultio-demo-secret`).
 
-> Si ya existen datos viejos y queres resetear: `docker compose down -v && docker compose up -d`.
+> Si necesitas resetear datos viejos: `docker compose down -v && docker compose up -d`.
 
 ### 2. Credenciales de Firebase
 
-**Frontend** — copiar `frontend/.env.example` a `frontend/.env.local` y completar:
+**Frontend** — copiá `apps/web/.env.example` a `apps/web/.env.local` y completalo:
 
 ```dotenv
 VITE_FIREBASE_API_KEY=...
@@ -49,7 +104,7 @@ VITE_FIREBASE_APP_ID=...
 VITE_API_URL=http://localhost:4000
 ```
 
-**Backend** — descargar el _service account JSON_ desde Firebase Console → ⚙️ Project Settings → Service accounts → "Generate new private key". Guardarlo en la raíz del repo como `vaultio-auth-firebase-adminsdk-fbsvc-*.json` (queda en `.gitignore`). Alternativa: definir `GOOGLE_APPLICATION_CREDENTIALS` apuntando a la ruta.
+**Backend** — descargar el _service account JSON_ desde Firebase Console → ⚙️ Project Settings → Service accounts → "Generate new private key". Guardalo en la raíz del repo como `vaultio-auth-firebase-adminsdk-fbsvc-*.json` (queda en `.gitignore`). Alternativa: definir `GOOGLE_APPLICATION_CREDENTIALS` apuntando a la ruta del JSON.
 
 En Firebase Console → Authentication → Sign-in method habilitar:
 
@@ -60,8 +115,7 @@ En Firebase Console → Authentication → Sign-in method habilitar:
 
 ```bash
 npm install
-cd frontend && npm install && cd ..
-npm run prisma:generate --workspace apps/api
+npm run prisma:generate
 ```
 
 ### 4. Arrancar dev
@@ -73,22 +127,35 @@ npm run dev:api       # NestJS en http://localhost:4000
 npm run dev:web       # Vite en http://localhost:5173
 ```
 
+## Comandos disponibles (raíz)
+
+```bash
+npm run dev:api                  # API watch
+npm run dev:web                  # Frontend watch
+npm run build:api                # tsc build del API
+npm run build:web                # build de producción del frontend (tsc + vite)
+npm run build                    # build API + web
+npm run test:api                 # 12 tests integrales (requiere docker compose up)
+npm run typecheck:web            # typecheck del frontend
+npm run prisma:generate          # regenerar Prisma Client tras cambios al schema
+```
+
 ## Flujo de demo
 
 1. Abrí `http://localhost:5173` y entrá a **"Iniciar sesión"**.
 2. Opciones:
    - **Continuar con Google** (popup), o
-   - **Email + contraseña** → si no tenés cuenta, clic en "Crear una" para registrarte.
+   - **Email + contraseña** → si no tenés cuenta, "Crear una".
 3. Si es tu primera vez, completá nombre/apellido y elegí carrera.
-4. Subí un recurso en `/app/upload`: seleccioná archivo → completá metadata → se sube directo a MinIO con URL firmada y se registra en Postgres.
-5. Calificá, comentá, guardá recursos. Compartí enlaces (copia al portapapeles).
-6. Probá con un segundo usuario: cerrá sesión, registrate con otra cuenta y verás los recursos del primer usuario.
+4. Subí un recurso en `/app/upload`: seleccionás archivo → completás metadata → se sube directo a MinIO con URL firmada y se registra en Postgres.
+5. Calificá, comentá, guardá recursos. Compartí enlaces.
+6. Probá con un segundo usuario: cerrá sesión, registrate con otra cuenta y verás los recursos del primero.
 
 ## Endpoints principales
 
 ```
 GET    /health
-GET    /stats                       — totales públicos (landing)
+GET    /stats                       totales públicos (landing)
 
 GET    /catalog/institutions
 GET    /catalog/careers
@@ -98,28 +165,28 @@ GET    /catalog/resource-types
 GET    /catalog/academic-periods
 GET    /catalog/professors
 
-GET    /auth/me                     — perfil actual (verifica ID token Firebase)
+GET    /auth/me                     perfil actual (verifica ID token Firebase)
 
-GET    /users/me                    — equivalente a /auth/me
-PATCH  /users/me                    — nombre, apellido, bio, carreras
-GET    /users/me/stats              — uploads, saved, ratings dados/recibidos
-GET    /users/me/resources          — recursos del usuario actual
-GET    /users/me/saved              — recursos guardados
+GET    /users/me
+PATCH  /users/me                    nombre, apellido, bio, carreras
+GET    /users/me/stats
+GET    /users/me/resources
+GET    /users/me/saved
 
-GET    /resources                   — list (search, courseId, typeId, careerId)
-GET    /resources/:id               — detalle (incluye `saved` y `userRating`)
-POST   /resources                   — crear (requiere storage metadata)
-POST   /resources/:id/download      — registra descarga + URL firmada GET
-POST   /resources/:id/ratings       — calificar (1-5, upsert)
-POST   /resources/:id/save          — guardar
-DELETE /resources/:id/save          — desmarcar
+GET    /resources                   list (search, courseId, typeId, careerId)
+GET    /resources/:id               detalle (incluye `saved` y `userRating`)
+POST   /resources                   crear (con storage metadata)
+POST   /resources/:id/download      registra descarga + URL firmada GET
+POST   /resources/:id/ratings       upsert 1-5
+POST   /resources/:id/save
+DELETE /resources/:id/save
 GET    /resources/:id/comments
 POST   /resources/:id/comments
 
-POST   /storage/uploads             — URL pre-firmada PUT a MinIO
+POST   /storage/uploads             URL pre-firmada PUT a MinIO
 ```
 
-> Los endpoints `POST /auth/login` y `POST /auth/register` se quedaron bloqueados en producción/dev. Solo se activan con `NODE_ENV=test` o `VAULTIO_ALLOW_DEMO_TOKENS=true` (uso interno para los tests).
+> Los endpoints demo `POST /auth/login` / `POST /auth/register` están bloqueados en producción y solo se activan con `NODE_ENV=test` o `VAULTIO_ALLOW_DEMO_TOKENS=true` (uso interno para los tests).
 
 ## Variables de entorno (backend)
 
@@ -137,53 +204,8 @@ POST   /storage/uploads             — URL pre-firmada PUT a MinIO
 | `VAULTIO_STORAGE_SECRET_ACCESS_KEY` | `vaultio-demo-secret`                                               |
 | `VAULTIO_ALLOW_DEMO_TOKENS`         | solo `true` en tests                                                |
 
-## Comandos
-
-```bash
-npm run dev:api                       # API en watch
-npm run dev:web                       # Frontend en watch
-npm run test:api                      # 12 tests integrales (requiere DB up)
-npm run build                         # Build API + frontend
-cd frontend && npm run typecheck      # Typecheck del frontend
-```
-
-## Estructura
-
-```text
-apps/api/
-  prisma/schema.prisma         # esquema (introspectado desde SQL)
-  src/
-    auth.controller.ts         # GET /auth/me
-    auth.service.ts            # verifica ID token Firebase y sincroniza users/identities
-    catalog.controller.ts      # carreras, cursos, periodos, profesores
-    resources.controller.ts    # CRUD + download + ratings + save + comments
-    users.controller.ts        # /users/me y derivados
-    storage.controller.ts      # presigned URLs MinIO
-    stats.controller.ts        # GET /stats
-    firebase-admin.service.ts  # init firebase-admin
-    seed.ts                    # seed catálogos
-  test/api.test.ts             # 12 tests integrales
-
-backend/database/
-  schema.sql, logic.sql, seed.sql   # init Postgres (montado por docker-compose)
-
-frontend/
-  src/app/
-    App.tsx                    # AuthProvider + Toaster + Router
-    routes.tsx                 # rutas con RequireAuth
-    lib/
-      firebase.ts              # Firebase Web SDK (Google + email/password + reset)
-      auth-context.tsx         # signIn/signUp/signOut + perfil
-      RequireAuth.tsx          # guard
-      api.ts                   # cliente del backend (token desde Firebase)
-    pages/                     # auth, courses, home, library, profile, resources
-    components/                # layout, comments, filters, resources, ui
-
-docker-compose.yml             # Postgres + MinIO
-```
-
 ## Notas de seguridad
 
 - El service account JSON está en `.gitignore`. **No commitearlo nunca.**
-- El bucket de MinIO se crea automáticamente al primer arranque del API.
+- Para que tu compañero pruebe el proyecto, generale un service account JSON propio desde Firebase Console (no le pases el tuyo). El frontend `.env.local` con `VITE_FIREBASE_*` se puede compartir libremente (la apiKey de Firebase Web es pública por diseño).
 - Para producción: rotar el service account, migrar storage a S3/GCS y servir con HTTPS.

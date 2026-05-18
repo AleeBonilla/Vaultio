@@ -19,6 +19,7 @@ const repoRoot = findRepoRoot(__dirname);
 
 export const config = {
   port: Number(process.env.VAULTIO_API_PORT || 4000),
+  publicUrl: process.env.VAULTIO_API_PUBLIC_URL || `http://localhost:${process.env.VAULTIO_API_PORT || 4000}`,
   databaseUrl: process.env.DATABASE_URL || "postgresql://vaultio:vaultio@localhost:5432/vaultio?schema=public",
   repoRoot,
   auth: {

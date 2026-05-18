@@ -1,0 +1,260 @@
+import { ArrowLeft, Camera } from "lucide-react";
+import { useEffect, useState } from "react";
+import { Link, useNavigate } from "react-router";
+import { toast } from "sonner";
+import { Button } from "../../components/ui/Button";
+import { Input } from "../../components/ui/Input";
+import { catalogApi, storageApi, usersApi, type Career, type Course } from "../../lib/api";
+import { useAuth } from "../../lib/auth-context";
+
+export function EditProfile() {
+  const navigate = useNavigate();
+  const { profile, updateProfile } = useAuth();
+  const [careers, setCareers] = useState<Career[]>([]);
+  const [courses, setCourses] = useState<Course[]>([]);
+  const [firstName, setFirstName] = useState("");
+  const [lastName, setLastName] = useState("");
+  const [bio, setBio] = useState("");
+  const [careerId, setCareerId] = useState("");
+  const [courseIds, setCourseIds] = useState<number[]>([]);
+  const [photoFile, setPhotoFile] = useState<File | null>(null);
+  const [photoPreview, setPhotoPreview] = useState<string | null>(null);
+  const [submitting, setSubmitting] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    Promise.all([catalogApi.careers(), catalogApi.courses(), usersApi.courses()])
+      .then(([loadedCareers, loadedCourses, selectedCourses]) => {
+        setCareers(loadedCareers);
+        setCourses(loadedCourses);
+        setCourseIds(selectedCourses.map((course) => course.id));
+      })
+      .catch(() => {
+        setCareers([]);
+        setCourses([]);
+      });
+  }, []);
+
+  useEffect(() => {
+    if (profile) {
+      setFirstName(profile.firstName);
+      setLastName(profile.lastName);
+      setBio(profile.bio || "");
+      setCareerId(profile.careerIds[0] ? String(profile.careerIds[0]) : "");
+    }
+  }, [profile]);
+
+  useEffect(() => {
+    if (!photoFile) {
+      setPhotoPreview(null);
+      return;
+    }
+    const url = URL.createObjectURL(photoFile);
+    setPhotoPreview(url);
+    return () => URL.revokeObjectURL(url);
+  }, [photoFile]);
+
+  if (!profile) return null;
+
+  const handleSubmit = async (event: React.FormEvent) => {
+    event.preventDefault();
+    setSubmitting(true);
+    setError(null);
+    try {
+      let photoUrl = profile.photoUrl || null;
+      if (photoFile) {
+        const upload = await storageApi.createUploadUrl({
+          originalFilename: `avatar-${profile.id}-${photoFile.name}`,
+          mimeType: photoFile.type || "application/octet-stream",
+          scope: "profile-photo",
+        });
+        await fetch(upload.uploadUrl, {
+          method: "PUT",
+          headers: { "content-type": photoFile.type || "application/octet-stream" },
+          body: photoFile,
+        });
+        photoUrl = `${storageApi.publicObjectUrl(upload.storageKey)}&v=${Date.now()}`;
+      }
+
+      await updateProfile({
+        firstName: firstName.trim(),
+        lastName: lastName.trim(),
+        bio: bio.trim(),
+        photoUrl,
+        careerIds: careerId ? [Number(careerId)] : [],
+      });
+      await usersApi.updateCourses(courseIds);
+      toast.success("Perfil actualizado");
+      navigate("/app/profile");
+    } catch (err) {
+      const message = err instanceof Error ? err.message : "No se pudo actualizar el perfil";
+      setError(message);
+      toast.error(message);
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  const toggleCourse = (id: number) => {
+    setCourseIds((current) => (current.includes(id) ? current.filter((courseId) => courseId !== id) : [...current, id]));
+  };
+
+  const initials =
+    `${firstName?.[0] || ""}${lastName?.[0] || ""}`.toUpperCase() ||
+    profile.email?.[0]?.toUpperCase() ||
+    "?";
+  const avatarUrl = photoPreview || profile.photoUrl;
+
+  return (
+    <div className="max-w-3xl mx-auto">
+      <Link
+        to="/app/profile"
+        className="mb-6 inline-flex items-center gap-2 text-blue-600 transition-colors hover:text-blue-800"
+      >
+        <ArrowLeft className="w-4 h-4" />
+        Volver al perfil
+      </Link>
+
+      <div className="rounded-3xl border border-blue-100 bg-white/85 p-8 shadow-sm shadow-blue-900/5">
+        <p className="mb-3 text-xs font-semibold uppercase tracking-[0.22em] text-blue-600">Perfil</p>
+        <h1 className="mb-3 text-4xl font-extrabold tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-blue-700 via-blue-500 to-cyan-500">
+          Editar perfil
+        </h1>
+        <p className="mb-8 text-slate-600">Actualizá tu información pública en Vaultio.</p>
+
+        <form onSubmit={handleSubmit} className="space-y-6">
+          {error && (
+            <div className="rounded-xl border border-red-200 bg-red-50 p-3 text-sm text-red-700" role="alert">
+              {error}
+            </div>
+          )}
+
+          <div className="flex flex-col gap-4 rounded-2xl border border-blue-100 bg-blue-50/30 p-4 sm:flex-row sm:items-center">
+            {avatarUrl ? (
+              <img src={avatarUrl} alt="Foto de perfil" className="h-24 w-24 rounded-full object-cover shadow-lg shadow-blue-900/10" />
+            ) : (
+              <div className="flex h-24 w-24 items-center justify-center rounded-full bg-gradient-to-br from-blue-600 to-cyan-500 text-3xl font-bold text-white shadow-lg shadow-blue-600/20">
+                {initials}
+              </div>
+            )}
+            <div className="flex-1">
+              <label htmlFor="profilePhoto" className="mb-2 block text-sm font-medium text-slate-900">
+                Foto de perfil
+              </label>
+              <label
+                htmlFor="profilePhoto"
+                className="inline-flex cursor-pointer items-center gap-2 rounded-full border border-blue-100 bg-white px-4 py-2 text-sm font-medium text-blue-600 transition-colors hover:bg-blue-50"
+              >
+                <Camera className="h-4 w-4" />
+                Subir foto
+              </label>
+              <input
+                id="profilePhoto"
+                type="file"
+                accept="image/*"
+                className="sr-only"
+                onChange={(event) => setPhotoFile(event.target.files?.[0] || null)}
+              />
+              {photoFile && <p className="mt-2 text-xs text-slate-500">{photoFile.name}</p>}
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <Input
+              label="Nombre"
+              value={firstName}
+              onChange={(event) => setFirstName(event.target.value)}
+              required
+            />
+            <Input
+              label="Apellido"
+              value={lastName}
+              onChange={(event) => setLastName(event.target.value)}
+              required
+            />
+          </div>
+
+          <Input label="Correo electrónico" type="email" value={profile.email} disabled readOnly />
+
+          <div>
+            <label htmlFor="career" className="mb-2 block text-sm font-medium text-slate-900">
+              Carrera
+            </label>
+            <select
+              id="career"
+              value={careerId}
+              onChange={(event) => setCareerId(event.target.value)}
+              className="w-full rounded-md border border-blue-100 bg-white px-4 py-2.5 focus:outline-none focus-visible:border-blue-500 focus-visible:ring-2 focus-visible:ring-blue-500"
+            >
+              <option value="">Sin carrera asignada</option>
+              {careers.map((career) => (
+                <option key={career.id} value={career.id}>
+                  {career.name}
+                </option>
+              ))}
+            </select>
+          </div>
+
+          <div>
+            <div className="mb-3 flex items-center justify-between gap-3">
+              <label className="block text-sm font-medium text-slate-900">Cursos que estoy llevando</label>
+              <span className="text-xs text-slate-500">{courseIds.length} seleccionados</span>
+            </div>
+            <div className="grid max-h-72 grid-cols-1 gap-2 overflow-y-auto rounded-2xl border border-blue-100 bg-white/80 p-3 sm:grid-cols-2">
+              {courses.map((course) => {
+                const checked = courseIds.includes(course.id);
+                return (
+                  <label
+                    key={course.id}
+                    className={`flex cursor-pointer items-start gap-3 rounded-xl border p-3 transition-colors ${
+                      checked ? "border-blue-200 bg-blue-50 text-blue-900" : "border-transparent hover:border-blue-100 hover:bg-blue-50/50"
+                    }`}
+                  >
+                    <input
+                      type="checkbox"
+                      checked={checked}
+                      onChange={() => toggleCourse(course.id)}
+                      className="mt-1 h-4 w-4 rounded border-blue-100 text-blue-600 focus:ring-2 focus:ring-blue-500"
+                    />
+                    <span>
+                      <span className="block text-sm font-semibold">{course.code}</span>
+                      <span className="block text-xs text-slate-600">{course.name}</span>
+                    </span>
+                  </label>
+                );
+              })}
+              {courses.length === 0 && <p className="p-3 text-sm text-slate-500">No hay cursos disponibles.</p>}
+            </div>
+          </div>
+
+          <div>
+            <label htmlFor="bio" className="mb-2 block text-sm font-medium text-slate-900">
+              Biografía
+            </label>
+            <textarea
+              id="bio"
+              value={bio}
+              maxLength={280}
+              onChange={(event) => setBio(event.target.value)}
+              className="w-full resize-none rounded-md border border-blue-100 px-4 py-3 focus:outline-none focus-visible:border-blue-500 focus-visible:ring-2 focus-visible:ring-blue-500"
+              rows={4}
+              placeholder="Contanos un poco sobre vos (opcional)"
+            />
+            <p className="mt-1 text-xs text-slate-500">{bio.length}/280 caracteres</p>
+          </div>
+
+          <div className="flex gap-3 border-t border-blue-100 pt-4">
+            <Link to="/app/profile" className="flex-1">
+              <Button type="button" variant="secondary" className="w-full rounded-full border-blue-100 hover:bg-blue-50">
+                Cancelar
+              </Button>
+            </Link>
+            <Button type="submit" variant="primary" className="flex-1 rounded-full bg-blue-600 shadow-lg shadow-blue-600/15 hover:bg-blue-700" disabled={submitting}>
+              {submitting ? "Guardando..." : "Guardar cambios"}
+            </Button>
+          </div>
+        </form>
+      </div>
+    </div>
+  );
+}

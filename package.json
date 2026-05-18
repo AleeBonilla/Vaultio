@@ -2,21 +2,19 @@
   "name": "vaultio",
   "private": true,
   "version": "0.1.0",
-  "type": "module",
-  "scripts": {
-    "dev:api": "npm run dev --workspace apps/api",
-    "start:api": "npm run start --workspace apps/api",
-    "build:api": "npm run build --workspace apps/api",
-    "test:api": "npm run test --workspace apps/api",
-    "dev:web": "npm run dev --prefix frontend",
-    "build:web": "npm run build --prefix frontend",
-    "test": "npm run test:api",
-    "build": "npm run build:api && npm run build:web"
-  },
   "workspaces": [
-    "apps/api"
+    "apps/*"
   ],
-  "dependencies": {
-    "firebase-admin": "^13.10.0"
+  "scripts": {
+    "dev:api": "npm run dev --workspace @vaultio/api",
+    "dev:web": "npm run dev --workspace @vaultio/web",
+    "start:api": "npm run start --workspace @vaultio/api",
+    "build:api": "npm run build --workspace @vaultio/api",
+    "build:web": "npm run build --workspace @vaultio/web",
+    "test:api": "npm run test --workspace @vaultio/api",
+    "typecheck:web": "npm run typecheck --workspace @vaultio/web",
+    "test": "npm run test:api",
+    "build": "npm run build:api && npm run build:web",
+    "prisma:generate": "npm run prisma:generate --workspace @vaultio/api"
   }
 }

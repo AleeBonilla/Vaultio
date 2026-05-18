@@ -3,7 +3,7 @@ import "@nestjs/platform-express";
 import { NestFactory } from "@nestjs/core";
 import { AppModule } from "./app.module";
 import { config } from "./config";
-import { ApiExceptionFilter } from "./http-exception.filter";
+import { ApiExceptionFilter } from "./common/http-exception.filter";
 
 export async function createNestApp() {
   const app = await NestFactory.create(AppModule);

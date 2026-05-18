@@ -1,15 +1,14 @@
+# Dependencies
 node_modules/
-dist/
+
+# Env files
 .env
 .env.*
+!.env.example
 
-frontend/node_modules/
-frontend/dist/
-
-apps/api/data/*.json
-
+# Local agent/IDE stuff
 .claude/
+.claudeignore
 
 # Firebase service account credentials
-vaultio-auth-firebase-adminsdk-fbsvc-04da3d9bea.json
 *-firebase-adminsdk-*.json
