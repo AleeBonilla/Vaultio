@@ -1,6 +1,6 @@
 import { MessageCircle, ThumbsDown, ThumbsUp, Trash2 } from "lucide-react";
 import type { ReactNode } from "react";
-import { useState } from "react";
+import { useId, useState } from "react";
 import { Link } from "react-router";
 import { Button } from "../ui/Button";
 
@@ -41,6 +41,7 @@ export function CommentBlock({
 }: CommentBlockProps) {
   const [replying, setReplying] = useState(false);
   const [replyDraft, setReplyDraft] = useState("");
+  const replyInputId = useId();
   const initial = author?.[0]?.toUpperCase() || "?";
 
   const handleReply = async (event: React.FormEvent) => {
@@ -92,7 +93,7 @@ export function CommentBlock({
                 aria-pressed={userVote === 1}
                 className={`inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-xs font-medium transition-colors ${
                   userVote === 1 ? "bg-blue-600 text-white" : "bg-blue-50 text-slate-600 hover:bg-blue-100"
-                }`}
+                } focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2`}
               >
                 <ThumbsUp className="h-3.5 w-3.5" />
                 {likes}
@@ -103,7 +104,7 @@ export function CommentBlock({
                 aria-pressed={userVote === -1}
                 className={`inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-xs font-medium transition-colors ${
                   userVote === -1 ? "bg-slate-700 text-white" : "bg-slate-100 text-slate-600 hover:bg-slate-200"
-                }`}
+                } focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2`}
               >
                 <ThumbsDown className="h-3.5 w-3.5" />
                 {dislikes}
@@ -111,7 +112,7 @@ export function CommentBlock({
               <button
                 type="button"
                 onClick={() => setReplying((current) => !current)}
-                className="inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-xs font-medium text-blue-600 hover:bg-blue-50"
+                className="inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-xs font-medium text-blue-600 hover:bg-blue-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2"
               >
                 <MessageCircle className="h-3.5 w-3.5" />
                 Responder
@@ -120,7 +121,7 @@ export function CommentBlock({
                 <button
                   type="button"
                   onClick={onDelete}
-                  className="inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-xs font-medium text-red-600 hover:bg-red-50"
+                  className="inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-xs font-medium text-red-600 hover:bg-red-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-red-500 focus-visible:ring-offset-2"
                 >
                   <Trash2 className="h-3.5 w-3.5" />
                   Eliminar
@@ -131,7 +132,11 @@ export function CommentBlock({
 
           {replying && (
             <form onSubmit={handleReply} className="mt-3 rounded-2xl border border-blue-100 bg-blue-50/30 p-3">
+              <label htmlFor={replyInputId} className="sr-only">
+                Respuesta para {author}
+              </label>
               <textarea
+                id={replyInputId}
                 value={replyDraft}
                 onChange={(event) => setReplyDraft(event.target.value)}
                 rows={2}

@@ -1,5 +1,5 @@
 import { ArrowLeft, Camera } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Link, useNavigate } from "react-router";
 import { toast } from "sonner";
 import { Button } from "../../components/ui/Button";
@@ -12,6 +12,7 @@ export function EditProfile() {
   const { profile, updateProfile } = useAuth();
   const [careers, setCareers] = useState<Career[]>([]);
   const [courses, setCourses] = useState<Course[]>([]);
+  const [username, setUsername] = useState("");
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
   const [bio, setBio] = useState("");
@@ -21,6 +22,7 @@ export function EditProfile() {
   const [photoPreview, setPhotoPreview] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const photoInputRef = useRef<HTMLInputElement | null>(null);
 
   useEffect(() => {
     Promise.all([catalogApi.careers(), catalogApi.courses(), usersApi.courses()])
@@ -39,6 +41,7 @@ export function EditProfile() {
     if (profile) {
       setFirstName(profile.firstName);
       setLastName(profile.lastName);
+      setUsername(profile.username);
       setBio(profile.bio || "");
       setCareerId(profile.careerIds[0] ? String(profile.careerIds[0]) : "");
     }
@@ -77,6 +80,7 @@ export function EditProfile() {
       }
 
       await updateProfile({
+        username: username.trim().toLowerCase(),
         firstName: firstName.trim(),
         lastName: lastName.trim(),
         bio: bio.trim(),
@@ -141,16 +145,20 @@ export function EditProfile() {
               <label htmlFor="profilePhoto" className="mb-2 block text-sm font-medium text-slate-900">
                 Foto de perfil
               </label>
-              <label
-                htmlFor="profilePhoto"
-                className="inline-flex cursor-pointer items-center gap-2 rounded-full border border-blue-100 bg-white px-4 py-2 text-sm font-medium text-blue-600 transition-colors hover:bg-blue-50"
+              <button
+                type="button"
+                onClick={() => photoInputRef.current?.click()}
+                className="inline-flex items-center gap-2 rounded-full border border-blue-100 bg-white px-4 py-2 text-sm font-medium text-blue-600 transition-colors hover:bg-blue-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2"
               >
                 <Camera className="h-4 w-4" />
                 Subir foto
-              </label>
+              </button>
               <input
                 id="profilePhoto"
+                ref={photoInputRef}
                 type="file"
+                aria-label="Subir foto de perfil"
+                tabIndex={-1}
                 accept="image/*"
                 className="sr-only"
                 onChange={(event) => setPhotoFile(event.target.files?.[0] || null)}
@@ -173,6 +181,14 @@ export function EditProfile() {
               required
             />
           </div>
+
+          <Input
+            label="Username"
+            value={username}
+            onChange={(event) => setUsername(event.target.value.toLowerCase())}
+            autoComplete="username"
+            required
+          />
 
           <Input label="Correo electrónico" type="email" value={profile.email} disabled readOnly />
 

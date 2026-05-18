@@ -114,6 +114,11 @@ export interface CreateResourceInput {
   originalFilename?: string;
   fileSize?: number;
   mimeType?: string;
+  storageProvider?: string;
+  storageBucket?: string;
+  storageKey?: string;
+  publicUrl?: string;
+  externalUrl?: string;
 }
 
 export interface CreateUploadUrlInput {
@@ -190,7 +195,7 @@ export const usersApi = {
     return items;
   },
 
-  async updateMe(input: Partial<Pick<User, "firstName" | "lastName" | "bio" | "photoUrl">> & { careerIds?: number[] }) {
+  async updateMe(input: Partial<Pick<User, "username" | "firstName" | "lastName" | "bio" | "photoUrl">> & { careerIds?: number[] }) {
     const { user } = await apiFetch<{ user: User }>("/users/me", {
       method: "PATCH",
       body: JSON.stringify(input),
@@ -268,7 +273,20 @@ export const catalogApi = {
 };
 
 export const resourcesApi = {
-  async list(params: { search?: string; careerId?: string; courseId?: string; typeId?: string | number } = {}) {
+  async list(
+    params: {
+      search?: string;
+      careerId?: string | number;
+      courseId?: string | number;
+      typeId?: string | number;
+      professorId?: string | number;
+      academicPeriodId?: string | number;
+      minRating?: string | number;
+      extension?: string;
+      kind?: "file" | "link";
+      sort?: string;
+    } = {},
+  ) {
     const search = new URLSearchParams();
     Object.entries(params).forEach(([key, value]) => {
       if (value !== undefined && value !== null && value !== "") search.set(key, String(value));

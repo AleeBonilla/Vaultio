@@ -1,26 +1,29 @@
-import { CheckCircle, FileText, Upload } from "lucide-react";
-import { useEffect, useId, useState } from "react";
+import { CheckCircle, FileText, Link as LinkIcon, Upload } from "lucide-react";
+import { useEffect, useId, useRef, useState } from "react";
 import { useNavigate } from "react-router";
 import { toast } from "sonner";
 import { Badge } from "../../components/ui/Badge";
 import { Button } from "../../components/ui/Button";
 import { Input } from "../../components/ui/Input";
-import { catalogApi, resourcesApi, storageApi, type Course } from "../../lib/api";
+import { catalogApi, resourcesApi, storageApi, type Course, type CreateResourceInput } from "../../lib/api";
 
 type Option = { id: number; name: string };
 type Professor = { id: number; firstName: string; lastName: string; courseIds: number[] };
+type UploadMode = "file" | "link";
 
 const MAX_FILE_SIZE_MB = 50;
 
 export function UploadResource() {
   const navigate = useNavigate();
   const [step, setStep] = useState(1);
+  const [mode, setMode] = useState<UploadMode>("file");
   const [dragActive, setDragActive] = useState(false);
   const [courses, setCourses] = useState<Course[]>([]);
   const [resourceTypes, setResourceTypes] = useState<Option[]>([]);
   const [periods, setPeriods] = useState<Option[]>([]);
   const [professors, setProfessors] = useState<Professor[]>([]);
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const [resourceUrl, setResourceUrl] = useState("");
   const [createdResourceId, setCreatedResourceId] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
   const [uploadProgress, setUploadProgress] = useState<string | null>(null);
@@ -36,6 +39,7 @@ export function UploadResource() {
 
   const fileInputId = useId();
   const descriptionId = useId();
+  const fileInputRef = useRef<HTMLInputElement | null>(null);
 
   useEffect(() => {
     Promise.all([
@@ -50,7 +54,7 @@ export function UploadResource() {
         setPeriods(loadedPeriods);
         setProfessors(loadedProfessors);
       })
-      .catch(() => setError("No se pudieron cargar los catálogos"));
+      .catch(() => setError("No se pudieron cargar los catalogos"));
   }, []);
 
   const handleDrag = (event: React.DragEvent) => {
@@ -76,25 +80,46 @@ export function UploadResource() {
   };
 
   const handleSubmit = async () => {
-    if (!selectedFile) return;
+    if (mode === "file" && !selectedFile) return;
+    if (mode === "link" && !resourceUrl.trim()) return;
     setSubmitting(true);
     setError(null);
 
     try {
-      setUploadProgress("Generando enlace de subida...");
-      const presigned = await storageApi.createUploadUrl({
-        originalFilename: selectedFile.name,
-        mimeType: selectedFile.type || "application/octet-stream",
-      });
+      let metadata: Partial<CreateResourceInput> = {};
 
-      setUploadProgress("Subiendo archivo a MinIO...");
-      const uploadResponse = await fetch(presigned.uploadUrl, {
-        method: "PUT",
-        headers: { "content-type": selectedFile.type || "application/octet-stream" },
-        body: selectedFile,
-      });
-      if (!uploadResponse.ok) {
-        throw new Error(`Fallo al subir el archivo (HTTP ${uploadResponse.status})`);
+      if (mode === "file" && selectedFile) {
+        setUploadProgress("Generando enlace de subida...");
+        const presigned = await storageApi.createUploadUrl({
+          originalFilename: selectedFile.name,
+          mimeType: selectedFile.type || "application/octet-stream",
+        });
+
+        setUploadProgress("Subiendo archivo a MinIO...");
+        const uploadResponse = await fetch(presigned.uploadUrl, {
+          method: "PUT",
+          headers: { "content-type": selectedFile.type || "application/octet-stream" },
+          body: selectedFile,
+        });
+        if (!uploadResponse.ok) throw new Error(`Fallo al subir el archivo (HTTP ${uploadResponse.status})`);
+
+        metadata = {
+          originalFilename: selectedFile.name,
+          fileSize: selectedFile.size,
+          mimeType: selectedFile.type || "application/octet-stream",
+          storageProvider: presigned.provider,
+          storageBucket: presigned.bucket,
+          storageKey: presigned.storageKey,
+          publicUrl: presigned.publicUrl,
+        };
+      } else {
+        const parsed = new URL(resourceUrl.trim());
+        metadata = {
+          externalUrl: parsed.toString(),
+          originalFilename: parsed.hostname,
+          fileSize: 0,
+          mimeType: "text/uri-list",
+        };
       }
 
       setUploadProgress("Registrando recurso...");
@@ -106,18 +131,12 @@ export function UploadResource() {
         academicPeriodId: periodId ? Number(periodId) : undefined,
         professorId: professorId ? Number(professorId) : undefined,
         tags,
-        originalFilename: selectedFile.name,
-        fileSize: selectedFile.size,
-        mimeType: selectedFile.type || "application/octet-stream",
-        storageProvider: presigned.provider,
-        storageBucket: presigned.bucket,
-        storageKey: presigned.storageKey,
-        publicUrl: presigned.publicUrl,
-      } as any);
+        ...metadata,
+      });
 
       setCreatedResourceId(created.id);
       setStep(3);
-      toast.success("¡Recurso publicado!");
+      toast.success("Recurso publicado");
     } catch (err) {
       const message = err instanceof Error ? err.message : "No se pudo subir el recurso";
       setError(message);
@@ -136,7 +155,7 @@ export function UploadResource() {
             <CheckCircle aria-hidden="true" className="w-8 h-8 text-green-600" />
           </div>
           <h1 className="mb-3 text-3xl font-bold text-slate-900">Recurso publicado</h1>
-          <p className="mb-8 text-slate-600">Tu material ya está disponible para el resto de la comunidad.</p>
+          <p className="mb-8 text-slate-600">Tu material ya esta disponible para el resto de la comunidad.</p>
           <div className="flex flex-wrap gap-3 justify-center">
             <Button variant="secondary" className="rounded-full border-blue-100 hover:bg-blue-50" onClick={() => window.location.reload()}>
               Subir otro
@@ -154,9 +173,14 @@ export function UploadResource() {
     );
   }
 
-  const canContinue = Boolean(selectedFile);
+  const canContinue = mode === "file" ? Boolean(selectedFile) : Boolean(resourceUrl.trim());
   const canSubmit =
-    !submitting && title.trim() && description.trim() && courseId && resourceTypeId && selectedFile;
+    !submitting &&
+    title.trim() &&
+    description.trim() &&
+    courseId &&
+    resourceTypeId &&
+    (mode === "file" ? selectedFile : resourceUrl.trim());
 
   return (
     <div className="max-w-3xl mx-auto">
@@ -165,7 +189,7 @@ export function UploadResource() {
         <h1 className="mb-3 text-4xl font-extrabold tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-blue-700 via-blue-500 to-cyan-500">
           Subir recurso
         </h1>
-        <p className="text-slate-600">Compartí tus materiales de estudio con otros estudiantes.</p>
+        <p className="text-slate-600">Comparte tus materiales de estudio con otros estudiantes.</p>
       </div>
 
       <ol className="mb-8 flex flex-wrap items-center gap-4" aria-label="Progreso de subida">
@@ -179,7 +203,7 @@ export function UploadResource() {
               {s}
             </span>
             <span className={`font-medium ${step >= s ? "text-slate-900" : "text-slate-500"}`}>
-              {s === 1 ? "Seleccionar archivo" : "Detalles del recurso"}
+              {s === 1 ? "Origen del recurso" : "Detalles del recurso"}
             </span>
             {s < 2 && <span aria-hidden="true" className="ml-2 h-0.5 w-16 bg-blue-100" />}
           </li>
@@ -195,42 +219,84 @@ export function UploadResource() {
 
         {step === 1 && (
           <div>
-            <h2 className="mb-6 text-xl font-semibold text-slate-900">Seleccioná tu archivo</h2>
+            <h2 className="mb-6 text-xl font-semibold text-slate-900">Selecciona el origen</h2>
 
-            <div
-              className={`border-2 border-dashed rounded-lg p-12 text-center transition-colors ${
-                dragActive ? "border-blue-500 bg-blue-50" : "border-blue-100 hover:border-blue-300"
-              }`}
-              onDragEnter={handleDrag}
-              onDragLeave={handleDrag}
-              onDragOver={handleDrag}
-              onDrop={handleDrop}
-            >
-              <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-blue-100">
-                <Upload aria-hidden="true" className="w-8 h-8 text-blue-600" />
-              </div>
-              <h3 className="mb-2 font-medium text-slate-900">Arrastrá y soltá tu archivo aquí</h3>
-              <p className="mb-4 text-sm text-slate-500">o</p>
-              <input
-                id={fileInputId}
-                type="file"
-                className="sr-only"
-                accept=".pdf,.doc,.docx,.ppt,.pptx,.zip,.txt,.png,.jpg,.jpeg"
-                onChange={(event) => {
-                  const file = event.target.files?.[0];
-                  if (file) chooseFile(file);
-                }}
-              />
-              <label
-                htmlFor={fileInputId}
-                className="inline-flex cursor-pointer rounded-full border border-blue-100 bg-white px-4 py-2 font-medium text-blue-600 transition-colors hover:bg-blue-50"
+            <div className="mb-6 grid grid-cols-2 gap-3 rounded-2xl border border-blue-100 bg-blue-50/40 p-2">
+              <button
+                type="button"
+                aria-pressed={mode === "file"}
+                onClick={() => setMode("file")}
+                className={`flex items-center justify-center gap-2 rounded-xl px-4 py-3 text-sm font-semibold transition-colors ${
+                  mode === "file" ? "bg-white text-blue-700 shadow-sm" : "text-slate-600 hover:bg-white/70"
+                }`}
               >
-                Seleccionar archivo
-              </label>
-              <p className="mt-4 text-xs text-slate-500">Máximo {MAX_FILE_SIZE_MB} MB. PDF, DOCX, PPTX, ZIP, imágenes.</p>
+                <Upload className="h-4 w-4" />
+                Archivo
+              </button>
+              <button
+                type="button"
+                aria-pressed={mode === "link"}
+                onClick={() => setMode("link")}
+                className={`flex items-center justify-center gap-2 rounded-xl px-4 py-3 text-sm font-semibold transition-colors ${
+                  mode === "link" ? "bg-white text-blue-700 shadow-sm" : "text-slate-600 hover:bg-white/70"
+                }`}
+              >
+                <LinkIcon className="h-4 w-4" />
+                Link
+              </button>
             </div>
 
-            {selectedFile && (
+            {mode === "file" ? (
+              <div
+                className={`border-2 border-dashed rounded-lg p-12 text-center transition-colors ${
+                  dragActive ? "border-blue-500 bg-blue-50" : "border-blue-100 hover:border-blue-300"
+                }`}
+                onDragEnter={handleDrag}
+                onDragLeave={handleDrag}
+                onDragOver={handleDrag}
+                onDrop={handleDrop}
+              >
+                <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-blue-100">
+                  <Upload aria-hidden="true" className="w-8 h-8 text-blue-600" />
+                </div>
+                <h3 className="mb-2 font-medium text-slate-900">Arrastra y suelta tu archivo aqui</h3>
+                <p className="mb-4 text-sm text-slate-500">o</p>
+                <input
+                  id={fileInputId}
+                  ref={fileInputRef}
+                  type="file"
+                  aria-label="Seleccionar archivo"
+                  tabIndex={-1}
+                  className="sr-only"
+                  accept=".pdf,.doc,.docx,.ppt,.pptx,.zip,.txt,.png,.jpg,.jpeg"
+                  onChange={(event) => {
+                    const file = event.target.files?.[0];
+                    if (file) chooseFile(file);
+                  }}
+                />
+                <button
+                  type="button"
+                  onClick={() => fileInputRef.current?.click()}
+                  className="inline-flex rounded-full border border-blue-100 bg-white px-4 py-2 font-medium text-blue-600 transition-colors hover:bg-blue-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2"
+                >
+                  Seleccionar archivo
+                </button>
+                <p className="mt-4 text-xs text-slate-500">Maximo {MAX_FILE_SIZE_MB} MB. PDF, DOCX, PPTX, ZIP, imagenes.</p>
+              </div>
+            ) : (
+              <div className="rounded-2xl border border-blue-100 bg-blue-50/40 p-5">
+                <Input
+                  label="URL del recurso"
+                  type="url"
+                  value={resourceUrl}
+                  onChange={(event) => setResourceUrl(event.target.value)}
+                  placeholder="https://..."
+                  required
+                />
+              </div>
+            )}
+
+            {mode === "file" && selectedFile && (
               <div className="mt-6 flex items-center gap-3 rounded-2xl border border-blue-100 bg-blue-50/50 p-4">
                 <FileText aria-hidden="true" className="w-10 h-10 text-blue-600" />
                 <div className="flex-1 min-w-0">
@@ -240,6 +306,17 @@ export function UploadResource() {
                       ? `${Math.max(1, Math.round(selectedFile.size / 1024))} KB`
                       : `${(selectedFile.size / 1024 / 1024).toFixed(1)} MB`}
                   </p>
+                </div>
+                <Badge variant="green">Listo</Badge>
+              </div>
+            )}
+
+            {mode === "link" && resourceUrl.trim() && (
+              <div className="mt-6 flex items-center gap-3 rounded-2xl border border-blue-100 bg-blue-50/50 p-4">
+                <LinkIcon aria-hidden="true" className="w-10 h-10 text-blue-600" />
+                <div className="flex-1 min-w-0">
+                  <p className="truncate font-medium text-slate-900">{resourceUrl.trim()}</p>
+                  <p className="text-sm text-slate-500">Se abrira como enlace externo</p>
                 </div>
                 <Badge variant="green">Listo</Badge>
               </div>
@@ -259,7 +336,7 @@ export function UploadResource() {
 
             <div className="space-y-4">
               <Input
-                label="Título"
+                label="Titulo"
                 value={title}
                 onChange={(event) => setTitle(event.target.value)}
                 placeholder="ej. Examen final 2026 - resuelto"
@@ -268,7 +345,7 @@ export function UploadResource() {
 
               <div>
                 <label htmlFor={descriptionId} className="mb-1.5 block text-sm font-medium text-slate-900">
-                  Descripción
+                  Descripcion
                 </label>
                 <textarea
                   id={descriptionId}
@@ -291,7 +368,7 @@ export function UploadResource() {
                   className="w-full rounded-md border border-blue-100 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
                   required
                 >
-                  <option value="">Seleccioná un curso</option>
+                  <option value="">Selecciona un curso</option>
                   {courses.map((course) => (
                     <option key={course.id} value={course.id}>
                       {course.code} - {course.name}
@@ -311,7 +388,7 @@ export function UploadResource() {
                   className="w-full rounded-md border border-blue-100 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
                   required
                 >
-                  <option value="">Seleccioná el tipo</option>
+                  <option value="">Selecciona el tipo</option>
                   {resourceTypes.map((type) => (
                     <option key={type.id} value={type.id}>
                       {type.name}
@@ -376,10 +453,10 @@ export function UploadResource() {
 
             <div className="flex gap-3 mt-8">
               <Button variant="secondary" onClick={() => setStep(1)} className="flex-1 rounded-full border-blue-100 hover:bg-blue-50" disabled={submitting}>
-                Atrás
+                Atras
               </Button>
               <Button variant="primary" onClick={handleSubmit} className="flex-1 rounded-full bg-blue-600 shadow-lg shadow-blue-600/15 hover:bg-blue-700" disabled={!canSubmit}>
-                {submitting ? "Subiendo..." : "Publicar recurso"}
+                {submitting ? (mode === "file" ? "Subiendo..." : "Publicando...") : "Publicar recurso"}
               </Button>
             </div>
           </div>

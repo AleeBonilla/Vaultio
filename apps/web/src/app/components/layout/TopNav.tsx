@@ -34,7 +34,7 @@ export function TopNav({ onOpenMobileMenu }: TopNavProps) {
           type="button"
           aria-label="Abrir menú"
           onClick={onOpenMobileMenu}
-          className="rounded-md p-2 text-slate-600 hover:bg-blue-50 lg:hidden"
+          className="rounded-md p-2 text-slate-600 hover:bg-blue-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2 lg:hidden"
         >
           <Menu className="w-5 h-5" />
         </button>

@@ -25,6 +25,7 @@ export class AuthService {
     const firstName = String(input.firstName || "").trim();
     const lastName = String(input.lastName || "").trim();
     const careerId = input.careerId ? Number(input.careerId) : null;
+    const requestedUsername = String(input.username || "").trim();
 
     if (!email || !password || !firstName || !lastName) {
       badRequest("Nombre, apellido, correo y contrasena son requeridos");
@@ -36,7 +37,9 @@ export class AuthService {
     const existing = await this.prisma.identities.findFirst({ where: { email } });
     if (existing) badRequest("Ya existe un usuario con ese correo");
 
-    const username = await this.uniqueUsername(email.split("@")[0].replace(/[^a-z0-9_]/gi, "").slice(0, 24) || "usuario");
+    const username = requestedUsername
+      ? await this.ensureAvailableUsername(requestedUsername)
+      : await this.uniqueUsername(email.split("@")[0].replace(/[^a-z0-9_]/gi, "").slice(0, 24) || "usuario");
 
     const user = await this.prisma.$transaction(async (tx) => {
       const createdUser = await tx.users.create({
@@ -151,6 +154,16 @@ export class AuthService {
       candidate = `${base.slice(0, 30 - postfix.length)}${postfix}`;
     }
     return candidate;
+  }
+
+  private async ensureAvailableUsername(value: string) {
+    const username = value.trim().toLowerCase();
+    if (!/^[a-z0-9_]{3,30}$/.test(username)) {
+      badRequest("El username debe tener 3 a 30 caracteres y solo usar letras, numeros o guion bajo");
+    }
+    const existing = await this.prisma.users.findUnique({ where: { username } });
+    if (existing) badRequest("Ese username ya esta en uso");
+    return username;
   }
 
   private readBearerToken(authorizationHeader?: string) {

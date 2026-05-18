@@ -22,16 +22,17 @@ interface AuthContextValue {
   clearError: () => void;
   signInWithGoogle: () => Promise<void>;
   signInWithEmail: (email: string, password: string) => Promise<void>;
-  signUpWithEmail: (input: { email: string; password: string; firstName: string; lastName: string }) => Promise<void>;
+  signUpWithEmail: (input: { email: string; password: string; username?: string; firstName: string; lastName: string }) => Promise<void>;
   sendPasswordReset: (email: string) => Promise<void>;
   signOut: () => Promise<void>;
   refreshProfile: () => Promise<void>;
-  updateProfile: (input: Partial<Pick<VaultioUser, "firstName" | "lastName" | "bio" | "photoUrl">> & { careerIds?: number[] }) => Promise<VaultioUser>;
+  updateProfile: (input: Partial<Pick<VaultioUser, "username" | "firstName" | "lastName" | "bio" | "photoUrl">> & { careerIds?: number[] }) => Promise<VaultioUser>;
 }
 
 const AuthContext = createContext<AuthContextValue | undefined>(undefined);
 
 interface PendingSignupProfile {
+  username?: string;
   firstName: string;
   lastName: string;
 }
@@ -81,8 +82,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         let synced = (await authApi.me()).user;
 
         const pending = pendingProfileRef.current;
-        if (pending && (synced.firstName !== pending.firstName || synced.lastName !== pending.lastName)) {
+        if (
+          pending &&
+          (synced.firstName !== pending.firstName ||
+            synced.lastName !== pending.lastName ||
+            (pending.username && synced.username !== pending.username))
+        ) {
           synced = await usersApi.updateMe({
+            username: pending.username,
             firstName: pending.firstName,
             lastName: pending.lastName,
           });
@@ -136,11 +143,23 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const signUpWithEmail = useCallback(
-    async ({ email, password, firstName, lastName }: { email: string; password: string; firstName: string; lastName: string }) => {
+    async ({
+      email,
+      password,
+      username,
+      firstName,
+      lastName,
+    }: {
+      email: string;
+      password: string;
+      username?: string;
+      firstName: string;
+      lastName: string;
+    }) => {
       setError(null);
       setLoading(true);
       try {
-        pendingProfileRef.current = { firstName, lastName };
+        pendingProfileRef.current = { username, firstName, lastName };
         await firebaseSignUpWithEmail(email, password, `${firstName} ${lastName}`.trim());
       } catch (signUpError) {
         pendingProfileRef.current = null;
@@ -175,7 +194,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const updateProfile = useCallback(
-    async (input: Partial<Pick<VaultioUser, "firstName" | "lastName" | "bio" | "photoUrl">> & { careerIds?: number[] }) => {
+    async (input: Partial<Pick<VaultioUser, "username" | "firstName" | "lastName" | "bio" | "photoUrl">> & { careerIds?: number[] }) => {
       const updated = await usersApi.updateMe(input);
       setProfile(updated);
       return updated;

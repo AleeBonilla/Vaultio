@@ -1,5 +1,5 @@
 import { ArrowLeft, BookOpen, ChevronRight, SlidersHorizontal } from "lucide-react";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 import { Link, useParams } from "react-router";
 import { FilterPanel, type FilterValues } from "../../components/filters/FilterPanel";
 import { SortSelect } from "../../components/filters/SortSelect";
@@ -16,6 +16,15 @@ const SORT_OPTIONS: Array<{ value: SortMode; label: string }> = [
   { value: "views", label: "Más vistos" },
 ];
 
+const EMPTY_FILTERS: FilterValues = {
+  typeId: "",
+  courseId: "",
+  professorId: "",
+  academicPeriodId: "",
+  minRating: 0,
+  kind: "",
+};
+
 function formatDate(value: string) {
   return new Intl.DateTimeFormat("es-CR", { day: "2-digit", month: "short", year: "numeric" }).format(new Date(value));
 }
@@ -27,9 +36,11 @@ export function CourseResources() {
   const [course, setCourse] = useState<Course | null>(null);
   const [resources, setResources] = useState<ResourceSummary[]>([]);
   const [typeOptions, setTypeOptions] = useState<Array<{ label: string; value: string }>>([]);
+  const [professorOptions, setProfessorOptions] = useState<Array<{ label: string; value: string }>>([]);
+  const [periodOptions, setPeriodOptions] = useState<Array<{ label: string; value: string }>>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [filters, setFilters] = useState<FilterValues>({ types: [], minRating: 0 });
+  const [filters, setFilters] = useState<FilterValues>(EMPTY_FILTERS);
   const [sort, setSort] = useState<SortMode>("recent");
 
   useEffect(() => {
@@ -41,15 +52,32 @@ export function CourseResources() {
     Promise.all([
       catalogApi.careers(),
       catalogApi.coursesByCareer(careerId),
-      resourcesApi.list({ courseId }),
+      resourcesApi.list({
+        courseId,
+        typeId: filters.typeId || undefined,
+        professorId: filters.professorId || undefined,
+        academicPeriodId: filters.academicPeriodId || undefined,
+        minRating: filters.minRating || undefined,
+        kind: filters.kind || undefined,
+        sort,
+      }),
       catalogApi.resourceTypes(),
+      catalogApi.professors(Number(courseId)),
+      catalogApi.academicPeriods(),
     ])
-      .then(([careers, courses, loadedResources, types]) => {
+      .then(([careers, courses, loadedResources, types, professors, periods]) => {
         if (!active) return;
         setCareer(careers.find((item) => String(item.id) === careerId) || null);
         setCourse(courses.find((item) => String(item.id) === courseId) || null);
         setResources(loadedResources);
-        setTypeOptions(types.map((type) => ({ label: type.name, value: type.name })));
+        setTypeOptions(types.map((type) => ({ label: type.name, value: String(type.id) })));
+        setProfessorOptions(
+          professors.map((professor) => ({
+            label: `${professor.firstName} ${professor.lastName}`,
+            value: String(professor.id),
+          })),
+        );
+        setPeriodOptions(periods.map((period) => ({ label: period.name, value: String(period.id) })));
       })
       .catch((err) => {
         if (active) setError(err instanceof Error ? err.message : "No se pudo cargar el curso");
@@ -61,19 +89,7 @@ export function CourseResources() {
     return () => {
       active = false;
     };
-  }, [careerId, courseId]);
-
-  const filtered = useMemo(() => {
-    let list = resources;
-    if (filters.types.length > 0) list = list.filter((resource) => filters.types.includes(resource.type));
-    if (filters.minRating > 0) list = list.filter((resource) => resource.rating >= filters.minRating);
-    const sorted = [...list];
-    if (sort === "rating") sorted.sort((a, b) => b.rating - a.rating);
-    else if (sort === "downloads") sorted.sort((a, b) => b.downloads - a.downloads);
-    else if (sort === "views") sorted.sort((a, b) => b.views - a.views);
-    else sorted.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
-    return sorted;
-  }, [resources, filters, sort]);
+  }, [careerId, courseId, filters, sort]);
 
   if (loading) {
     return (
@@ -119,7 +135,7 @@ export function CourseResources() {
           <div>
             <h1 className="mb-2 text-3xl font-bold text-slate-900">{course.name}</h1>
             <p className="text-slate-600">
-              {course.code} · {filtered.length} de {resources.length} recursos
+              {course.code} · {resources.length} recursos
             </p>
           </div>
         </div>
@@ -145,16 +161,19 @@ export function CourseResources() {
             <div className="lg:sticky lg:top-20">
               <FilterPanel
                 typeOptions={typeOptions}
+                courseOptions={[]}
+                professorOptions={professorOptions}
+                periodOptions={periodOptions}
                 values={filters}
                 onChange={setFilters}
-                onClear={() => setFilters({ types: [], minRating: 0 })}
+                onClear={() => setFilters(EMPTY_FILTERS)}
               />
             </div>
           </aside>
         )}
 
         <div className="flex-1">
-          {filtered.length === 0 ? (
+          {resources.length === 0 ? (
             <div className="rounded-2xl border border-blue-100 bg-white/85 p-10 text-center text-slate-600 shadow-sm shadow-blue-900/5">
               {resources.length === 0
                 ? "Este curso aún no tiene recursos publicados. ¡Sé el primero en subir uno!"
@@ -162,7 +181,7 @@ export function CourseResources() {
             </div>
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
-              {filtered.map((resource) => (
+              {resources.map((resource) => (
                 <ResourceCard
                   key={resource.id}
                   id={resource.id}

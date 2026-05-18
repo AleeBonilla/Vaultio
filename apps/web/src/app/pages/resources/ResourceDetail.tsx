@@ -2,6 +2,7 @@ import {
   Bookmark,
   Calendar,
   Download,
+  ExternalLink,
   FileText,
   MessageSquare,
   Share2,
@@ -146,7 +147,7 @@ export function ResourceDetail() {
       const { url, downloads: total } = await resourcesApi.download(resource.id);
       setDownloads(total);
       window.open(url, "_blank", "noopener,noreferrer");
-      toast.success("Descarga iniciada");
+      toast.success(resource.storageProvider === "external" ? "Enlace abierto" : "Descarga iniciada");
     } catch (err) {
       toast.error(err instanceof Error ? err.message : "No se pudo descargar el archivo");
     } finally {
@@ -248,6 +249,7 @@ export function ResourceDetail() {
       {(repliesByParent.get(comment.id) || []).map((reply) => renderComment(reply, depth + 1))}
     </CommentBlock>
   );
+  const isExternalResource = resource.storageProvider === "external" || resource.fileExtension === "link";
 
   return (
     <div className="max-w-7xl mx-auto">
@@ -294,7 +296,7 @@ export function ResourceDetail() {
             <div className="mb-6 flex aspect-[4/3] items-center justify-center rounded-2xl border border-blue-100 bg-blue-50/60">
               <div className="text-center">
                 <ResourceTypeIcon type={resource.type} fileExtension={resource.fileExtension} className="mx-auto mb-3 !p-4" />
-                <p className="text-slate-600">Archivo {resource.fileExtension?.toUpperCase() || "digital"}</p>
+                <p className="text-slate-600">{isExternalResource ? "Enlace externo" : `Archivo ${resource.fileExtension?.toUpperCase() || "digital"}`}</p>
                 <p className="text-sm text-slate-500">{resource.originalFilename}</p>
               </div>
             </div>
@@ -306,8 +308,8 @@ export function ResourceDetail() {
                 onClick={handleDownload}
                 disabled={downloading}
               >
-                <Download className="w-4 h-4" />
-                {downloading ? "Generando enlace..." : "Descargar recurso"}
+                {isExternalResource ? <ExternalLink className="w-4 h-4" /> : <Download className="w-4 h-4" />}
+                {downloading ? "Generando enlace..." : isExternalResource ? "Abrir link" : "Descargar recurso"}
               </Button>
               <Button variant="secondary" className="flex items-center gap-2 rounded-full border-blue-100 hover:bg-blue-50" onClick={handleShare}>
                 <Share2 className="w-4 h-4" />
@@ -396,13 +398,13 @@ export function ResourceDetail() {
               />
               <InfoRow
                 icon={<Download className="w-5 h-5 text-blue-400" />}
-                label="Descargas"
+                label={isExternalResource ? "Aperturas" : "Descargas"}
                 value={`${downloads} veces`}
               />
               <InfoRow
                 icon={<FileText className="w-5 h-5 text-blue-400" />}
-                label="Tipo de archivo"
-                value={`${resource.fileExtension?.toUpperCase() || "Archivo"} (${formatFileSize(resource.fileSize)})`}
+                label={isExternalResource ? "Tipo de recurso" : "Tipo de archivo"}
+                value={isExternalResource ? "Link externo" : `${resource.fileExtension?.toUpperCase() || "Archivo"} (${formatFileSize(resource.fileSize)})`}
               />
             </div>
           </div>

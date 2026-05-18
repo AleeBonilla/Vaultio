@@ -46,6 +46,15 @@ export class UsersService {
       if (!value) badRequest("El nombre no puede estar vacio");
       data.first_name = value.slice(0, 80);
     }
+    if (typeof input.username === "string") {
+      const username = this.normalizeUsername(input.username);
+      const existing = await this.prisma.users.findFirst({
+        where: { username, id: { not: user.id } },
+        select: { id: true },
+      });
+      if (existing) badRequest("Ese username ya esta en uso");
+      data.username = username;
+    }
     if (typeof input.lastName === "string") {
       data.last_name = input.lastName.trim().slice(0, 80);
     }
@@ -322,5 +331,13 @@ export class UsersService {
     `);
     await this.prisma.$executeRawUnsafe("CREATE INDEX IF NOT EXISTS idx_user_courses_user ON user_courses(user_id)");
     await this.prisma.$executeRawUnsafe("CREATE INDEX IF NOT EXISTS idx_user_courses_course ON user_courses(course_id)");
+  }
+
+  private normalizeUsername(value: string) {
+    const username = value.trim().toLowerCase();
+    if (!/^[a-z0-9_]{3,30}$/.test(username)) {
+      badRequest("El username debe tener 3 a 30 caracteres y solo usar letras, numeros o guion bajo");
+    }
+    return username;
   }
 }

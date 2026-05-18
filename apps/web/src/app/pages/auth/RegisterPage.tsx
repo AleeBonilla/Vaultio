@@ -32,6 +32,7 @@ export function RegisterPage() {
   } = useAuth();
 
   const [careers, setCareers] = useState<Career[]>([]);
+  const [username, setUsername] = useState("");
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
   const [email, setEmail] = useState("");
@@ -53,6 +54,7 @@ export function RegisterPage() {
     if (profile) {
       setFirstName(profile.firstName || "");
       setLastName(profile.lastName || "");
+      setUsername(profile.username || "");
       if (profile.careerIds[0]) setCareerId(String(profile.careerIds[0]));
     }
   }, [profile]);
@@ -80,6 +82,7 @@ export function RegisterPage() {
           return;
         }
         await updateProfile({
+          username: username.trim().toLowerCase(),
           firstName: firstName.trim(),
           lastName: lastName.trim(),
           careerIds: [Number(careerId)],
@@ -89,8 +92,12 @@ export function RegisterPage() {
         return;
       }
 
-      if (!firstName.trim() || !lastName.trim() || !email.trim() || !password) {
+      if (!username.trim() || !firstName.trim() || !lastName.trim() || !email.trim() || !password) {
         setLocalError("Completá todos los campos para registrarte.");
+        return;
+      }
+      if (!/^[a-z0-9_]{3,30}$/.test(username.trim().toLowerCase())) {
+        setLocalError("El username debe tener 3 a 30 caracteres y solo usar letras, numeros o guion bajo.");
         return;
       }
       if (password.length < 6) {
@@ -106,7 +113,13 @@ export function RegisterPage() {
         return;
       }
 
-      await signUpWithEmail({ email: email.trim(), password, firstName: firstName.trim(), lastName: lastName.trim() });
+      await signUpWithEmail({
+        email: email.trim(),
+        password,
+        username: username.trim().toLowerCase(),
+        firstName: firstName.trim(),
+        lastName: lastName.trim(),
+      });
       // Una vez autenticado, vamos a completar la carrera. Esperamos al efecto del onAuthStateChanged
       // y luego este mismo componente, al re-render, hará el updateProfile con el careerId actual.
     } catch (err) {
@@ -124,6 +137,7 @@ export function RegisterPage() {
     (async () => {
       try {
         await updateProfile({
+          username: username.trim().toLowerCase() || profile.username,
           firstName: firstName.trim() || profile.firstName,
           lastName: lastName.trim() || profile.lastName,
           careerIds: [Number(careerId)],
@@ -183,6 +197,15 @@ export function RegisterPage() {
                 required
               />
             </div>
+
+            <Input
+              label="Username"
+              value={username}
+              onChange={(event) => setUsername(event.target.value.toLowerCase())}
+              autoComplete="username"
+              placeholder="andres_tec"
+              required
+            />
 
             {!hasSession && (
               <>

@@ -1,4 +1,5 @@
 import { BookOpen, Bookmark, Home, LogOut, Upload, User, X } from "lucide-react";
+import { useEffect, useRef } from "react";
 import { Link, useLocation, useNavigate } from "react-router";
 import { toast } from "sonner";
 import { useAuth } from "../../lib/auth-context";
@@ -20,6 +21,44 @@ export function Sidebar({ mobileOpen = false, onCloseMobile }: SidebarProps) {
   const location = useLocation();
   const navigate = useNavigate();
   const { signOut } = useAuth();
+  const drawerRef = useRef<HTMLElement | null>(null);
+  const closeButtonRef = useRef<HTMLButtonElement | null>(null);
+
+  useEffect(() => {
+    if (!mobileOpen) return;
+
+    closeButtonRef.current?.focus();
+
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === "Escape") {
+        onCloseMobile?.();
+        return;
+      }
+      if (event.key !== "Tab") return;
+
+      const drawer = drawerRef.current;
+      if (!drawer) return;
+      const focusable = Array.from(
+        drawer.querySelectorAll<HTMLElement>(
+          'a[href], button:not([disabled]), input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])',
+        ),
+      );
+      if (focusable.length === 0) return;
+
+      const first = focusable[0];
+      const last = focusable[focusable.length - 1];
+      if (event.shiftKey && document.activeElement === first) {
+        event.preventDefault();
+        last.focus();
+      } else if (!event.shiftKey && document.activeElement === last) {
+        event.preventDefault();
+        first.focus();
+      }
+    };
+
+    document.addEventListener("keydown", handleKeyDown);
+    return () => document.removeEventListener("keydown", handleKeyDown);
+  }, [mobileOpen, onCloseMobile]);
 
   const isActive = (path: string) => {
     if (path === "/app") return location.pathname === "/app";
@@ -42,12 +81,16 @@ export function Sidebar({ mobileOpen = false, onCloseMobile }: SidebarProps) {
         <button
           type="button"
           aria-label="Cerrar menú"
-          className="fixed inset-0 z-30 bg-black/40 lg:hidden"
+          className="fixed inset-0 z-30 bg-black/40 lg:hidden focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
           onClick={onCloseMobile}
         />
       )}
 
       <aside
+        ref={drawerRef}
+        role={mobileOpen ? "dialog" : undefined}
+        aria-modal={mobileOpen ? "true" : undefined}
+        aria-label={mobileOpen ? "Menu principal" : undefined}
         className={`fixed left-0 top-0 z-40 h-screen w-64 flex-col border-r border-blue-100/80 bg-white/85 backdrop-blur-xl transition-transform lg:flex lg:translate-x-0 ${
           mobileOpen ? "flex translate-x-0" : "hidden -translate-x-full"
         }`}
@@ -64,9 +107,10 @@ export function Sidebar({ mobileOpen = false, onCloseMobile }: SidebarProps) {
           {mobileOpen && (
             <button
               type="button"
+              ref={closeButtonRef}
               aria-label="Cerrar menú"
               onClick={onCloseMobile}
-              className="rounded-md p-1 text-slate-600 hover:bg-blue-50 lg:hidden"
+              className="rounded-md p-1 text-slate-600 hover:bg-blue-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2 lg:hidden"
             >
               <X className="w-5 h-5" />
             </button>

@@ -77,12 +77,26 @@ let ResourcesService = class ResourcesService {
                 { title: { contains: search, mode: "insensitive" } },
                 { description: { contains: search, mode: "insensitive" } },
                 { tags: { has: search.toLowerCase() } },
+                { courses: { code: { contains: search, mode: "insensitive" } } },
+                { courses: { name: { contains: search, mode: "insensitive" } } },
+                { professors: { first_name: { contains: search, mode: "insensitive" } } },
+                { professors: { last_name: { contains: search, mode: "insensitive" } } },
             ];
         }
         if (query.courseId)
             where.course_id = Number(query.courseId);
         if (query.typeId)
             where.resource_type_id = Number(query.typeId);
+        if (query.professorId)
+            where.professor_id = Number(query.professorId);
+        if (query.academicPeriodId)
+            where.academic_period_id = Number(query.academicPeriodId);
+        if (query.extension)
+            where.file_extension = String(query.extension).replace(/^\./, "").toLowerCase();
+        if (query.kind === "link")
+            where.storage_provider = "external";
+        if (query.kind === "file")
+            where.storage_provider = { not: "external" };
         if (query.careerId) {
             where.courses = {
                 course_careers: {
@@ -95,7 +109,22 @@ let ResourcesService = class ResourcesService {
             include: resourceInclude,
             orderBy: { created_at: "desc" },
         });
-        return { items: items.map(serializers_1.summarizeResource) };
+        let summaries = items.map(serializers_1.summarizeResource);
+        const minRating = Number(query.minRating || 0);
+        if (Number.isFinite(minRating) && minRating > 0) {
+            summaries = summaries.filter((item) => item.rating >= minRating);
+        }
+        const sort = String(query.sort || "recent");
+        summaries.sort((a, b) => {
+            if (sort === "rating")
+                return b.rating - a.rating;
+            if (sort === "downloads")
+                return b.downloads - a.downloads;
+            if (sort === "views")
+                return b.views - a.views;
+            return new Date(b.date).getTime() - new Date(a.date).getTime();
+        });
+        return { items: summaries };
     }
     async detail(id, authorizationHeader) {
         const item = await this.prisma.resources.update({
@@ -141,16 +170,31 @@ let ResourcesService = class ResourcesService {
             (0, errors_1.badRequest)("Curso invalido");
         if (!resourceType)
             (0, errors_1.badRequest)("Tipo de recurso invalido");
-        const originalFilename = String(input.originalFilename || "recurso").trim();
+        const externalUrl = typeof input.externalUrl === "string" ? input.externalUrl.trim() : "";
+        let parsedExternalUrl = null;
+        if (externalUrl) {
+            try {
+                parsedExternalUrl = new URL(externalUrl);
+            }
+            catch {
+                (0, errors_1.badRequest)("El enlace no es valido");
+            }
+            if (!["http:", "https:"].includes(parsedExternalUrl.protocol)) {
+                (0, errors_1.badRequest)("El enlace debe iniciar con http:// o https://");
+            }
+        }
+        const originalFilename = String(input.originalFilename || (externalUrl ? parsedExternalUrl?.hostname : "recurso")).trim();
         const extension = originalFilename.includes(".")
             ? originalFilename.split(".").pop()?.toLowerCase() || ""
             : "";
         const id = node_crypto_1.default.randomUUID();
         const providedStorageKey = typeof input.storageKey === "string" ? input.storageKey.trim() : "";
-        const storageKey = providedStorageKey || `resources/${user.id}/${id}/${originalFilename.replace(/[^a-zA-Z0-9._-]/g, "_")}`;
-        const storageBucket = String(input.storageBucket || this.storage.bucket);
-        const storageProvider = String(input.storageProvider || this.storage.provider);
-        const fileUrl = String(input.publicUrl || input.fileUrl || this.storage.publicObjectUrl(storageKey));
+        const storageProvider = externalUrl ? "external" : String(input.storageProvider || this.storage.provider);
+        const storageBucket = externalUrl ? "links" : String(input.storageBucket || this.storage.bucket);
+        const storageKey = externalUrl
+            ? providedStorageKey || externalUrl
+            : providedStorageKey || `resources/${user.id}/${id}/${originalFilename.replace(/[^a-zA-Z0-9._-]/g, "_")}`;
+        const fileUrl = externalUrl || String(input.publicUrl || input.fileUrl || this.storage.publicObjectUrl(storageKey));
         const tags = Array.isArray(input.tags)
             ? input.tags.map(String).map((tag) => tag.trim().toLowerCase()).filter(Boolean)
             : String(input.tags || "").split(",").map((tag) => tag.trim().toLowerCase()).filter(Boolean);
@@ -167,7 +211,7 @@ let ResourcesService = class ResourcesService {
                 mime_type: String(input.mimeType || "application/octet-stream"),
                 file_url: fileUrl,
                 file_size: BigInt(Number(input.fileSize || 0)),
-                file_extension: extension || null,
+                file_extension: externalUrl ? "link" : extension || null,
                 upload_status: input.uploadStatus ? String(input.uploadStatus) : "ready",
                 professor_id: input.professorId ? Number(input.professorId) : null,
                 user_id: user.id,
@@ -197,6 +241,12 @@ let ResourcesService = class ResourcesService {
                 where: { id },
                 data: { downloads_count: { increment: 1 } },
             });
+        if (resource.storage_provider === "external" && resource.file_url) {
+            return {
+                url: resource.file_url,
+                downloads: Number(updated.downloads_count),
+            };
+        }
         let signedUrl;
         try {
             signedUrl = await this.storage.createDownloadUrl(resource.storage_key, resource.original_filename);

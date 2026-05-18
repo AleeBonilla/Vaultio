@@ -67,6 +67,7 @@ export function UserProfile() {
               <h1 className="mb-2 text-3xl font-bold text-slate-900">
                 {profile.firstName} {profile.lastName}
               </h1>
+              <p className="mb-3 text-sm font-semibold text-blue-600">@{profile.username}</p>
               <div className="mb-3 flex flex-wrap items-center gap-3 text-slate-600">
                 <span className="inline-flex items-center gap-2">
                   <Mail className="w-4 h-4" />

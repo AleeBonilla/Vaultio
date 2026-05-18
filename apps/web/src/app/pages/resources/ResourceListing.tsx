@@ -1,5 +1,5 @@
 import { SlidersHorizontal } from "lucide-react";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 import { useSearchParams } from "react-router";
 import { FilterPanel, type FilterValues } from "../../components/filters/FilterPanel";
 import { SortSelect } from "../../components/filters/SortSelect";
@@ -10,11 +10,20 @@ import { catalogApi, resourcesApi, type ResourceSummary } from "../../lib/api";
 type SortMode = "recent" | "rating" | "downloads" | "views";
 
 const SORT_OPTIONS: Array<{ value: SortMode; label: string }> = [
-  { value: "recent", label: "Más recientes" },
+  { value: "recent", label: "Mas recientes" },
   { value: "rating", label: "Mejor calificados" },
-  { value: "downloads", label: "Más descargados" },
-  { value: "views", label: "Más vistos" },
+  { value: "downloads", label: "Mas descargados" },
+  { value: "views", label: "Mas vistos" },
 ];
+
+const EMPTY_FILTERS: FilterValues = {
+  typeId: "",
+  courseId: "",
+  professorId: "",
+  academicPeriodId: "",
+  minRating: 0,
+  kind: "",
+};
 
 function formatDate(value: string) {
   return new Intl.DateTimeFormat("es-CR", { day: "2-digit", month: "short", year: "numeric" }).format(new Date(value));
@@ -27,19 +36,45 @@ export function ResourceListing() {
   const [resources, setResources] = useState<ResourceSummary[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [filters, setFilters] = useState<FilterValues>({ types: [], minRating: 0 });
+  const [filters, setFilters] = useState<FilterValues>(EMPTY_FILTERS);
   const [sort, setSort] = useState<SortMode>("recent");
   const [typeOptions, setTypeOptions] = useState<Array<{ label: string; value: string }>>([]);
+  const [courseOptions, setCourseOptions] = useState<Array<{ label: string; value: string }>>([]);
+  const [professorOptions, setProfessorOptions] = useState<Array<{ label: string; value: string }>>([]);
+  const [periodOptions, setPeriodOptions] = useState<Array<{ label: string; value: string }>>([]);
 
   useEffect(() => {
     let active = true;
     setLoading(true);
     setError(null);
-    Promise.all([resourcesApi.list({ search: search || undefined }), catalogApi.resourceTypes()])
-      .then(([loadedResources, types]) => {
+    Promise.all([
+      resourcesApi.list({
+        search: search || undefined,
+        typeId: filters.typeId || undefined,
+        courseId: filters.courseId || undefined,
+        professorId: filters.professorId || undefined,
+        academicPeriodId: filters.academicPeriodId || undefined,
+        minRating: filters.minRating || undefined,
+        kind: filters.kind || undefined,
+        sort,
+      }),
+      catalogApi.resourceTypes(),
+      catalogApi.courses(),
+      catalogApi.professors(),
+      catalogApi.academicPeriods(),
+    ])
+      .then(([loadedResources, types, courses, professors, periods]) => {
         if (!active) return;
         setResources(loadedResources);
-        setTypeOptions(types.map((type) => ({ label: type.name, value: type.name })));
+        setTypeOptions(types.map((type) => ({ label: type.name, value: String(type.id) })));
+        setCourseOptions(courses.map((course) => ({ label: `${course.code} - ${course.name}`, value: String(course.id) })));
+        setProfessorOptions(
+          professors.map((professor) => ({
+            label: `${professor.firstName} ${professor.lastName}`,
+            value: String(professor.id),
+          })),
+        );
+        setPeriodOptions(periods.map((period) => ({ label: period.name, value: String(period.id) })));
       })
       .catch((err) => {
         if (active) setError(err instanceof Error ? err.message : "No se pudieron cargar los recursos");
@@ -50,19 +85,7 @@ export function ResourceListing() {
     return () => {
       active = false;
     };
-  }, [search]);
-
-  const filtered = useMemo(() => {
-    let list = resources;
-    if (filters.types.length > 0) list = list.filter((resource) => filters.types.includes(resource.type));
-    if (filters.minRating > 0) list = list.filter((resource) => resource.rating >= filters.minRating);
-    const sorted = [...list];
-    if (sort === "rating") sorted.sort((a, b) => b.rating - a.rating);
-    else if (sort === "downloads") sorted.sort((a, b) => b.downloads - a.downloads);
-    else if (sort === "views") sorted.sort((a, b) => b.views - a.views);
-    else sorted.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
-    return sorted;
-  }, [resources, filters, sort]);
+  }, [search, filters, sort]);
 
   return (
     <div className="max-w-7xl mx-auto">
@@ -72,7 +95,7 @@ export function ResourceListing() {
           Todos los recursos
         </h1>
         <p className="text-slate-600">
-          {loading ? "Cargando recursos..." : `${filtered.length} de ${resources.length} recursos`}
+          {loading ? "Cargando recursos..." : `${resources.length} recursos`}
           {search && <span className="ml-1">para "{search}"</span>}
         </p>
       </div>
@@ -99,9 +122,12 @@ export function ResourceListing() {
             <div className="lg:sticky lg:top-20">
               <FilterPanel
                 typeOptions={typeOptions}
+                courseOptions={courseOptions}
+                professorOptions={professorOptions}
+                periodOptions={periodOptions}
                 values={filters}
                 onChange={setFilters}
-                onClear={() => setFilters({ types: [], minRating: 0 })}
+                onClear={() => setFilters(EMPTY_FILTERS)}
               />
             </div>
           </aside>
@@ -112,13 +138,13 @@ export function ResourceListing() {
             <div className="rounded-2xl border border-blue-100 bg-white/85 p-6 text-slate-600 shadow-sm shadow-blue-900/5">
               Cargando recursos...
             </div>
-          ) : filtered.length === 0 ? (
+          ) : resources.length === 0 ? (
             <div className="rounded-2xl border border-blue-100 bg-white/85 p-10 text-center text-slate-600 shadow-sm shadow-blue-900/5">
               No hay recursos que coincidan con los filtros actuales.
             </div>
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
-              {filtered.map((resource) => (
+              {resources.map((resource) => (
                 <ResourceCard
                   key={resource.id}
                   id={resource.id}
