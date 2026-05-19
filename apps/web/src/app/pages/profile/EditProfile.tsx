@@ -1,5 +1,5 @@
 import { ArrowLeft, Camera } from "lucide-react";
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useId, useMemo, useRef, useState } from "react";
 import { Link, useNavigate } from "react-router";
 import { toast } from "sonner";
 import { Button } from "../../components/ui/Button";
@@ -25,6 +25,10 @@ export function EditProfile() {
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const photoInputRef = useRef<HTMLInputElement | null>(null);
+  const careerSearchId = useId();
+  const careerListboxId = useId();
+  const courseSearchId = useId();
+  const courseListboxId = useId();
 
   useEffect(() => {
     Promise.all([catalogApi.careers(), catalogApi.courses(), usersApi.courses()])
@@ -173,6 +177,7 @@ export function EditProfile() {
               </label>
               <button
                 type="button"
+                aria-label="Seleccionar nueva foto de perfil"
                 onClick={() => photoInputRef.current?.click()}
                 className="inline-flex items-center gap-2 rounded-full border border-blue-100 bg-white px-4 py-2 text-sm font-medium text-blue-600 transition-colors hover:bg-blue-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2"
               >
@@ -219,7 +224,9 @@ export function EditProfile() {
           <Input label="Correo electrónico" type="email" value={profile.email} disabled readOnly />
 
           <div>
-            <label className="mb-2 block text-sm font-medium text-slate-900">Carrera</label>
+            <label htmlFor={careerSearchId} className="mb-2 block text-sm font-medium text-slate-900">
+              Carrera
+            </label>
             <div className="rounded-2xl border border-blue-100 bg-white/80 p-3">
               {selectedCareer && (
                 <div className="mb-3 flex items-center justify-between gap-3 rounded-xl border border-blue-100 bg-blue-50 px-3 py-2">
@@ -229,6 +236,7 @@ export function EditProfile() {
                   </div>
                   <button
                     type="button"
+                    aria-label={`Quitar carrera ${selectedCareer.name}`}
                     onClick={() => {
                       setCareerId("");
                       setCareerQuery("");
@@ -240,17 +248,29 @@ export function EditProfile() {
                 </div>
               )}
               <Input
+                id={careerSearchId}
                 label="Buscar carrera"
                 value={careerQuery}
                 onChange={(event) => setCareerQuery(event.target.value)}
                 placeholder="Buscar por codigo o nombre..."
+                role="combobox"
+                aria-autocomplete="list"
+                aria-expanded={Boolean(careerQuery.trim())}
+                aria-controls={careerQuery.trim() ? careerListboxId : undefined}
               />
               {careerQuery.trim() && (
-                <div className="mt-3 grid max-h-72 grid-cols-1 gap-2 overflow-y-auto">
+                <div
+                  id={careerListboxId}
+                  role="listbox"
+                  aria-label="Opciones de carrera"
+                  className="mt-3 grid max-h-72 grid-cols-1 gap-2 overflow-y-auto"
+                >
                   {matchingCareers.map((career) => (
                     <button
                       type="button"
                       key={career.id}
+                      role="option"
+                      aria-selected={String(career.id) === careerId}
                       onClick={() => {
                         setCareerId(String(career.id));
                         setCareerQuery("");
@@ -271,7 +291,9 @@ export function EditProfile() {
 
           <div>
             <div className="mb-3 flex items-center justify-between gap-3">
-              <label className="block text-sm font-medium text-slate-900">Cursos que estoy llevando</label>
+              <label htmlFor={courseSearchId} className="block text-sm font-medium text-slate-900">
+                Cursos que estoy llevando
+              </label>
               <span className="text-xs text-slate-500">{courseIds.length} seleccionados</span>
             </div>
             <div className="rounded-2xl border border-blue-100 bg-white/80 p-3">
@@ -281,6 +303,7 @@ export function EditProfile() {
                     <button
                       key={course.id}
                       type="button"
+                      aria-label={`Quitar curso ${course.code} ${course.name}`}
                       onClick={() => toggleCourse(course.id)}
                       className="rounded-full border border-blue-100 bg-blue-50 px-3 py-1.5 text-left text-xs text-blue-900 hover:bg-blue-100"
                       title="Click para desmarcar"
@@ -291,17 +314,29 @@ export function EditProfile() {
                 </div>
               )}
               <Input
+                id={courseSearchId}
                 label="Buscar curso"
                 value={courseQuery}
                 onChange={(event) => setCourseQuery(event.target.value)}
                 placeholder="Buscar por codigo o nombre..."
+                role="combobox"
+                aria-autocomplete="list"
+                aria-expanded={Boolean(courseQuery.trim())}
+                aria-controls={courseQuery.trim() ? courseListboxId : undefined}
               />
               {courseQuery.trim() && (
-                <div className="mt-3 grid max-h-72 grid-cols-1 gap-2 overflow-y-auto sm:grid-cols-2">
+                <div
+                  id={courseListboxId}
+                  role="listbox"
+                  aria-label="Opciones de curso"
+                  className="mt-3 grid max-h-72 grid-cols-1 gap-2 overflow-y-auto sm:grid-cols-2"
+                >
                   {matchingCourses.map((course) => (
                     <button
                       type="button"
                       key={course.id}
+                      role="option"
+                      aria-selected={courseIds.includes(course.id)}
                       onClick={() => {
                         toggleCourse(course.id);
                         setCourseQuery("");

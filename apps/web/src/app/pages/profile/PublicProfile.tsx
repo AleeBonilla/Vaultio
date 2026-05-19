@@ -151,9 +151,10 @@ export function PublicProfile() {
                 type="button"
                 variant="secondary"
                 className="flex items-center gap-2 rounded-full border-red-100 text-red-600 hover:bg-red-50"
+                aria-expanded={showReport}
                 onClick={() => setShowReport((current) => !current)}
               >
-                <AlertTriangle className="h-4 w-4" />
+                <AlertTriangle aria-hidden="true" className="h-4 w-4" />
                 Reportar usuario
               </Button>
             )}
@@ -161,7 +162,11 @@ export function PublicProfile() {
         </div>
 
         {showReport && (
-          <form onSubmit={handleReport} className="mt-6 rounded-2xl border border-red-100 bg-red-50/60 p-4">
+          <form
+            onSubmit={handleReport}
+            aria-label={`Reportar usuario ${user.firstName} ${user.lastName}`}
+            className="mt-6 rounded-2xl border border-red-100 bg-red-50/60 p-4"
+          >
             <label htmlFor="reportReason" className="mb-2 block text-sm font-semibold text-slate-900">
               Motivo del reporte
             </label>
@@ -243,7 +248,9 @@ export function PublicProfile() {
 function Stat({ label, value, icon }: { label: string; value: number | string; icon: React.ReactNode }) {
   return (
     <div className="rounded-2xl border border-blue-100 bg-blue-50/40 p-4 text-center">
-      <div className="mb-2 flex items-center justify-center">{icon}</div>
+      <div aria-hidden="true" className="mb-2 flex items-center justify-center">
+        {icon}
+      </div>
       <div className="text-2xl font-bold text-blue-600">{value}</div>
       <div className="text-sm text-slate-600">{label}</div>
     </div>

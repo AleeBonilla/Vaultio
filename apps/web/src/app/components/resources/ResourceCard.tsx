@@ -1,5 +1,5 @@
 import { Bookmark, Download, Edit3, Eye, Trash2 } from "lucide-react";
-import { useState } from "react";
+import { useId, useState } from "react";
 import { Link } from "react-router";
 import { toast } from "sonner";
 import { resourcesApi } from "../../lib/api";
@@ -56,6 +56,7 @@ export function ResourceCard({
   onSavedChange,
   onDelete,
 }: ResourceCardProps) {
+  const titleId = useId();
   const [isSaved, setIsSaved] = useState(saved);
   const [pending, setPending] = useState(false);
 
@@ -80,7 +81,10 @@ export function ResourceCard({
   };
 
   return (
-    <article className="flex h-full flex-col rounded-2xl border border-blue-100 bg-white/85 p-5 shadow-sm shadow-blue-900/5 transition-colors hover:border-blue-200 hover:bg-blue-50/30">
+    <article
+      aria-labelledby={titleId}
+      className="flex h-full flex-col rounded-2xl border border-blue-100 bg-white/85 p-5 shadow-sm shadow-blue-900/5 transition-colors hover:border-blue-200 hover:bg-blue-50/30"
+    >
       <div className="flex items-start justify-between gap-3 mb-4">
         <div className="flex items-center gap-2 flex-1 min-w-0 overflow-hidden">
           <ResourceTypeIcon type={type} fileExtension={fileExtension} className="flex-shrink-0" />
@@ -105,9 +109,10 @@ export function ResourceCard({
         </button>
       </div>
 
-      <h3 className="mb-2 line-clamp-2 min-h-[2.5rem] font-semibold text-slate-900">
+      <h3 id={titleId} className="mb-2 line-clamp-2 min-h-[2.5rem] font-semibold text-slate-900">
         <Link
           to={`/app/resources/${id}`}
+          aria-label={`Abrir recurso ${title}`}
           className="rounded-sm hover:text-blue-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2"
         >
           {title}
@@ -138,11 +143,11 @@ export function ResourceCard({
 
       <div className="mt-auto flex items-center justify-between border-t border-blue-100 pt-4">
         <div className="flex items-center gap-4 text-xs text-slate-600">
-          <span className="flex items-center gap-1">
+          <span className="flex items-center gap-1" aria-label={`${downloads} descargas`}>
             <Download aria-hidden="true" className="w-3.5 h-3.5" />
             {downloads}
           </span>
-          <span className="flex items-center gap-1">
+          <span className="flex items-center gap-1" aria-label={`${views} vistas`}>
             <Eye aria-hidden="true" className="w-3.5 h-3.5" />
             {views}
           </span>
@@ -154,17 +159,19 @@ export function ResourceCard({
         <div className="mt-4 flex gap-2 border-t border-blue-100 pt-4">
           <Link
             to={`/app/resources/${id}/edit`}
+            aria-label={`Editar recurso ${title}`}
             className="inline-flex flex-1 items-center justify-center gap-2 rounded-full border border-blue-100 px-3 py-2 text-sm font-medium text-blue-600 transition-colors hover:bg-blue-50"
           >
-            <Edit3 className="h-4 w-4" />
+            <Edit3 aria-hidden="true" className="h-4 w-4" />
             Editar
           </Link>
           <button
             type="button"
             onClick={onDelete}
+            aria-label={`Eliminar recurso ${title}`}
             className="inline-flex flex-1 items-center justify-center gap-2 rounded-full border border-red-100 px-3 py-2 text-sm font-medium text-red-600 transition-colors hover:bg-red-50"
           >
-            <Trash2 className="h-4 w-4" />
+            <Trash2 aria-hidden="true" className="h-4 w-4" />
             Eliminar
           </button>
         </div>

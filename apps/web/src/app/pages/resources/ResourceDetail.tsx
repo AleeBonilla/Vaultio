@@ -327,15 +327,18 @@ export function ResourceDetail() {
 
   return (
     <div className="max-w-7xl mx-auto">
-      <nav className="flex items-center gap-2 text-sm text-slate-600 mb-6 flex-wrap">
+      <nav
+        aria-label="Ruta de navegacion del recurso"
+        className="flex items-center gap-2 text-sm text-slate-600 mb-6 flex-wrap"
+      >
         <Link to="/app" className="hover:text-blue-700">
           Inicio
         </Link>
-        <span>/</span>
+        <span aria-hidden="true">/</span>
         <Link to="/app/resources" className="hover:text-blue-700">
           Recursos
         </Link>
-        <span>/</span>
+        <span aria-hidden="true">/</span>
         <span className="line-clamp-1 text-slate-900">{resource.title}</span>
       </nav>
 
@@ -364,10 +367,11 @@ export function ResourceDetail() {
                 type="button"
                 onClick={handleToggleSaved}
                 aria-pressed={isSaved}
-                aria-label={isSaved ? "Quitar de guardados" : "Guardar recurso"}
+                aria-label={isSaved ? `Quitar ${resource.title} de guardados` : `Guardar ${resource.title}`}
                 className="rounded-lg p-2 transition-colors hover:bg-blue-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
               >
                 <Bookmark
+                  aria-hidden="true"
                   className={`w-5 h-5 transition-colors ${isSaved ? "fill-blue-600 text-blue-600" : "text-slate-400"}`}
                 />
               </button>
@@ -428,10 +432,15 @@ export function ResourceDetail() {
             </div>
           </div>
 
-          <div className="rounded-2xl border border-blue-100 bg-white/85 p-6 shadow-sm shadow-blue-900/5">
+          <section
+            aria-labelledby="resource-comments-title"
+            className="rounded-2xl border border-blue-100 bg-white/85 p-6 shadow-sm shadow-blue-900/5"
+          >
             <div className="flex items-center gap-2 mb-6">
-              <MessageSquare className="w-5 h-5 text-blue-600" />
-              <h2 className="text-lg font-semibold text-slate-900">Comentarios ({comments.length})</h2>
+              <MessageSquare aria-hidden="true" className="w-5 h-5 text-blue-600" />
+              <h2 id="resource-comments-title" className="text-lg font-semibold text-slate-900">
+                Comentarios ({comments.length})
+              </h2>
             </div>
 
             <form onSubmit={handleComment} className="mb-6">
@@ -466,7 +475,7 @@ export function ResourceDetail() {
                 {comments.filter((comment) => !comment.parentId).map((comment) => renderComment(comment))}
               </div>
             )}
-          </div>
+          </section>
         </div>
 
         <aside className="lg:col-span-1">

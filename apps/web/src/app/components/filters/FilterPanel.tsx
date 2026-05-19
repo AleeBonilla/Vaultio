@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useId, useMemo, useRef, useState } from "react";
 import { Star, X } from "lucide-react";
 import { Button } from "../ui/Button";
 
@@ -63,6 +63,7 @@ function SearchSelect({
 }) {
   const selected = options.find((option) => option.value === value);
   const containerRef = useRef<HTMLDivElement | null>(null);
+  const listboxId = useId();
   const [query, setQuery] = useState(selected?.label || "");
   const [open, setOpen] = useState(false);
 
@@ -95,6 +96,10 @@ function SearchSelect({
       <div className="flex rounded-xl border border-blue-100 bg-white focus-within:ring-2 focus-within:ring-blue-500">
         <input
           id={id}
+          role="combobox"
+          aria-autocomplete="list"
+          aria-expanded={open}
+          aria-controls={open ? listboxId : undefined}
           value={query}
           onFocus={() => setOpen(true)}
           onChange={(event) => {
@@ -121,7 +126,12 @@ function SearchSelect({
         )}
       </div>
       {open && (
-        <div className="absolute z-10 mt-2 max-h-60 w-full overflow-y-auto rounded-2xl border border-blue-100 bg-white p-1 shadow-xl shadow-blue-900/10">
+        <div
+          id={listboxId}
+          role="listbox"
+          aria-label={`Opciones de ${label}`}
+          className="absolute z-10 mt-2 max-h-60 w-full overflow-y-auto rounded-2xl border border-blue-100 bg-white p-1 shadow-xl shadow-blue-900/10"
+        >
           {matches.length === 0 ? (
             <p className="px-3 py-2 text-sm text-slate-500">Sin resultados</p>
           ) : (
@@ -129,6 +139,8 @@ function SearchSelect({
               <button
                 key={option.value}
                 type="button"
+                role="option"
+                aria-selected={option.value === value}
                 onClick={() => {
                   onChange(option.value);
                   setQuery(option.label);

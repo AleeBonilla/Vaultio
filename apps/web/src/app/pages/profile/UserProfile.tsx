@@ -1,5 +1,5 @@
 import { AlertTriangle, BookOpen, Calendar, Edit, Mail, Star, Upload, X } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useEffect, useId, useRef, useState } from "react";
 import { Link } from "react-router";
 import { toast } from "sonner";
 import { ResourceCard } from "../../components/resources/ResourceCard";
@@ -31,6 +31,8 @@ export function UserProfile() {
   const [resourceToDelete, setResourceToDelete] = useState<ResourceSummary | null>(null);
   const [deletingResource, setDeletingResource] = useState(false);
   const [loading, setLoading] = useState(true);
+  const deleteDialogTitleId = useId();
+  const deleteDialogRef = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
     let active = true;
@@ -49,6 +51,10 @@ export function UserProfile() {
       active = false;
     };
   }, []);
+
+  useEffect(() => {
+    if (resourceToDelete) deleteDialogRef.current?.focus();
+  }, [resourceToDelete]);
 
   if (!profile) return null;
 
@@ -206,14 +212,23 @@ export function UserProfile() {
 
       {resourceToDelete && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/40 px-4 backdrop-blur-sm">
-          <div className="w-full max-w-md rounded-3xl border border-blue-100 bg-white p-6 shadow-2xl shadow-blue-950/20">
+          <div
+            ref={deleteDialogRef}
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby={deleteDialogTitleId}
+            tabIndex={-1}
+            className="w-full max-w-md rounded-3xl border border-blue-100 bg-white p-6 shadow-2xl shadow-blue-950/20"
+          >
             <div className="mb-5 flex items-start justify-between gap-4">
               <div className="flex items-start gap-3">
                 <span className="flex h-11 w-11 flex-shrink-0 items-center justify-center rounded-2xl bg-red-50 text-red-600">
                   <AlertTriangle className="h-5 w-5" />
                 </span>
                 <div>
-                  <h3 className="text-lg font-semibold text-slate-900">Eliminar recurso</h3>
+                  <h3 id={deleteDialogTitleId} className="text-lg font-semibold text-slate-900">
+                    Eliminar recurso
+                  </h3>
                   <p className="mt-1 text-sm text-slate-600">
                     Esta accion quitara el recurso de la plataforma. No se eliminara el historial asociado.
                   </p>
@@ -263,7 +278,9 @@ export function UserProfile() {
 function Stat({ label, value, icon }: { label: string; value: number | string; icon: React.ReactNode }) {
   return (
     <div className="rounded-2xl border border-blue-100 bg-blue-50/40 p-4 text-center">
-      <div className="mb-2 flex items-center justify-center">{icon}</div>
+      <div aria-hidden="true" className="mb-2 flex items-center justify-center">
+        {icon}
+      </div>
       <div className="text-2xl font-bold text-blue-600">{value}</div>
       <div className="text-sm text-slate-600">{label}</div>
     </div>

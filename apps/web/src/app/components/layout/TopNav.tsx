@@ -39,7 +39,7 @@ export function TopNav({ onOpenMobileMenu }: TopNavProps) {
           <Menu className="w-5 h-5" />
         </button>
 
-        <form onSubmit={handleSearch} className="flex-1 max-w-2xl">
+        <form role="search" aria-label="Buscar recursos" onSubmit={handleSearch} className="flex-1 max-w-2xl">
           <SearchBar
             label="Buscar recursos"
             value={search}
