@@ -169,6 +169,86 @@ let UsersService = class UsersService {
             .map((resource) => (0, serializers_1.summarizeResource)(resource));
         return { items };
     }
+    async activity(authorizationHeader) {
+        const user = await this.auth.readUserFromAuthorization(authorizationHeader);
+        const [resources, comments, ratings, saved, downloads] = await Promise.all([
+            this.prisma.resources.findMany({
+                where: { user_id: user.id },
+                orderBy: { created_at: "desc" },
+                take: 5,
+                select: { id: true, title: true, created_at: true, is_active: true },
+            }),
+            this.prisma.comments.findMany({
+                where: { user_id: user.id },
+                orderBy: { created_at: "desc" },
+                take: 5,
+                include: { resources: { select: { id: true, title: true } } },
+            }),
+            this.prisma.ratings.findMany({
+                where: { user_id: user.id },
+                orderBy: { created_at: "desc" },
+                take: 5,
+                include: { resources: { select: { id: true, title: true } } },
+            }),
+            this.prisma.saved_resources.findMany({
+                where: { user_id: user.id },
+                orderBy: { created_at: "desc" },
+                take: 5,
+                include: { resources: { select: { id: true, title: true } } },
+            }),
+            this.prisma.user_downloads.findMany({
+                where: { user_id: user.id },
+                orderBy: { downloaded_at: "desc" },
+                take: 5,
+                include: { resources: { select: { id: true, title: true } } },
+            }),
+        ]);
+        const items = [
+            ...resources.map((item) => ({
+                id: `resource:${item.id}`,
+                type: item.is_active ? "resource_created" : "resource_deleted",
+                label: item.is_active ? "Subiste un recurso" : "Eliminaste un recurso",
+                resourceId: item.id,
+                resourceTitle: item.title,
+                createdAt: item.created_at.toISOString(),
+            })),
+            ...comments.map((item) => ({
+                id: `comment:${item.id}`,
+                type: "comment_created",
+                label: "Comentaste en un recurso",
+                resourceId: item.resource_id,
+                resourceTitle: item.resources?.title || "Recurso",
+                createdAt: item.created_at.toISOString(),
+            })),
+            ...ratings.map((item) => ({
+                id: `rating:${item.id}`,
+                type: "rating_created",
+                label: `Calificaste con ${item.stars} estrellas`,
+                resourceId: item.resource_id,
+                resourceTitle: item.resources?.title || "Recurso",
+                createdAt: item.created_at.toISOString(),
+            })),
+            ...saved.map((item) => ({
+                id: `saved:${item.resource_id}`,
+                type: "resource_saved",
+                label: "Guardaste un recurso",
+                resourceId: item.resource_id,
+                resourceTitle: item.resources?.title || "Recurso",
+                createdAt: item.created_at.toISOString(),
+            })),
+            ...downloads.map((item) => ({
+                id: `download:${item.id}`,
+                type: "resource_downloaded",
+                label: "Descargaste un recurso",
+                resourceId: item.resource_id,
+                resourceTitle: item.resources?.title || "Recurso",
+                createdAt: item.downloaded_at.toISOString(),
+            })),
+        ]
+            .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
+            .slice(0, 10);
+        return { items };
+    }
     async publicProfile(id) {
         const user = await this.prisma.users.findFirst({
             where: { id, is_active: true },

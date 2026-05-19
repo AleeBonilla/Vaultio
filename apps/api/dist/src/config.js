@@ -17,6 +17,25 @@ function findRepoRoot(start) {
     }
     return process.cwd();
 }
+function findFirebaseServiceAccount(repoRoot) {
+    if (process.env.GOOGLE_APPLICATION_CREDENTIALS) {
+        return process.env.GOOGLE_APPLICATION_CREDENTIALS;
+    }
+    if (process.env.VAULTIO_FIREBASE_SERVICE_ACCOUNT) {
+        return node_path_1.default.resolve(repoRoot, process.env.VAULTIO_FIREBASE_SERVICE_ACCOUNT);
+    }
+    try {
+        const match = node_fs_1.default
+            .readdirSync(repoRoot)
+            .find((name) => /-firebase-adminsdk-.*\.json$/i.test(name));
+        if (match)
+            return node_path_1.default.resolve(repoRoot, match);
+    }
+    catch {
+        /* repo root not readable */
+    }
+    return node_path_1.default.resolve(repoRoot, "firebase-service-account.json");
+}
 const repoRoot = findRepoRoot(__dirname);
 exports.config = {
     port: Number(process.env.VAULTIO_API_PORT || 4000),
@@ -26,8 +45,7 @@ exports.config = {
     auth: {
         provider: process.env.VAULTIO_AUTH_PROVIDER || "firebase",
         allowedEmailDomain: (process.env.VAULTIO_AUTH_ALLOWED_DOMAIN || "").trim().toLowerCase() || null,
-        firebaseServiceAccountPath: process.env.GOOGLE_APPLICATION_CREDENTIALS ||
-            node_path_1.default.resolve(repoRoot, "vaultio-auth-firebase-adminsdk-fbsvc-04da3d9bea.json"),
+        firebaseServiceAccountPath: findFirebaseServiceAccount(repoRoot),
         allowDemoTokens: process.env.VAULTIO_ALLOW_DEMO_TOKENS === "true" || process.env.NODE_ENV === "test",
     },
     storage: {

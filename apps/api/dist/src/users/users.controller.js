@@ -35,6 +35,9 @@ let UsersController = class UsersController {
     saved(authorization) {
         return this.users.saved(authorization);
     }
+    activity(authorization) {
+        return this.users.activity(authorization);
+    }
     courses(authorization) {
         return this.users.courses(authorization);
     }
@@ -79,6 +82,13 @@ __decorate([
     __metadata("design:paramtypes", [String]),
     __metadata("design:returntype", void 0)
 ], UsersController.prototype, "saved", null);
+__decorate([
+    (0, common_1.Get)("activity"),
+    __param(0, (0, common_1.Headers)("authorization")),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String]),
+    __metadata("design:returntype", void 0)
+], UsersController.prototype, "activity", null);
 __decorate([
     (0, common_1.Get)("courses"),
     __param(0, (0, common_1.Headers)("authorization")),

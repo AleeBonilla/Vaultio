@@ -29,6 +29,12 @@ let ResourcesController = class ResourcesController {
     create(authorization, body) {
         return this.resources.create(authorization, body);
     }
+    update(authorization, id, body) {
+        return this.resources.update(authorization, id, body);
+    }
+    delete(authorization, id) {
+        return this.resources.delete(authorization, id);
+    }
     download(authorization, id) {
         return this.resources.download(authorization, id);
     }
@@ -81,6 +87,23 @@ __decorate([
     __metadata("design:paramtypes", [Object, Object]),
     __metadata("design:returntype", void 0)
 ], ResourcesController.prototype, "create", null);
+__decorate([
+    (0, common_1.Patch)(":id"),
+    __param(0, (0, common_1.Headers)("authorization")),
+    __param(1, (0, common_1.Param)("id")),
+    __param(2, (0, common_1.Body)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object, String, Object]),
+    __metadata("design:returntype", void 0)
+], ResourcesController.prototype, "update", null);
+__decorate([
+    (0, common_1.Delete)(":id"),
+    __param(0, (0, common_1.Headers)("authorization")),
+    __param(1, (0, common_1.Param)("id")),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object, String]),
+    __metadata("design:returntype", void 0)
+], ResourcesController.prototype, "delete", null);
 __decorate([
     (0, common_1.Post)(":id/download"),
     (0, common_1.HttpCode)(200),

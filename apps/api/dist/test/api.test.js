@@ -145,6 +145,22 @@ function authHeaders(token) {
         createdResourceIds.push(created.body.item.id);
         strict_1.default.equal(created.body.item.courseId, 6);
         strict_1.default.equal(created.body.item.type, "Resumenes");
+        const linkResource = await request(baseUrl, "/resources", {
+            method: "POST",
+            headers: authHeaders(token),
+            body: JSON.stringify({
+                title: "Repositorio de apoyo",
+                description: "Enlace externo con material complementario.",
+                courseId: 6,
+                resourceTypeId: 1,
+                tags: ["link", "repo"],
+                externalUrl: `https://example.com/vaultio-test-${Date.now()}`,
+            }),
+        });
+        strict_1.default.equal(linkResource.response.status, 201);
+        createdResourceIds.push(linkResource.body.item.id);
+        strict_1.default.equal(linkResource.body.item.storageProvider, "external");
+        strict_1.default.equal(linkResource.body.item.fileExtension, "link");
     });
     (0, node_test_1.it)("guarda y desmarca recursos via /resources/:id/save", async () => {
         const token = await loginAs(baseUrl, "carlos@estudiantec.cr");

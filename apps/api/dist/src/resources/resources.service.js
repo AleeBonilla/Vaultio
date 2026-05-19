@@ -171,6 +171,8 @@ let ResourcesService = class ResourcesService {
         if (!resourceType)
             (0, errors_1.badRequest)("Tipo de recurso invalido");
         const externalUrl = typeof input.externalUrl === "string" ? input.externalUrl.trim() : "";
+        if (externalUrl)
+            await this.ensureResourceModelConstraints();
         let parsedExternalUrl = null;
         if (externalUrl) {
             try {
@@ -192,7 +194,7 @@ let ResourcesService = class ResourcesService {
         const storageProvider = externalUrl ? "external" : String(input.storageProvider || this.storage.provider);
         const storageBucket = externalUrl ? "links" : String(input.storageBucket || this.storage.bucket);
         const storageKey = externalUrl
-            ? providedStorageKey || externalUrl
+            ? providedStorageKey || `links/${user.id}/${id}`
             : providedStorageKey || `resources/${user.id}/${id}/${originalFilename.replace(/[^a-zA-Z0-9._-]/g, "_")}`;
         const fileUrl = externalUrl || String(input.publicUrl || input.fileUrl || this.storage.publicObjectUrl(storageKey));
         const tags = Array.isArray(input.tags)
@@ -222,6 +224,76 @@ let ResourcesService = class ResourcesService {
             include: resourceInclude,
         });
         return { item: (0, serializers_1.resourceDetail)(item, user.id) };
+    }
+    async update(authorizationHeader, id, input) {
+        const user = await this.auth.readUserFromAuthorization(authorizationHeader);
+        const resource = await this.prisma.resources.findFirst({ where: { id, is_active: true } });
+        if (!resource)
+            (0, errors_1.notFound)("Recurso no encontrado");
+        if (resource.user_id !== user.id)
+            (0, errors_1.unauthorized)("Solo puedes editar recursos propios");
+        const data = {};
+        if (typeof input.title === "string") {
+            const title = input.title.trim();
+            if (!title)
+                (0, errors_1.badRequest)("El titulo no puede estar vacio");
+            data.title = title.slice(0, 80);
+        }
+        if (typeof input.description === "string") {
+            const description = input.description.trim();
+            if (!description)
+                (0, errors_1.badRequest)("La descripcion no puede estar vacia");
+            data.description = description;
+        }
+        if (Array.isArray(input.tags) || typeof input.tags === "string") {
+            data.tags = Array.isArray(input.tags)
+                ? input.tags.map(String).map((tag) => tag.trim().toLowerCase()).filter(Boolean)
+                : String(input.tags).split(",").map((tag) => tag.trim().toLowerCase()).filter(Boolean);
+        }
+        if (input.courseId !== undefined) {
+            const courseId = Number(input.courseId);
+            const course = await this.prisma.courses.findFirst({ where: { id: courseId, is_active: true } });
+            if (!course)
+                (0, errors_1.badRequest)("Curso invalido");
+            data.course_id = courseId;
+        }
+        if (input.resourceTypeId !== undefined) {
+            const resourceTypeId = Number(input.resourceTypeId);
+            const resourceType = await this.prisma.resource_types.findUnique({ where: { id: resourceTypeId } });
+            if (!resourceType)
+                (0, errors_1.badRequest)("Tipo de recurso invalido");
+            data.resource_type_id = resourceTypeId;
+        }
+        if (input.academicPeriodId !== undefined) {
+            data.academic_period_id = input.academicPeriodId ? Number(input.academicPeriodId) : null;
+        }
+        if (input.professorId !== undefined) {
+            data.professor_id = input.professorId ? Number(input.professorId) : null;
+        }
+        const item = await this.prisma.resources.update({
+            where: { id },
+            data: { ...data, updated_at: new Date() },
+            include: resourceInclude,
+        });
+        return { item: (0, serializers_1.resourceDetail)(item, user.id) };
+    }
+    async delete(authorizationHeader, id) {
+        const user = await this.auth.readUserFromAuthorization(authorizationHeader);
+        const resource = await this.prisma.resources.findFirst({ where: { id, is_active: true } });
+        if (!resource)
+            (0, errors_1.notFound)("Recurso no encontrado");
+        if (resource.user_id !== user.id)
+            (0, errors_1.unauthorized)("Solo puedes eliminar recursos propios");
+        await this.ensureResourceModelConstraints();
+        await this.prisma.resources.update({
+            where: { id },
+            data: {
+                is_active: false,
+                upload_status: "deleted",
+                updated_at: new Date(),
+            },
+        });
+        return { deleted: true };
     }
     async download(authorizationHeader, id) {
         const user = await this.auth.readUserFromAuthorization(authorizationHeader);
@@ -268,6 +340,23 @@ let ResourcesService = class ResourcesService {
         if (!Number.isFinite(stars) || stars < 1 || stars > 5) {
             (0, errors_1.badRequest)("La calificacion debe estar entre 1 y 5");
         }
+        const existing = await this.prisma.ratings.findUnique({
+            where: { user_id_resource_id: { user_id: user.id, resource_id: id } },
+        });
+        if (existing?.stars === stars) {
+            await this.prisma.ratings.delete({ where: { id: existing.id } });
+            const aggregate = await this.prisma.ratings.aggregate({
+                where: { resource_id: id },
+                _avg: { stars: true },
+                _count: { _all: true },
+            });
+            return {
+                item: null,
+                rating: aggregate._avg.stars ? Number(Number(aggregate._avg.stars).toFixed(1)) : 0,
+                ratingsCount: aggregate._count._all,
+                userRating: null,
+            };
+        }
         const rating = await this.prisma.ratings.upsert({
             where: { user_id_resource_id: { user_id: user.id, resource_id: id } },
             update: { stars },
@@ -286,6 +375,7 @@ let ResourcesService = class ResourcesService {
             },
             rating: aggregate._avg.stars ? Number(Number(aggregate._avg.stars).toFixed(1)) : 0,
             ratingsCount: aggregate._count._all,
+            userRating: stars,
         };
     }
     async isSavedBy(userId, resourceId) {
@@ -411,6 +501,35 @@ let ResourcesService = class ResourcesService {
       ) AS exists
     `;
         return rows[0]?.exists === true;
+    }
+    async ensureResourceModelConstraints() {
+        await this.prisma.$executeRawUnsafe(`
+      ALTER TABLE resources
+      DROP CONSTRAINT IF EXISTS chk_resources_storage_provider
+    `);
+        await this.prisma.$executeRawUnsafe(`
+      ALTER TABLE resources
+      ADD CONSTRAINT chk_resources_storage_provider
+      CHECK (storage_provider IN ('firebase_storage', 'minio', 'local', 's3', 'external'))
+    `);
+        await this.prisma.$executeRawUnsafe(`
+      ALTER TABLE resources
+      DROP CONSTRAINT IF EXISTS chk_resources_file_size
+    `);
+        await this.prisma.$executeRawUnsafe(`
+      ALTER TABLE resources
+      ADD CONSTRAINT chk_resources_file_size
+      CHECK (file_size >= 0)
+    `);
+        await this.prisma.$executeRawUnsafe(`
+      ALTER TABLE resources
+      DROP CONSTRAINT IF EXISTS chk_resources_upload_status
+    `);
+        await this.prisma.$executeRawUnsafe(`
+      ALTER TABLE resources
+      ADD CONSTRAINT chk_resources_upload_status
+      CHECK (upload_status IN ('pending', 'ready', 'failed', 'deleted'))
+    `);
     }
 };
 exports.ResourcesService = ResourcesService;

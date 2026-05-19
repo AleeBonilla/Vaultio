@@ -109,6 +109,7 @@ function summarizeResource(resource) {
         author: resource.users ? `${resource.users.first_name} ${resource.users.last_name}` : "Usuario desconocido",
         authorId: resource.user_id,
         date: resource.created_at instanceof Date ? resource.created_at.toISOString() : resource.created_at,
+        professorId: resource.professor_id,
         professor: resource.professors ? `${resource.professors.first_name} ${resource.professors.last_name}` : null,
         fileExtension: resource.file_extension,
         fileSize: toNumber(resource.file_size),
