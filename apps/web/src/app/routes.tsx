@@ -12,6 +12,7 @@ import { NotFound } from "./pages/NotFound";
 import { EditProfile } from "./pages/profile/EditProfile";
 import { PublicProfile } from "./pages/profile/PublicProfile";
 import { UserProfile } from "./pages/profile/UserProfile";
+import { EditResource } from "./pages/resources/EditResource";
 import { ResourceDetail } from "./pages/resources/ResourceDetail";
 import { ResourceListing } from "./pages/resources/ResourceListing";
 import { UploadResource } from "./pages/resources/UploadResource";
@@ -33,6 +34,7 @@ export const router = createBrowserRouter([
           { path: "courses/:careerId/:courseId", element: <CourseResources /> },
           { path: "resources", element: <ResourceListing /> },
           { path: "resources/:id", element: <ResourceDetail /> },
+          { path: "resources/:id/edit", element: <EditResource /> },
           { path: "upload", element: <UploadResource /> },
           { path: "profile", element: <UserProfile /> },
           { path: "profile/edit", element: <EditProfile /> },

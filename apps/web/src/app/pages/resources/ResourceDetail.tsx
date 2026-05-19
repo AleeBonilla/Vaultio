@@ -159,9 +159,10 @@ export function ResourceDetail() {
     const previous = userRating;
     setUserRating(stars);
     try {
-      const { rating, ratingsCount } = await resourcesApi.rate(resource.id, stars);
-      setResource({ ...resource, rating, ratingsCount, userRating: stars });
-      toast.success("¡Gracias por calificar!");
+      const { rating, ratingsCount, userRating } = await resourcesApi.rate(resource.id, stars);
+      setUserRating(userRating ?? 0);
+      setResource({ ...resource, rating, ratingsCount, userRating });
+      toast.success(userRating ? "Calificación actualizada" : "Calificación eliminada");
     } catch (err) {
       setUserRating(previous);
       toast.error(err instanceof Error ? err.message : "No se pudo calificar");

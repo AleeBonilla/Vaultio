@@ -1,4 +1,4 @@
-import { Bookmark, Download, Eye } from "lucide-react";
+import { Bookmark, Download, Edit3, Eye, Trash2 } from "lucide-react";
 import { useState } from "react";
 import { Link } from "react-router";
 import { toast } from "sonner";
@@ -21,7 +21,9 @@ interface ResourceCardProps {
   professor?: string | null;
   fileExtension?: string;
   saved?: boolean;
+  canManage?: boolean;
   onSavedChange?: (saved: boolean) => void;
+  onDelete?: () => void;
 }
 
 const TYPE_COLORS: Record<string, "blue" | "green" | "purple" | "orange" | "red"> = {
@@ -50,7 +52,9 @@ export function ResourceCard({
   professor,
   fileExtension,
   saved = false,
+  canManage = false,
   onSavedChange,
+  onDelete,
 }: ResourceCardProps) {
   const [isSaved, setIsSaved] = useState(saved);
   const [pending, setPending] = useState(false);
@@ -145,6 +149,26 @@ export function ResourceCard({
         </div>
         <span className="text-xs text-slate-400">{date}</span>
       </div>
+
+      {canManage && (
+        <div className="mt-4 flex gap-2 border-t border-blue-100 pt-4">
+          <Link
+            to={`/app/resources/${id}/edit`}
+            className="inline-flex flex-1 items-center justify-center gap-2 rounded-full border border-blue-100 px-3 py-2 text-sm font-medium text-blue-600 transition-colors hover:bg-blue-50"
+          >
+            <Edit3 className="h-4 w-4" />
+            Editar
+          </Link>
+          <button
+            type="button"
+            onClick={onDelete}
+            className="inline-flex flex-1 items-center justify-center gap-2 rounded-full border border-red-100 px-3 py-2 text-sm font-medium text-red-600 transition-colors hover:bg-red-50"
+          >
+            <Trash2 className="h-4 w-4" />
+            Eliminar
+          </button>
+        </div>
+      )}
     </article>
   );
 }

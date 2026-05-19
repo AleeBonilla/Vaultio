@@ -1,5 +1,5 @@
 import { ArrowLeft, Camera } from "lucide-react";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { Link, useNavigate } from "react-router";
 import { toast } from "sonner";
 import { Button } from "../../components/ui/Button";
@@ -18,6 +18,7 @@ export function EditProfile() {
   const [bio, setBio] = useState("");
   const [careerId, setCareerId] = useState("");
   const [courseIds, setCourseIds] = useState<number[]>([]);
+  const [courseQuery, setCourseQuery] = useState("");
   const [photoFile, setPhotoFile] = useState<File | null>(null);
   const [photoPreview, setPhotoPreview] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
@@ -102,6 +103,16 @@ export function EditProfile() {
   const toggleCourse = (id: number) => {
     setCourseIds((current) => (current.includes(id) ? current.filter((courseId) => courseId !== id) : [...current, id]));
   };
+
+  const selectedCourses = courses.filter((course) => courseIds.includes(course.id));
+  const matchingCourses = useMemo(() => {
+    const normalized = courseQuery.trim().toLowerCase();
+    if (!normalized) return courses.filter((course) => !courseIds.includes(course.id)).slice(0, 8);
+    return courses
+      .filter((course) => !courseIds.includes(course.id))
+      .filter((course) => `${course.code} ${course.name}`.toLowerCase().includes(normalized))
+      .slice(0, 8);
+  }, [courses, courseIds, courseQuery]);
 
   const initials =
     `${firstName?.[0] || ""}${lastName?.[0] || ""}`.toUpperCase() ||
@@ -216,30 +227,45 @@ export function EditProfile() {
               <label className="block text-sm font-medium text-slate-900">Cursos que estoy llevando</label>
               <span className="text-xs text-slate-500">{courseIds.length} seleccionados</span>
             </div>
-            <div className="grid max-h-72 grid-cols-1 gap-2 overflow-y-auto rounded-2xl border border-blue-100 bg-white/80 p-3 sm:grid-cols-2">
-              {courses.map((course) => {
-                const checked = courseIds.includes(course.id);
-                return (
-                  <label
+            <div className="rounded-2xl border border-blue-100 bg-white/80 p-3">
+              {selectedCourses.length > 0 && (
+                <div className="mb-3 flex flex-wrap gap-2">
+                  {selectedCourses.map((course) => (
+                    <button
+                      key={course.id}
+                      type="button"
+                      onClick={() => toggleCourse(course.id)}
+                      className="rounded-full border border-blue-100 bg-blue-50 px-3 py-1.5 text-left text-xs text-blue-900 hover:bg-blue-100"
+                      title="Click para desmarcar"
+                    >
+                      <span className="font-semibold">{course.code}</span> · {course.name}
+                    </button>
+                  ))}
+                </div>
+              )}
+              <Input
+                label="Buscar curso"
+                value={courseQuery}
+                onChange={(event) => setCourseQuery(event.target.value)}
+                placeholder="Buscar por codigo o nombre..."
+              />
+              <div className="mt-3 grid max-h-72 grid-cols-1 gap-2 overflow-y-auto sm:grid-cols-2">
+                {matchingCourses.map((course) => (
+                  <button
+                    type="button"
                     key={course.id}
-                    className={`flex cursor-pointer items-start gap-3 rounded-xl border p-3 transition-colors ${
-                      checked ? "border-blue-200 bg-blue-50 text-blue-900" : "border-transparent hover:border-blue-100 hover:bg-blue-50/50"
-                    }`}
+                    onClick={() => {
+                      toggleCourse(course.id);
+                      setCourseQuery("");
+                    }}
+                    className="rounded-xl border border-transparent p-3 text-left transition-colors hover:border-blue-100 hover:bg-blue-50/50"
                   >
-                    <input
-                      type="checkbox"
-                      checked={checked}
-                      onChange={() => toggleCourse(course.id)}
-                      className="mt-1 h-4 w-4 rounded border-blue-100 text-blue-600 focus:ring-2 focus:ring-blue-500"
-                    />
-                    <span>
-                      <span className="block text-sm font-semibold">{course.code}</span>
-                      <span className="block text-xs text-slate-600">{course.name}</span>
-                    </span>
-                  </label>
-                );
-              })}
-              {courses.length === 0 && <p className="p-3 text-sm text-slate-500">No hay cursos disponibles.</p>}
+                    <span className="block text-sm font-semibold text-slate-900">{course.code}</span>
+                    <span className="block text-xs text-slate-600">{course.name}</span>
+                  </button>
+                ))}
+                {matchingCourses.length === 0 && <p className="p-3 text-sm text-slate-500">Sin cursos para esa busqueda.</p>}
+              </div>
             </div>
           </div>
 

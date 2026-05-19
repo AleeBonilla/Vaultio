@@ -4,18 +4,9 @@ import { Link, Navigate, useNavigate } from "react-router";
 import { toast } from "sonner";
 import { Button } from "../../components/ui/Button";
 import { Input } from "../../components/ui/Input";
+import { VaultioLogo } from "../../components/ui/VaultioLogo";
 import { catalogApi, type Career } from "../../lib/api";
 import { useAuth } from "../../lib/auth-context";
-
-function LogoMark() {
-  return (
-    <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-blue-600 to-cyan-500 shadow-lg shadow-blue-600/20">
-      <svg viewBox="0 0 24 24" className="h-6 w-6 text-white" fill="currentColor" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-        <path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z" />
-      </svg>
-    </div>
-  );
-}
 
 export function RegisterPage() {
   const navigate = useNavigate();
@@ -159,8 +150,7 @@ export function RegisterPage() {
       <div className="relative z-10 w-full max-w-md">
         <div className="mb-10 text-center">
           <Link to="/" className="mb-8 inline-flex items-center gap-2">
-            <LogoMark />
-            <span className="text-3xl font-extrabold tracking-tighter text-slate-900 lowercase">vaultio</span>
+            <VaultioLogo />
           </Link>
           <h1 className="mb-3 text-4xl font-extrabold tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-blue-700 via-blue-500 to-cyan-500">
             {heading}

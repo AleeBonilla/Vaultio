@@ -1,4 +1,4 @@
-import { Body, Controller, Delete, Get, Headers, HttpCode, Inject, Param, Post, Query } from "@nestjs/common";
+import { Body, Controller, Delete, Get, Headers, HttpCode, Inject, Param, Patch, Post, Query } from "@nestjs/common";
 import { ResourcesService } from "./resources.service";
 
 @Controller("resources")
@@ -18,6 +18,16 @@ export class ResourcesController {
   @Post()
   create(@Headers("authorization") authorization: string | undefined, @Body() body: any) {
     return this.resources.create(authorization, body);
+  }
+
+  @Patch(":id")
+  update(@Headers("authorization") authorization: string | undefined, @Param("id") id: string, @Body() body: any) {
+    return this.resources.update(authorization, id, body);
+  }
+
+  @Delete(":id")
+  delete(@Headers("authorization") authorization: string | undefined, @Param("id") id: string) {
+    return this.resources.delete(authorization, id);
   }
 
   @Post(":id/download")

@@ -1,10 +1,11 @@
-import { BookOpen, Calendar, Edit, Mail, Star, Upload } from "lucide-react";
+import { AlertTriangle, BookOpen, Calendar, Edit, Mail, Star, Upload, X } from "lucide-react";
 import { useEffect, useState } from "react";
 import { Link } from "react-router";
+import { toast } from "sonner";
 import { ResourceCard } from "../../components/resources/ResourceCard";
 import { Badge } from "../../components/ui/Badge";
 import { Button } from "../../components/ui/Button";
-import { catalogApi, usersApi, type Career, type Course, type ResourceSummary, type UserStats } from "../../lib/api";
+import { catalogApi, resourcesApi, usersApi, type Career, type Course, type ResourceSummary, type UserStats } from "../../lib/api";
 import { useAuth } from "../../lib/auth-context";
 
 function formatDate(value: string) {
@@ -17,6 +18,8 @@ export function UserProfile() {
   const [uploads, setUploads] = useState<ResourceSummary[]>([]);
   const [careers, setCareers] = useState<Career[]>([]);
   const [courses, setCourses] = useState<Course[]>([]);
+  const [resourceToDelete, setResourceToDelete] = useState<ResourceSummary | null>(null);
+  const [deletingResource, setDeletingResource] = useState(false);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -46,6 +49,21 @@ export function UserProfile() {
   const careerNames = profile.careerIds
     .map((id) => careers.find((career) => career.id === id)?.name)
     .filter((name): name is string => Boolean(name));
+
+  const handleDeleteResource = async () => {
+    if (!resourceToDelete) return;
+    setDeletingResource(true);
+    try {
+      await resourcesApi.delete(resourceToDelete.id);
+      setUploads((current) => current.filter((item) => item.id !== resourceToDelete.id));
+      setResourceToDelete(null);
+      toast.success("Recurso eliminado");
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "No se pudo eliminar el recurso");
+    } finally {
+      setDeletingResource(false);
+    }
+  };
 
   return (
     <div className="max-w-7xl mx-auto">
@@ -95,8 +113,8 @@ export function UserProfile() {
                 ) : (
                   <div className="flex flex-wrap gap-2">
                     {courses.map((course) => (
-                      <Badge key={course.id} variant="purple">
-                        {course.code}
+                      <Badge key={course.id} variant="purple" className="whitespace-normal text-left">
+                        {course.code} - {course.name}
                       </Badge>
                     ))}
                   </div>
@@ -105,7 +123,7 @@ export function UserProfile() {
             </div>
           </div>
           <Link to="/app/profile/edit">
-            <Button variant="secondary" className="flex items-center gap-2 rounded-full border-blue-100 hover:bg-blue-50">
+            <Button variant="secondary" className="flex min-w-40 items-center justify-center gap-2 whitespace-nowrap rounded-full border-blue-100 hover:bg-blue-50">
               <Edit className="w-4 h-4" />
               Editar perfil
             </Button>
@@ -157,11 +175,66 @@ export function UserProfile() {
                 date={formatDate(resource.date)}
                 professor={resource.professor}
                 fileExtension={resource.fileExtension}
+                canManage
+                onDelete={() => setResourceToDelete(resource)}
               />
             ))}
           </div>
         )}
       </section>
+
+      {resourceToDelete && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/40 px-4 backdrop-blur-sm">
+          <div className="w-full max-w-md rounded-3xl border border-blue-100 bg-white p-6 shadow-2xl shadow-blue-950/20">
+            <div className="mb-5 flex items-start justify-between gap-4">
+              <div className="flex items-start gap-3">
+                <span className="flex h-11 w-11 flex-shrink-0 items-center justify-center rounded-2xl bg-red-50 text-red-600">
+                  <AlertTriangle className="h-5 w-5" />
+                </span>
+                <div>
+                  <h3 className="text-lg font-semibold text-slate-900">Eliminar recurso</h3>
+                  <p className="mt-1 text-sm text-slate-600">
+                    Esta accion quitara el recurso de la plataforma. No se eliminara el historial asociado.
+                  </p>
+                </div>
+              </div>
+              <button
+                type="button"
+                aria-label="Cerrar"
+                onClick={() => setResourceToDelete(null)}
+                className="rounded-full p-1 text-slate-400 hover:bg-blue-50 hover:text-slate-700"
+                disabled={deletingResource}
+              >
+                <X className="h-5 w-5" />
+              </button>
+            </div>
+            <div className="mb-6 rounded-2xl border border-blue-100 bg-blue-50/40 p-4">
+              <p className="text-sm font-semibold text-slate-900">{resourceToDelete.title}</p>
+              <p className="mt-1 text-sm text-slate-600">{resourceToDelete.course}</p>
+            </div>
+            <div className="flex gap-3">
+              <Button
+                type="button"
+                variant="secondary"
+                className="flex-1 rounded-full border-blue-100 hover:bg-blue-50"
+                onClick={() => setResourceToDelete(null)}
+                disabled={deletingResource}
+              >
+                Cancelar
+              </Button>
+              <Button
+                type="button"
+                variant="primary"
+                className="flex-1 rounded-full bg-red-600 hover:bg-red-700"
+                onClick={handleDeleteResource}
+                disabled={deletingResource}
+              >
+                {deletingResource ? "Eliminando..." : "Eliminar"}
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

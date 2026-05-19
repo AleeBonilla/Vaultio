@@ -1,7 +1,7 @@
 import { SlidersHorizontal } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useSearchParams } from "react-router";
-import { FilterPanel, type FilterValues } from "../../components/filters/FilterPanel";
+import { FilterPanel, type FilterOption, type FilterValues } from "../../components/filters/FilterPanel";
 import { SortSelect } from "../../components/filters/SortSelect";
 import { ResourceCard } from "../../components/resources/ResourceCard";
 import { Button } from "../../components/ui/Button";
@@ -18,6 +18,7 @@ const SORT_OPTIONS: Array<{ value: SortMode; label: string }> = [
 
 const EMPTY_FILTERS: FilterValues = {
   typeId: "",
+  careerId: "",
   courseId: "",
   professorId: "",
   academicPeriodId: "",
@@ -38,10 +39,11 @@ export function ResourceListing() {
   const [error, setError] = useState<string | null>(null);
   const [filters, setFilters] = useState<FilterValues>(EMPTY_FILTERS);
   const [sort, setSort] = useState<SortMode>("recent");
-  const [typeOptions, setTypeOptions] = useState<Array<{ label: string; value: string }>>([]);
-  const [courseOptions, setCourseOptions] = useState<Array<{ label: string; value: string }>>([]);
-  const [professorOptions, setProfessorOptions] = useState<Array<{ label: string; value: string }>>([]);
-  const [periodOptions, setPeriodOptions] = useState<Array<{ label: string; value: string }>>([]);
+  const [typeOptions, setTypeOptions] = useState<FilterOption[]>([]);
+  const [careerOptions, setCareerOptions] = useState<FilterOption[]>([]);
+  const [courseOptions, setCourseOptions] = useState<FilterOption[]>([]);
+  const [professorOptions, setProfessorOptions] = useState<FilterOption[]>([]);
+  const [periodOptions, setPeriodOptions] = useState<FilterOption[]>([]);
 
   useEffect(() => {
     let active = true;
@@ -51,6 +53,7 @@ export function ResourceListing() {
       resourcesApi.list({
         search: search || undefined,
         typeId: filters.typeId || undefined,
+        careerId: filters.careerId || undefined,
         courseId: filters.courseId || undefined,
         professorId: filters.professorId || undefined,
         academicPeriodId: filters.academicPeriodId || undefined,
@@ -59,14 +62,16 @@ export function ResourceListing() {
         sort,
       }),
       catalogApi.resourceTypes(),
+      catalogApi.careers(),
       catalogApi.courses(),
       catalogApi.professors(),
       catalogApi.academicPeriods(),
     ])
-      .then(([loadedResources, types, courses, professors, periods]) => {
+      .then(([loadedResources, types, careers, courses, professors, periods]) => {
         if (!active) return;
         setResources(loadedResources);
         setTypeOptions(types.map((type) => ({ label: type.name, value: String(type.id) })));
+        setCareerOptions(careers.map((career) => ({ label: career.name, value: String(career.id), description: career.code })));
         setCourseOptions(courses.map((course) => ({ label: `${course.code} - ${course.name}`, value: String(course.id) })));
         setProfessorOptions(
           professors.map((professor) => ({
@@ -122,6 +127,7 @@ export function ResourceListing() {
             <div className="lg:sticky lg:top-20">
               <FilterPanel
                 typeOptions={typeOptions}
+                careerOptions={careerOptions}
                 courseOptions={courseOptions}
                 professorOptions={professorOptions}
                 periodOptions={periodOptions}

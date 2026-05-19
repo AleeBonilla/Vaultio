@@ -218,3 +218,14 @@ WHERE (p.last_name LIKE 'Canessa%'    AND c.code = 'IC-6821')
 
 
 COMMIT;
+INSERT INTO resource_types (name, description) VALUES
+    ('Presentaciones',       'Diapositivas y material expositivo'),
+    ('Libros y lecturas',    'Libros, capitulos y lecturas complementarias'),
+    ('Guias de estudio',     'Listas de temas, objetivos o rutas de repaso'),
+    ('Laboratorios',         'Practicas, reportes y materiales de laboratorio'),
+    ('Tareas',               'Enunciados, soluciones y entregables de tareas'),
+    ('Proyectos',            'Proyectos finales o parciales del curso'),
+    ('Imagenes',             'Diagramas, capturas, infografias o imagenes utiles'),
+    ('Dataset',              'Datos, CSV, hojas de calculo y archivos tabulares'),
+    ('Link externo',         'Enlaces a recursos externos confiables')
+ON CONFLICT (name) DO NOTHING;

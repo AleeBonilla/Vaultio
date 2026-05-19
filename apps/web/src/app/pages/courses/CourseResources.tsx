@@ -18,6 +18,7 @@ const SORT_OPTIONS: Array<{ value: SortMode; label: string }> = [
 
 const EMPTY_FILTERS: FilterValues = {
   typeId: "",
+  careerId: "",
   courseId: "",
   professorId: "",
   academicPeriodId: "",
@@ -161,6 +162,7 @@ export function CourseResources() {
             <div className="lg:sticky lg:top-20">
               <FilterPanel
                 typeOptions={typeOptions}
+                careerOptions={[]}
                 courseOptions={[]}
                 professorOptions={professorOptions}
                 periodOptions={periodOptions}

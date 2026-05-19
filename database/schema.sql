@@ -241,10 +241,10 @@ CREATE TABLE IF NOT EXISTS resources (
 
     PRIMARY KEY (id),
     CONSTRAINT uq_resources_storage_object  UNIQUE (storage_provider, storage_bucket, storage_key),
-    CONSTRAINT chk_resources_file_size      CHECK (file_size > 0),
+    CONSTRAINT chk_resources_file_size      CHECK (file_size >= 0),
     CONSTRAINT chk_resources_views_count    CHECK (views_count >= 0),
     CONSTRAINT chk_resources_downloads_count CHECK (downloads_count >= 0),
-    CONSTRAINT chk_resources_storage_provider CHECK (storage_provider IN ('firebase_storage', 'minio', 'local', 's3')),
+    CONSTRAINT chk_resources_storage_provider CHECK (storage_provider IN ('firebase_storage', 'minio', 'local', 's3', 'external')),
     CONSTRAINT chk_resources_storage_bucket CHECK (LENGTH(TRIM(storage_bucket)) > 0),
     CONSTRAINT chk_resources_storage_key    CHECK (LENGTH(TRIM(storage_key)) > 0),
     CONSTRAINT chk_resources_upload_status  CHECK (upload_status IN ('pending', 'ready', 'failed', 'deleted')),

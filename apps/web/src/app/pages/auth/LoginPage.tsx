@@ -3,6 +3,7 @@ import { Link, Navigate } from "react-router";
 import { toast } from "sonner";
 import { Button } from "../../components/ui/Button";
 import { Input } from "../../components/ui/Input";
+import { VaultioLogo } from "../../components/ui/VaultioLogo";
 import { useAuth } from "../../lib/auth-context";
 
 function GoogleIcon() {
@@ -13,16 +14,6 @@ function GoogleIcon() {
       <path fill="#FBBC05" d="M3.964 10.71A5.41 5.41 0 0 1 3.682 9c0-.593.102-1.17.282-1.71V4.958H.957A8.997 8.997 0 0 0 0 9c0 1.452.348 2.827.957 4.042l3.007-2.332z" />
       <path fill="#EA4335" d="M9 3.58c1.321 0 2.508.454 3.44 1.345l2.582-2.58C13.463.891 11.426 0 9 0A8.997 8.997 0 0 0 .957 4.958L3.964 7.29C4.672 5.163 6.656 3.58 9 3.58z" />
     </svg>
-  );
-}
-
-function LogoMark() {
-  return (
-    <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-blue-600 to-cyan-500 shadow-lg shadow-blue-600/20">
-      <svg viewBox="0 0 24 24" className="h-6 w-6 text-white" fill="currentColor" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-        <path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z" />
-      </svg>
-    </div>
   );
 }
 
@@ -100,8 +91,7 @@ export function LoginPage() {
       <div className="relative z-10 w-full max-w-md">
         <div className="mb-10 text-center">
           <Link to="/" className="mb-8 inline-flex items-center gap-2">
-            <LogoMark />
-            <span className="text-3xl font-extrabold tracking-tighter text-slate-900 lowercase">vaultio</span>
+            <VaultioLogo />
           </Link>
           <h1 className="mb-3 text-4xl font-extrabold tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-blue-700 via-blue-500 to-cyan-500">
             Iniciá sesión

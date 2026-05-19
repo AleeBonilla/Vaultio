@@ -30,6 +30,11 @@ export class UsersController {
     return this.users.saved(authorization);
   }
 
+  @Get("activity")
+  activity(@Headers("authorization") authorization?: string) {
+    return this.users.activity(authorization);
+  }
+
   @Get("courses")
   courses(@Headers("authorization") authorization?: string) {
     return this.users.courses(authorization);

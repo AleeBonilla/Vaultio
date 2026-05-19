@@ -2,6 +2,7 @@ import { BookOpen, Bookmark, Home, LogOut, Upload, User, X } from "lucide-react"
 import { useEffect, useRef } from "react";
 import { Link, useLocation, useNavigate } from "react-router";
 import { toast } from "sonner";
+import { VaultioLogo } from "../ui/VaultioLogo";
 import { useAuth } from "../../lib/auth-context";
 
 const NAV_ITEMS = [
@@ -97,12 +98,7 @@ export function Sidebar({ mobileOpen = false, onCloseMobile }: SidebarProps) {
       >
         <div className="flex items-center justify-between border-b border-blue-100/80 p-6">
           <Link to="/" className="flex items-center gap-2">
-            <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-to-br from-blue-600 to-cyan-500 shadow-lg shadow-blue-600/20">
-              <svg viewBox="0 0 24 24" className="h-5 w-5 text-white" fill="currentColor" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-                <path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z" />
-              </svg>
-            </div>
-            <span className="text-2xl font-extrabold tracking-tighter text-slate-900 lowercase">vaultio</span>
+            <VaultioLogo textClassName="text-2xl" iconClassName="h-9 w-9" />
           </Link>
           {mobileOpen && (
             <button

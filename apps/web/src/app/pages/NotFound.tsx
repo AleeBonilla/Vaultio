@@ -1,15 +1,6 @@
 import { Link } from "react-router";
 import { Button } from "../components/ui/Button";
-
-function LogoMark() {
-  return (
-    <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-blue-600 to-cyan-500 shadow-lg shadow-blue-600/20">
-      <svg viewBox="0 0 24 24" className="h-6 w-6 text-white" fill="currentColor" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-        <path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z" />
-      </svg>
-    </div>
-  );
-}
+import { VaultioLogo } from "../components/ui/VaultioLogo";
 
 export function NotFound() {
   return (
@@ -18,8 +9,7 @@ export function NotFound() {
       <div className="absolute -left-64 top-1/3 h-[420px] w-[420px] rounded-full bg-cyan-300/20 blur-[110px]" />
       <div className="relative z-10 w-full max-w-md text-center">
         <div className="mb-8 inline-flex items-center gap-2">
-          <LogoMark />
-          <span className="text-3xl font-extrabold tracking-tighter text-slate-900 lowercase">vaultio</span>
+          <VaultioLogo />
         </div>
         <p className="mb-3 text-7xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-blue-700 via-blue-500 to-cyan-500">404</p>
         <h1 className="mb-3 text-2xl font-semibold text-slate-900">Página no encontrada</h1>

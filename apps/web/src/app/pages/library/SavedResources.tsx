@@ -1,6 +1,7 @@
 import { Bookmark } from "lucide-react";
 import { useEffect, useState } from "react";
 import { Link } from "react-router";
+import { SortSelect } from "../../components/filters/SortSelect";
 import { ResourceCard } from "../../components/resources/ResourceCard";
 import { usersApi, type ResourceSummary } from "../../lib/api";
 
@@ -9,6 +10,13 @@ function formatDate(value: string) {
 }
 
 type SortMode = "recent" | "rating" | "downloads" | "alphabetical";
+
+const SORT_OPTIONS: Array<{ value: SortMode; label: string }> = [
+  { value: "recent", label: "Mas recientes" },
+  { value: "rating", label: "Mejor calificados" },
+  { value: "downloads", label: "Mas descargados" },
+  { value: "alphabetical", label: "Alfabetico" },
+];
 
 export function SavedResources() {
   const [resources, setResources] = useState<ResourceSummary[]>([]);
@@ -42,33 +50,25 @@ export function SavedResources() {
       <div className="mb-10 flex flex-wrap items-center justify-between gap-3 rounded-3xl border border-blue-100 bg-white/80 p-8 shadow-sm shadow-blue-900/5">
         <div>
           <p className="mb-3 text-xs font-semibold uppercase tracking-[0.22em] text-blue-600">Biblioteca personal</p>
-          <h1 className="mb-3 text-4xl font-extrabold tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-blue-700 via-blue-500 to-cyan-500">
+          <h1 className="mb-3 pb-1 text-4xl font-extrabold leading-tight tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-blue-700 via-blue-500 to-cyan-500">
             Recursos guardados
           </h1>
           <p className="text-slate-600">Tus materiales marcados en un solo lugar.</p>
         </div>
-        <select
-          aria-label="Ordenar guardados"
-          value={sort}
-          onChange={(event) => setSort(event.target.value as SortMode)}
-          className="rounded-full border border-blue-100 bg-white px-4 py-2.5 text-slate-900 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
-        >
-          <option value="recent">Más recientes</option>
-          <option value="rating">Mejor calificados</option>
-          <option value="downloads">Más descargados</option>
-          <option value="alphabetical">Alfabético</option>
-        </select>
+        <SortSelect value={sort} onChange={setSort} options={SORT_OPTIONS} />
       </div>
 
       {loading ? (
-        <div className="rounded-2xl border border-blue-100 bg-white/85 p-6 text-slate-600 shadow-sm shadow-blue-900/5">Cargando guardados...</div>
+        <div className="rounded-2xl border border-blue-100 bg-white/85 p-6 text-slate-600 shadow-sm shadow-blue-900/5">
+          Cargando guardados...
+        </div>
       ) : resources.length === 0 ? (
         <div className="rounded-2xl border border-blue-100 bg-white/85 p-10 text-center shadow-sm shadow-blue-900/5">
           <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-full bg-blue-100">
             <Bookmark className="w-7 h-7 text-blue-600" />
           </div>
-          <h2 className="mb-2 text-lg font-semibold text-slate-900">Aún no tenés recursos guardados</h2>
-          <p className="mb-4 text-slate-600">Hacé clic en el marcador de cualquier recurso para guardarlo aquí.</p>
+          <h2 className="mb-2 text-lg font-semibold text-slate-900">Aun no tenes recursos guardados</h2>
+          <p className="mb-4 text-slate-600">Hace clic en el marcador de cualquier recurso para guardarlo aqui.</p>
           <Link to="/app/resources" className="text-blue-600 hover:underline">
             Explorar recursos
           </Link>

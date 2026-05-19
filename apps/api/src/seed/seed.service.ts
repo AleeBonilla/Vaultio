@@ -123,6 +123,15 @@ export class SeedService implements OnApplicationBootstrap {
       { id: 3, name: "Resumenes", description: "Sintesis de temas o unidades del curso" },
       { id: 4, name: "Ejercicios resueltos", description: "Problemas con solucion paso a paso" },
       { id: 5, name: "Codigo fuente", description: "Proyectos y snippets de programacion" },
+      { id: 6, name: "Presentaciones", description: "Diapositivas y material expositivo" },
+      { id: 7, name: "Libros y lecturas", description: "Libros, capitulos y lecturas complementarias" },
+      { id: 8, name: "Guias de estudio", description: "Rutas de repaso y listas de temas" },
+      { id: 9, name: "Laboratorios", description: "Practicas, reportes y materiales de laboratorio" },
+      { id: 10, name: "Tareas", description: "Enunciados, soluciones y entregables" },
+      { id: 11, name: "Proyectos", description: "Proyectos finales o parciales del curso" },
+      { id: 12, name: "Imagenes", description: "Diagramas, capturas e infografias" },
+      { id: 13, name: "Dataset", description: "Datos, CSV y archivos tabulares" },
+      { id: 14, name: "Link externo", description: "Enlaces a recursos externos confiables" },
     ];
 
     for (const type of resourceTypes) {

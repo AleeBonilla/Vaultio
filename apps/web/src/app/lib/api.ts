@@ -33,6 +33,7 @@ export interface ResourceSummary {
   author: string;
   authorId: string;
   date: string;
+  professorId?: number | null;
   professor: string | null;
   fileExtension?: string;
   fileSize?: number;
@@ -108,8 +109,8 @@ export interface CreateResourceInput {
   description: string;
   courseId: number;
   resourceTypeId: number;
-  academicPeriodId?: number;
-  professorId?: number;
+  academicPeriodId?: number | null;
+  professorId?: number | null;
   tags?: string;
   originalFilename?: string;
   fileSize?: number;
@@ -120,6 +121,22 @@ export interface CreateResourceInput {
   publicUrl?: string;
   externalUrl?: string;
 }
+
+export interface UserActivity {
+  id: string;
+  type: string;
+  label: string;
+  resourceId?: string | null;
+  resourceTitle?: string | null;
+  createdAt: string;
+}
+
+export type UpdateResourceInput = Partial<
+  Pick<CreateResourceInput, "title" | "description" | "courseId" | "resourceTypeId" | "tags">
+> & {
+  academicPeriodId?: number | null;
+  professorId?: number | null;
+};
 
 export interface CreateUploadUrlInput {
   originalFilename: string;
@@ -192,6 +209,11 @@ export const usersApi = {
 
   async saved() {
     const { items } = await apiFetch<ListResponse<ResourceSummary>>("/users/me/saved");
+    return items;
+  },
+
+  async activity() {
+    const { items } = await apiFetch<ListResponse<UserActivity>>("/users/me/activity");
     return items;
   },
 
@@ -309,12 +331,24 @@ export const resourcesApi = {
     return item;
   },
 
+  async update(id: string, input: UpdateResourceInput) {
+    const { item } = await apiFetch<ItemResponse<ResourceDetail>>(`/resources/${id}`, {
+      method: "PATCH",
+      body: JSON.stringify(input),
+    });
+    return item;
+  },
+
+  async delete(id: string) {
+    return apiFetch<{ deleted: boolean }>(`/resources/${id}`, { method: "DELETE" });
+  },
+
   async download(id: string) {
     return apiFetch<{ url: string; downloads: number }>(`/resources/${id}/download`, { method: "POST" });
   },
 
   async rate(id: string, stars: number) {
-    return apiFetch<{ item: { id: string; stars: number }; rating: number; ratingsCount: number }>(
+    return apiFetch<{ item: { id: string; stars: number } | null; rating: number; ratingsCount: number; userRating: number | null }>(
       `/resources/${id}/ratings`,
       {
         method: "POST",

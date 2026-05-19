@@ -268,7 +268,7 @@ export function UploadResource() {
                   aria-label="Seleccionar archivo"
                   tabIndex={-1}
                   className="sr-only"
-                  accept=".pdf,.doc,.docx,.ppt,.pptx,.zip,.txt,.png,.jpg,.jpeg"
+                  accept=".pdf,.doc,.docx,.ppt,.pptx,.xls,.xlsx,.csv,.zip,.rar,.tar,.tgz,.txt,.md,.png,.jpg,.jpeg,.gif,.webp,.svg,.js,.ts,.py,.java,.c,.cpp,.cs,.html,.css,.json"
                   onChange={(event) => {
                     const file = event.target.files?.[0];
                     if (file) chooseFile(file);
@@ -281,7 +281,9 @@ export function UploadResource() {
                 >
                   Seleccionar archivo
                 </button>
-                <p className="mt-4 text-xs text-slate-500">Maximo {MAX_FILE_SIZE_MB} MB. PDF, DOCX, PPTX, ZIP, imagenes.</p>
+                <p className="mt-4 text-xs text-slate-500">
+                  Maximo {MAX_FILE_SIZE_MB} MB. Documentos, hojas de calculo, presentaciones, codigo, comprimidos e imagenes.
+                </p>
               </div>
             ) : (
               <div className="rounded-2xl border border-blue-100 bg-blue-50/40 p-5">

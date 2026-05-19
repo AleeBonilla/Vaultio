@@ -2,6 +2,7 @@ import { BookOpen, Search, Star, Users, TrendingUp, Shield } from 'lucide-react'
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router';
 import { Button } from '../../components/ui/Button';
+import { VaultioLogo } from '../../components/ui/VaultioLogo';
 import { publicApi, type PublicStats } from '../../lib/api';
 
 export function LandingPage() {
@@ -19,18 +20,7 @@ export function LandingPage() {
 
       <nav className="relative z-10 border-b border-blue-100/80 bg-white/75 backdrop-blur-xl">
         <div className="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <svg viewBox="0 0 24 24" className="w-9 h-9" xmlns="http://www.w3.org/2000/svg">
-              <defs>
-                <linearGradient id="logo-gradient" x1="0%" y1="0%" x2="100%" y2="100%">
-                  <stop offset="0%" stopColor="#2563eb" /> {/* blue-600 */}
-                  <stop offset="100%" stopColor="#06b6d4" /> {/* cyan-500 */}
-                </linearGradient>
-              </defs>
-              <path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z" fill="url(#logo-gradient)" />
-            </svg>
-            <span className="font-extrabold text-3xl tracking-tighter text-slate-900 lowercase">vaultio</span>
-          </div>
+          <VaultioLogo />
           <div className="flex items-center gap-4">
             <Link to="/login">
               <Button variant="ghost" className="rounded-full text-slate-600 hover:text-blue-700 hover:bg-blue-50 transition-colors">Iniciar Sesión</Button>
@@ -63,8 +53,8 @@ export function LandingPage() {
           <div className="absolute -inset-1 bg-gradient-to-r from-blue-300 to-cyan-300 rounded-2xl blur opacity-35"></div>
           <div className="relative rounded-2xl bg-white border border-blue-100 p-2 shadow-2xl shadow-blue-900/10 overflow-hidden">
             <img
-              src="/vaultio_platform_preview_light.png"
-              alt="Vaultio Platform Preview"
+              src="/preview.png"
+              alt="Vista previa de Vaultio"
               className="w-full rounded-xl shadow-inner border border-slate-100 object-cover"
             />
           </div>
@@ -158,11 +148,8 @@ export function LandingPage() {
 
       <footer className="relative z-10 border-t border-blue-100 py-10 bg-white/80 backdrop-blur">
         <div className="max-w-7xl mx-auto px-6 flex flex-col md:flex-row items-center justify-between gap-3">
-          <div className="flex items-center gap-1.5 mb-4 md:mb-0">
-            <svg viewBox="0 0 24 24" className="w-6 h-6 text-blue-600" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
-              <path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z" />
-            </svg>
-            <span className="font-extrabold text-2xl tracking-tighter text-slate-900 lowercase">vaultio</span>
+          <div className="mb-4 md:mb-0">
+            <VaultioLogo textClassName="text-2xl" iconClassName="h-6 w-6" />
           </div>
           <div className="text-slate-500 text-sm">
             © 2026 Vaultio. Construido para estudiantes, por estudiantes.
