@@ -1,4 +1,16 @@
-import { Body, Controller, Delete, Get, Headers, HttpCode, Inject, Param, Patch, Post, Query } from "@nestjs/common";
+import {
+  Body,
+  Controller,
+  Delete,
+  Get,
+  Headers,
+  HttpCode,
+  Inject,
+  Param,
+  Patch,
+  Post,
+  Query,
+} from "@nestjs/common";
 import { ResourcesService } from "./resources.service";
 
 @Controller("resources")
@@ -21,7 +33,11 @@ export class ResourcesController {
   }
 
   @Patch(":id")
-  update(@Headers("authorization") authorization: string | undefined, @Param("id") id: string, @Body() body: any) {
+  update(
+    @Headers("authorization") authorization: string | undefined,
+    @Param("id") id: string,
+    @Body() body: any,
+  ) {
     return this.resources.update(authorization, id, body);
   }
 
@@ -62,7 +78,11 @@ export class ResourcesController {
   }
 
   @Post(":id/comments")
-  createComment(@Headers("authorization") authorization: string | undefined, @Param("id") id: string, @Body() body: any) {
+  createComment(
+    @Headers("authorization") authorization: string | undefined,
+    @Param("id") id: string,
+    @Body() body: any,
+  ) {
     return this.resources.createComment(authorization, id, body);
   }
 

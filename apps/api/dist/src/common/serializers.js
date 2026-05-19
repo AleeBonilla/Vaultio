@@ -35,8 +35,12 @@ function publicUser(user) {
         lastName: user.last_name ?? user.lastName,
         email,
         role,
-        careerIds: user.user_careers?.filter((item) => item.is_active).map((item) => item.career_id) || user.careerIds || [],
-        courseIds: user.user_courses?.filter((item) => item.is_active).map((item) => item.course_id) || user.courseIds || [],
+        careerIds: user.user_careers?.filter((item) => item.is_active).map((item) => item.career_id) ||
+            user.careerIds ||
+            [],
+        courseIds: user.user_courses?.filter((item) => item.is_active).map((item) => item.course_id) ||
+            user.courseIds ||
+            [],
         reputationScore: user.reputation_score ?? user.reputationScore ?? 0,
         photoUrl: normalizePhotoUrl(user.photo_url),
         bio: user.bio ?? null,
@@ -47,7 +51,7 @@ function serializeComment(comment, viewerId) {
     const votes = comment.comment_votes || [];
     const likes = votes.filter((vote) => Number(vote.vote_type) === 1).length;
     const dislikes = votes.filter((vote) => Number(vote.vote_type) === -1).length;
-    const userVote = viewerId ? votes.find((vote) => vote.user_id === viewerId)?.vote_type ?? 0 : 0;
+    const userVote = viewerId ? (votes.find((vote) => vote.user_id === viewerId)?.vote_type ?? 0) : 0;
     const isDeleted = comment.is_active === false;
     return {
         id: comment.id,
@@ -106,11 +110,15 @@ function summarizeResource(resource) {
         ratingsCount: ratings.length,
         downloads: toNumber(resource.downloads_count) || 0,
         views: toNumber(resource.views_count) || 0,
-        author: resource.users ? `${resource.users.first_name} ${resource.users.last_name}` : "Usuario desconocido",
+        author: resource.users
+            ? `${resource.users.first_name} ${resource.users.last_name}`
+            : "Usuario desconocido",
         authorId: resource.user_id,
         date: resource.created_at instanceof Date ? resource.created_at.toISOString() : resource.created_at,
         professorId: resource.professor_id,
-        professor: resource.professors ? `${resource.professors.first_name} ${resource.professors.last_name}` : null,
+        professor: resource.professors
+            ? `${resource.professors.first_name} ${resource.professors.last_name}`
+            : null,
         fileExtension: resource.file_extension,
         fileSize: toNumber(resource.file_size),
     };

@@ -25,9 +25,7 @@ function findFirebaseServiceAccount(repoRoot) {
         return node_path_1.default.resolve(repoRoot, process.env.VAULTIO_FIREBASE_SERVICE_ACCOUNT);
     }
     try {
-        const match = node_fs_1.default
-            .readdirSync(repoRoot)
-            .find((name) => /-firebase-adminsdk-.*\.json$/i.test(name));
+        const match = node_fs_1.default.readdirSync(repoRoot).find((name) => /-firebase-adminsdk-.*\.json$/i.test(name));
         if (match)
             return node_path_1.default.resolve(repoRoot, match);
     }
@@ -37,11 +35,27 @@ function findFirebaseServiceAccount(repoRoot) {
     return node_path_1.default.resolve(repoRoot, "firebase-service-account.json");
 }
 const repoRoot = findRepoRoot(__dirname);
+function parseOrigins(value) {
+    return (value || "")
+        .split(",")
+        .map((origin) => origin.trim())
+        .filter(Boolean);
+}
+const corsOrigins = parseOrigins(process.env.VAULTIO_CORS_ORIGINS || "http://localhost:5173,http://localhost:4173");
 exports.config = {
     port: Number(process.env.VAULTIO_API_PORT || 4000),
     publicUrl: process.env.VAULTIO_API_PUBLIC_URL || `http://localhost:${process.env.VAULTIO_API_PORT || 4000}`,
     databaseUrl: process.env.DATABASE_URL || "postgresql://vaultio:vaultio@localhost:5432/vaultio?schema=public",
     repoRoot,
+    env: process.env.NODE_ENV || "development",
+    cors: {
+        origins: corsOrigins,
+        allowAny: corsOrigins.includes("*"),
+    },
+    throttle: {
+        ttlMs: Number(process.env.VAULTIO_THROTTLE_TTL_MS || 60_000),
+        limit: Number(process.env.VAULTIO_THROTTLE_LIMIT || 120),
+    },
     auth: {
         provider: process.env.VAULTIO_AUTH_PROVIDER || "firebase",
         allowedEmailDomain: (process.env.VAULTIO_AUTH_ALLOWED_DOMAIN || "").trim().toLowerCase() || null,

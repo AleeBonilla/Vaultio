@@ -59,6 +59,23 @@ export function EditProfile() {
     return () => URL.revokeObjectURL(url);
   }, [photoFile]);
 
+  const matchingCareers = useMemo(() => {
+    const normalized = careerQuery.trim().toLowerCase();
+    if (!normalized) return [];
+    return careers
+      .filter((career) => `${career.code} ${career.name}`.toLowerCase().includes(normalized))
+      .slice(0, 8);
+  }, [careers, careerQuery]);
+
+  const matchingCourses = useMemo(() => {
+    const normalized = courseQuery.trim().toLowerCase();
+    if (!normalized) return [];
+    return courses
+      .filter((course) => !courseIds.includes(course.id))
+      .filter((course) => `${course.code} ${course.name}`.toLowerCase().includes(normalized))
+      .slice(0, 8);
+  }, [courses, courseIds, courseQuery]);
+
   if (!profile) return null;
 
   const handleSubmit = async (event: React.FormEvent) => {
@@ -102,31 +119,16 @@ export function EditProfile() {
   };
 
   const toggleCourse = (id: number) => {
-    setCourseIds((current) => (current.includes(id) ? current.filter((courseId) => courseId !== id) : [...current, id]));
+    setCourseIds((current) =>
+      current.includes(id) ? current.filter((courseId) => courseId !== id) : [...current, id],
+    );
   };
 
   const selectedCourses = courses.filter((course) => courseIds.includes(course.id));
   const selectedCareer = careers.find((career) => String(career.id) === careerId);
-  const matchingCareers = useMemo(() => {
-    const normalized = careerQuery.trim().toLowerCase();
-    if (!normalized) return [];
-    return careers
-      .filter((career) => `${career.code} ${career.name}`.toLowerCase().includes(normalized))
-      .slice(0, 8);
-  }, [careers, careerQuery]);
-  const matchingCourses = useMemo(() => {
-    const normalized = courseQuery.trim().toLowerCase();
-    if (!normalized) return [];
-    return courses
-      .filter((course) => !courseIds.includes(course.id))
-      .filter((course) => `${course.code} ${course.name}`.toLowerCase().includes(normalized))
-      .slice(0, 8);
-  }, [courses, courseIds, courseQuery]);
 
   const initials =
-    `${firstName?.[0] || ""}${lastName?.[0] || ""}`.toUpperCase() ||
-    profile.email?.[0]?.toUpperCase() ||
-    "?";
+    `${firstName?.[0] || ""}${lastName?.[0] || ""}`.toUpperCase() || profile.email?.[0]?.toUpperCase() || "?";
   const avatarUrl = photoPreview || profile.photoUrl;
 
   return (
@@ -155,7 +157,11 @@ export function EditProfile() {
 
           <div className="flex flex-col gap-4 rounded-2xl border border-blue-100 bg-blue-50/30 p-4 sm:flex-row sm:items-center">
             {avatarUrl ? (
-              <img src={avatarUrl} alt="Foto de perfil" className="h-24 w-24 rounded-full object-cover shadow-lg shadow-blue-900/10" />
+              <img
+                src={avatarUrl}
+                alt="Foto de perfil"
+                className="h-24 w-24 rounded-full object-cover shadow-lg shadow-blue-900/10"
+              />
             ) : (
               <div className="flex h-24 w-24 items-center justify-center rounded-full bg-gradient-to-br from-blue-600 to-cyan-500 text-3xl font-bold text-white shadow-lg shadow-blue-600/20">
                 {initials}
@@ -255,7 +261,9 @@ export function EditProfile() {
                       <span className="block text-xs text-slate-600">{career.name}</span>
                     </button>
                   ))}
-                  {matchingCareers.length === 0 && <p className="p-3 text-sm text-slate-500">Sin carreras para esa busqueda.</p>}
+                  {matchingCareers.length === 0 && (
+                    <p className="p-3 text-sm text-slate-500">Sin carreras para esa busqueda.</p>
+                  )}
                 </div>
               )}
             </div>
@@ -304,7 +312,9 @@ export function EditProfile() {
                       <span className="block text-xs text-slate-600">{course.name}</span>
                     </button>
                   ))}
-                  {matchingCourses.length === 0 && <p className="p-3 text-sm text-slate-500">Sin cursos para esa busqueda.</p>}
+                  {matchingCourses.length === 0 && (
+                    <p className="p-3 text-sm text-slate-500">Sin cursos para esa busqueda.</p>
+                  )}
                 </div>
               )}
             </div>
@@ -328,11 +338,20 @@ export function EditProfile() {
 
           <div className="flex gap-3 border-t border-blue-100 pt-4">
             <Link to="/app/profile" className="flex-1">
-              <Button type="button" variant="secondary" className="w-full rounded-full border-blue-100 hover:bg-blue-50">
+              <Button
+                type="button"
+                variant="secondary"
+                className="w-full rounded-full border-blue-100 hover:bg-blue-50"
+              >
                 Cancelar
               </Button>
             </Link>
-            <Button type="submit" variant="primary" className="flex-1 rounded-full bg-blue-600 shadow-lg shadow-blue-600/15 hover:bg-blue-700" disabled={submitting}>
+            <Button
+              type="submit"
+              variant="primary"
+              className="flex-1 rounded-full bg-blue-600 shadow-lg shadow-blue-600/15 hover:bg-blue-700"
+              disabled={submitting}
+            >
               {submitting ? "Guardando..." : "Guardar cambios"}
             </Button>
           </div>

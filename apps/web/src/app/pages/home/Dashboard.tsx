@@ -6,7 +6,9 @@ import { catalogApi, resourcesApi, type Career, type ResourceSummary } from "../
 import { useAuth } from "../../lib/auth-context";
 
 function formatDate(value: string) {
-  return new Intl.DateTimeFormat("es-CR", { day: "2-digit", month: "short", year: "numeric" }).format(new Date(value));
+  return new Intl.DateTimeFormat("es-CR", { day: "2-digit", month: "short", year: "numeric" }).format(
+    new Date(value),
+  );
 }
 
 function SkeletonCard() {
@@ -63,7 +65,9 @@ export function Dashboard() {
         <h1 className="mb-3 text-4xl font-extrabold tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-blue-700 via-blue-500 to-cyan-500">
           Hola{profile?.firstName ? `, ${profile.firstName}` : ""}
         </h1>
-        <p className="max-w-2xl text-slate-600">Descubrí y organizá tus materiales de estudio desde tu comunidad estudiantil.</p>
+        <p className="max-w-2xl text-slate-600">
+          Descubrí y organizá tus materiales de estudio desde tu comunidad estudiantil.
+        </p>
       </div>
 
       <div className="mb-12">
@@ -77,7 +81,9 @@ export function Dashboard() {
             </div>
             <div>
               <h3 className="text-xl font-semibold mb-1">Explorar todos los recursos</h3>
-              <p className="text-white/90 text-sm">Apuntes, exámenes, ejercicios y código de todas las carreras.</p>
+              <p className="text-white/90 text-sm">
+                Apuntes, exámenes, ejercicios y código de todas las carreras.
+              </p>
             </div>
           </div>
           <ChevronRight className="w-6 h-6 text-white group-hover:translate-x-1 transition-transform" />
@@ -120,7 +126,9 @@ export function Dashboard() {
                     <h3 className="mb-2 font-semibold text-slate-900 transition-colors group-hover:text-blue-700">
                       {career.name}
                     </h3>
-                    <div className="text-sm text-slate-600">{careerCounts[career.id] ?? 0} recursos disponibles</div>
+                    <div className="text-sm text-slate-600">
+                      {careerCounts[career.id] ?? 0} recursos disponibles
+                    </div>
                   </div>
                   <ChevronRight className="h-5 w-5 flex-shrink-0 text-slate-400 transition-colors group-hover:text-blue-600" />
                 </div>

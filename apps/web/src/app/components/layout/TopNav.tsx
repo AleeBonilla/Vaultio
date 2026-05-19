@@ -55,7 +55,11 @@ export function TopNav({ onOpenMobileMenu }: TopNavProps) {
             aria-label="Abrir perfil de usuario"
           >
             {profile?.photoUrl ? (
-              <img src={profile.photoUrl} alt="" className="h-8 w-8 rounded-full object-cover shadow-md shadow-blue-900/10" />
+              <img
+                src={profile.photoUrl}
+                alt=""
+                className="h-8 w-8 rounded-full object-cover shadow-md shadow-blue-900/10"
+              />
             ) : (
               <div className="flex h-8 w-8 items-center justify-center rounded-full bg-gradient-to-br from-blue-600 to-cyan-500 text-sm font-semibold text-white shadow-md shadow-blue-600/20">
                 {initials || <User className="w-4 h-4" />}

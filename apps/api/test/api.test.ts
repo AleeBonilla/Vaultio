@@ -58,8 +58,12 @@ describe("Vaultio API", () => {
       await prisma.resources.deleteMany({ where: { id: { in: createdResourceIds } } });
     }
     // Limpia ratings/saved creados por tests
-    await prisma.ratings.deleteMany({ where: { resource_id: { in: ["33333333-3333-4333-8333-333333333333"] } } });
-    await prisma.saved_resources.deleteMany({ where: { resource_id: { in: ["33333333-3333-4333-8333-333333333333"] } } });
+    await prisma.ratings.deleteMany({
+      where: { resource_id: { in: ["33333333-3333-4333-8333-333333333333"] } },
+    });
+    await prisma.saved_resources.deleteMany({
+      where: { resource_id: { in: ["33333333-3333-4333-8333-333333333333"] } },
+    });
     await app.close();
   });
 
@@ -196,7 +200,10 @@ describe("Vaultio API", () => {
     const list = await request(baseUrl, "/users/me/saved", { headers });
     assert.ok(list.body.items.some((item: any) => item.id === seededResourceId));
 
-    const unsave = await request(baseUrl, `/resources/${seededResourceId}/save`, { method: "DELETE", headers });
+    const unsave = await request(baseUrl, `/resources/${seededResourceId}/save`, {
+      method: "DELETE",
+      headers,
+    });
     assert.equal(unsave.body.saved, false);
   });
 

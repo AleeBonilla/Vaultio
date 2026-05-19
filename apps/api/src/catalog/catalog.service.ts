@@ -58,7 +58,9 @@ export class CatalogService {
       },
       orderBy: { id: "asc" },
     });
-    return { items: items.map((course) => serializeCourse({ ...course, resourcesCount: course.resources.length })) };
+    return {
+      items: items.map((course) => serializeCourse({ ...course, resourcesCount: course.resources.length })),
+    };
   }
 
   async resourceTypes() {
@@ -93,7 +95,9 @@ export class CatalogService {
         id: item.id,
         firstName: item.first_name,
         lastName: item.last_name,
-        courseIds: item.professor_courses.filter((course) => course.is_active).map((course) => course.course_id),
+        courseIds: item.professor_courses
+          .filter((course) => course.is_active)
+          .map((course) => course.course_id),
       })),
     };
   }

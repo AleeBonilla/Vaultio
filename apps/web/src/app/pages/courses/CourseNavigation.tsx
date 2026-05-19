@@ -1,14 +1,10 @@
-import { ArrowLeft, BookOpen, ChevronRight } from 'lucide-react';
-import { useEffect, useState } from 'react';
-import { Link, useParams } from 'react-router';
-import { catalogApi, type Career, type Course } from '../../lib/api';
+import { ArrowLeft, BookOpen, ChevronRight } from "lucide-react";
+import { useEffect, useState } from "react";
+import { Link, useParams } from "react-router";
+import { catalogApi, type Career, type Course } from "../../lib/api";
 
 function ErrorState({ message }: { message: string }) {
-  return (
-    <div className="rounded-2xl border border-red-200 bg-red-50 p-4 text-red-700">
-      {message}
-    </div>
-  );
+  return <div className="rounded-2xl border border-red-200 bg-red-50 p-4 text-red-700">{message}</div>;
 }
 
 export function CourseNavigation() {
@@ -32,7 +28,7 @@ export function CourseNavigation() {
         setCourses(loadedCourses);
       } catch (loadError) {
         if (!active) return;
-        setError(loadError instanceof Error ? loadError.message : 'No se pudo cargar el catalogo');
+        setError(loadError instanceof Error ? loadError.message : "No se pudo cargar el catalogo");
       } finally {
         if (active) setLoading(false);
       }
@@ -66,7 +62,9 @@ export function CourseNavigation() {
     return (
       <div className="max-w-7xl mx-auto">
         <div className="mb-10 rounded-3xl border border-blue-100 bg-white/80 p-8 shadow-sm shadow-blue-900/5">
-          <p className="mb-3 text-xs font-semibold uppercase tracking-[0.22em] text-blue-600">Catálogo académico</p>
+          <p className="mb-3 text-xs font-semibold uppercase tracking-[0.22em] text-blue-600">
+            Catálogo académico
+          </p>
           <h1 className="mb-3 text-4xl font-extrabold tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-blue-700 via-blue-500 to-cyan-500">
             Explorar por carrera
           </h1>
@@ -105,9 +103,13 @@ export function CourseNavigation() {
     <div className="max-w-7xl mx-auto">
       <div className="mb-10">
         <nav className="flex items-center gap-2 text-sm text-slate-600 mb-4">
-          <Link to="/app" className="hover:text-blue-700 transition-colors">Inicio</Link>
+          <Link to="/app" className="hover:text-blue-700 transition-colors">
+            Inicio
+          </Link>
           <ChevronRight className="w-4 h-4" />
-          <Link to="/app/courses" className="hover:text-blue-700 transition-colors">Carreras</Link>
+          <Link to="/app/courses" className="hover:text-blue-700 transition-colors">
+            Carreras
+          </Link>
           <ChevronRight className="w-4 h-4" />
           <span className="font-medium text-slate-900">{selectedCareer.name}</span>
         </nav>

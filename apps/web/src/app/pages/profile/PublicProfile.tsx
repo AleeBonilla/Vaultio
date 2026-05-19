@@ -9,7 +9,9 @@ import { catalogApi, usersApi, type Career, type PublicProfile as PublicProfileD
 import { useAuth } from "../../lib/auth-context";
 
 function formatDate(value: string) {
-  return new Intl.DateTimeFormat("es-CR", { day: "2-digit", month: "short", year: "numeric" }).format(new Date(value));
+  return new Intl.DateTimeFormat("es-CR", { day: "2-digit", month: "short", year: "numeric" }).format(
+    new Date(value),
+  );
 }
 
 export function PublicProfile() {
@@ -56,7 +58,9 @@ export function PublicProfile() {
   if (error || !data) {
     return (
       <div className="max-w-7xl mx-auto">
-        <div className="rounded-2xl border border-red-200 bg-red-50 p-4 text-red-700">{error || "Perfil no encontrado"}</div>
+        <div className="rounded-2xl border border-red-200 bg-red-50 p-4 text-red-700">
+          {error || "Perfil no encontrado"}
+        </div>
       </div>
     );
   }
@@ -105,7 +109,9 @@ export function PublicProfile() {
               </div>
             )}
             <div>
-              <p className="mb-2 text-xs font-semibold uppercase tracking-[0.22em] text-blue-600">Perfil público</p>
+              <p className="mb-2 text-xs font-semibold uppercase tracking-[0.22em] text-blue-600">
+                Perfil público
+              </p>
               <h1 className="mb-2 text-3xl font-bold text-slate-900">
                 {user.firstName} {user.lastName}
               </h1>
@@ -172,7 +178,13 @@ export function PublicProfile() {
               <Button type="button" variant="ghost" size="sm" onClick={() => setShowReport(false)}>
                 Cancelar
               </Button>
-              <Button type="submit" variant="primary" size="sm" className="rounded-full bg-red-600 hover:bg-red-700" disabled={submittingReport || !reason.trim()}>
+              <Button
+                type="submit"
+                variant="primary"
+                size="sm"
+                className="rounded-full bg-red-600 hover:bg-red-700"
+                disabled={submittingReport || !reason.trim()}
+              >
                 {submittingReport ? "Enviando..." : "Enviar reporte"}
               </Button>
             </div>
@@ -180,9 +192,21 @@ export function PublicProfile() {
         )}
 
         <div className="mt-8 grid grid-cols-2 gap-4 border-t border-blue-100 pt-8 md:grid-cols-3">
-          <Stat label="Recursos subidos" value={data.stats.uploads} icon={<Upload className="h-5 w-5 text-blue-600" />} />
-          <Stat label="Rating promedio" value={data.stats.avgRatingReceived.toFixed(1)} icon={<Star className="h-5 w-5 text-blue-600" />} />
-          <Stat label="Descargas recibidas" value={data.stats.totalDownloads} icon={<Upload className="h-5 w-5 text-blue-600" />} />
+          <Stat
+            label="Recursos subidos"
+            value={data.stats.uploads}
+            icon={<Upload className="h-5 w-5 text-blue-600" />}
+          />
+          <Stat
+            label="Rating promedio"
+            value={data.stats.avgRatingReceived.toFixed(1)}
+            icon={<Star className="h-5 w-5 text-blue-600" />}
+          />
+          <Stat
+            label="Descargas recibidas"
+            value={data.stats.totalDownloads}
+            icon={<Upload className="h-5 w-5 text-blue-600" />}
+          />
         </div>
       </div>
 

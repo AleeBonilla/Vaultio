@@ -295,11 +295,11 @@ El frontend hace `PUT` directo a `uploadUrl` con el archivo y luego llama a `POS
 
 ## Errores comunes
 
-| Código | Significado                                                   |
-| ------ | ------------------------------------------------------------- |
-| 400    | Body inválido o falta de campos requeridos.                   |
-| 401    | Token ausente o inválido. Refrescar sesión.                   |
-| 403    | El usuario no es dueño del recurso/comentario.                |
-| 404    | El recurso no existe o fue dado de baja lógicamente.          |
-| 409    | Constraint único (ej. username repetido).                     |
-| 500    | Error no manejado del servidor. Revisar logs.                 |
+| Código | Significado                                          |
+| ------ | ---------------------------------------------------- |
+| 400    | Body inválido o falta de campos requeridos.          |
+| 401    | Token ausente o inválido. Refrescar sesión.          |
+| 403    | El usuario no es dueño del recurso/comentario.       |
+| 404    | El recurso no existe o fue dado de baja lógicamente. |
+| 409    | Constraint único (ej. username repetido).            |
+| 500    | Error no manejado del servidor. Revisar logs.        |

@@ -54,12 +54,21 @@ export function CommentBlock({
   };
 
   return (
-    <div className={`${depth > 0 ? "border-l border-blue-100 pl-4" : "border-b border-blue-100 pb-4 last:border-0"}`}>
+    <div
+      className={`${depth > 0 ? "border-l border-blue-100 pl-4" : "border-b border-blue-100 pb-4 last:border-0"}`}
+    >
       <div className="flex items-start gap-3">
         {authorId && !isDeleted ? (
-          <Link to={`/app/users/${authorId}`} className="flex-shrink-0 rounded-full focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500">
+          <Link
+            to={`/app/users/${authorId}`}
+            className="flex-shrink-0 rounded-full focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
+          >
             {authorPhotoUrl ? (
-              <img src={authorPhotoUrl} alt={`Foto de ${author}`} className="h-10 w-10 rounded-full object-cover shadow-md shadow-blue-900/10" />
+              <img
+                src={authorPhotoUrl}
+                alt={`Foto de ${author}`}
+                className="h-10 w-10 rounded-full object-cover shadow-md shadow-blue-900/10"
+              />
             ) : (
               <div className="flex h-10 w-10 items-center justify-center rounded-full bg-gradient-to-br from-blue-600 to-cyan-500 font-semibold text-white shadow-md shadow-blue-600/20">
                 {initial}
@@ -83,7 +92,11 @@ export function CommentBlock({
             <span className="text-xs text-slate-300">•</span>
             <span className="text-xs text-slate-500">{date}</span>
           </div>
-          <p className={`whitespace-pre-line text-sm ${isDeleted ? "italic text-slate-500" : "text-slate-700"}`}>{content}</p>
+          <p
+            className={`whitespace-pre-line text-sm ${isDeleted ? "italic text-slate-500" : "text-slate-700"}`}
+          >
+            {content}
+          </p>
 
           {!isDeleted && (
             <div className="mt-3 flex flex-wrap items-center gap-2">
@@ -103,7 +116,9 @@ export function CommentBlock({
                 onClick={() => onVote(-1)}
                 aria-pressed={userVote === -1}
                 className={`inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-xs font-medium transition-colors ${
-                  userVote === -1 ? "bg-slate-700 text-white" : "bg-slate-100 text-slate-600 hover:bg-slate-200"
+                  userVote === -1
+                    ? "bg-slate-700 text-white"
+                    : "bg-slate-100 text-slate-600 hover:bg-slate-200"
                 } focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2`}
               >
                 <ThumbsDown className="h-3.5 w-3.5" />
@@ -131,7 +146,10 @@ export function CommentBlock({
           )}
 
           {replying && (
-            <form onSubmit={handleReply} className="mt-3 rounded-2xl border border-blue-100 bg-blue-50/30 p-3">
+            <form
+              onSubmit={handleReply}
+              className="mt-3 rounded-2xl border border-blue-100 bg-blue-50/30 p-3"
+            >
               <label htmlFor={replyInputId} className="sr-only">
                 Respuesta para {author}
               </label>
@@ -147,7 +165,13 @@ export function CommentBlock({
                 <Button type="button" variant="ghost" size="sm" onClick={() => setReplying(false)}>
                   Cancelar
                 </Button>
-                <Button type="submit" variant="primary" size="sm" className="rounded-full bg-blue-600 hover:bg-blue-700" disabled={!replyDraft.trim()}>
+                <Button
+                  type="submit"
+                  variant="primary"
+                  size="sm"
+                  className="rounded-full bg-blue-600 hover:bg-blue-700"
+                  disabled={!replyDraft.trim()}
+                >
                   Responder
                 </Button>
               </div>

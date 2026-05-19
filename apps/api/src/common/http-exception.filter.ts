@@ -5,7 +5,8 @@ import { Response } from "express";
 export class ApiExceptionFilter implements ExceptionFilter {
   catch(exception: unknown, host: ArgumentsHost) {
     const response = host.switchToHttp().getResponse<Response>();
-    const status = exception instanceof HttpException ? exception.getStatus() : HttpStatus.INTERNAL_SERVER_ERROR;
+    const status =
+      exception instanceof HttpException ? exception.getStatus() : HttpStatus.INTERNAL_SERVER_ERROR;
     const exceptionResponse = exception instanceof HttpException ? exception.getResponse() : null;
 
     const payload =

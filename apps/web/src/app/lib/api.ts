@@ -217,7 +217,11 @@ export const usersApi = {
     return items;
   },
 
-  async updateMe(input: Partial<Pick<User, "username" | "firstName" | "lastName" | "bio" | "photoUrl">> & { careerIds?: number[] }) {
+  async updateMe(
+    input: Partial<Pick<User, "username" | "firstName" | "lastName" | "bio" | "photoUrl">> & {
+      careerIds?: number[];
+    },
+  ) {
     const { user } = await apiFetch<{ user: User }>("/users/me", {
       method: "PATCH",
       body: JSON.stringify(input),
@@ -272,24 +276,26 @@ export const catalogApi = {
   },
 
   async resourceTypes() {
-    const { items } = await apiFetch<ListResponse<{ id: number; name: string; description: string }>>(
-      "/catalog/resource-types",
-    );
+    const { items } =
+      await apiFetch<ListResponse<{ id: number; name: string; description: string }>>(
+        "/catalog/resource-types",
+      );
     return items;
   },
 
   async academicPeriods() {
-    const { items } = await apiFetch<ListResponse<{ id: number; name: string; year: number; institutionId: number }>>(
-      "/catalog/academic-periods",
-    );
+    const { items } =
+      await apiFetch<ListResponse<{ id: number; name: string; year: number; institutionId: number }>>(
+        "/catalog/academic-periods",
+      );
     return items;
   },
 
   async professors(courseId?: number) {
     const suffix = courseId ? `?courseId=${courseId}` : "";
-    const { items } = await apiFetch<ListResponse<{ id: number; firstName: string; lastName: string; courseIds: number[] }>>(
-      `/catalog/professors${suffix}`,
-    );
+    const { items } = await apiFetch<
+      ListResponse<{ id: number; firstName: string; lastName: string; courseIds: number[] }>
+    >(`/catalog/professors${suffix}`);
     return items;
   },
 };
@@ -348,13 +354,15 @@ export const resourcesApi = {
   },
 
   async rate(id: string, stars: number) {
-    return apiFetch<{ item: { id: string; stars: number } | null; rating: number; ratingsCount: number; userRating: number | null }>(
-      `/resources/${id}/ratings`,
-      {
-        method: "POST",
-        body: JSON.stringify({ stars }),
-      },
-    );
+    return apiFetch<{
+      item: { id: string; stars: number } | null;
+      rating: number;
+      ratingsCount: number;
+      userRating: number | null;
+    }>(`/resources/${id}/ratings`, {
+      method: "POST",
+      body: JSON.stringify({ stars }),
+    });
   },
 
   async save(id: string) {
@@ -380,11 +388,15 @@ export const resourcesApi = {
   },
 
   async unvoteComment(id: string, commentId: string) {
-    return apiFetch<{ item: ResourceComment }>(`/resources/${id}/comments/${commentId}/vote`, { method: "DELETE" });
+    return apiFetch<{ item: ResourceComment }>(`/resources/${id}/comments/${commentId}/vote`, {
+      method: "DELETE",
+    });
   },
 
   async deleteComment(id: string, commentId: string) {
-    return apiFetch<{ item: ResourceComment }>(`/resources/${id}/comments/${commentId}`, { method: "DELETE" });
+    return apiFetch<{ item: ResourceComment }>(`/resources/${id}/comments/${commentId}`, {
+      method: "DELETE",
+    });
   },
 };
 

@@ -53,11 +53,12 @@ Ejemplo de jerarquía:
 
 Universidad
 └── Carrera
-    └── Curso
-        └── Tipo de recurso
-            └── Recurso
+└── Curso
+└── Tipo de recurso
+└── Recurso
 
 Metadatos adicionales:
+
 - Semestre
 - Profesor
 - Carrera
@@ -75,16 +76,19 @@ La contextualización institucional es el principal diferenciador competitivo de
 ## 1. Estudiante de Primer Ingreso (Consumidor)
 
 Características:
+
 - Primeros semestres
 - No posee red académica consolidada
 - Depende de grupos de WhatsApp/Telegram
 
 Necesidades:
+
 - Encontrar material rápidamente
 - Acceder a contenido organizado
 - Descubrir recursos confiables
 
 Comportamiento:
+
 - Consume contenido
 - Rara vez sube material
 
@@ -93,14 +97,17 @@ Comportamiento:
 ## 2. Estudiante Intermedio (Usuario Mixto)
 
 Características:
+
 - Ya conoce el ecosistema universitario
 - Utiliza Google Drive y plataformas académicas externas
 
 Necesidades:
+
 - Acceso rápido a recursos estructurados
 - Mejor filtrado y búsqueda
 
 Comportamiento:
+
 - Consume y ocasionalmente sube material
 
 ---
@@ -108,15 +115,18 @@ Comportamiento:
 ## 3. Estudiante Avanzado (Colaborador Activo)
 
 Características:
+
 - Posee gran cantidad de materiales académicos
 - Participa en comunidades estudiantiles
 
 Necesidades:
+
 - Organizar y preservar contenido académico
 - Ayudar a otros estudiantes
 - Validar calidad del contenido
 
 Comportamiento:
+
 - Sube recursos
 - Comenta y evalúa materiales
 - Participa activamente en la comunidad
@@ -126,18 +136,22 @@ Comportamiento:
 # Roles del Sistema
 
 ## Visitante
+
 Usuario no autenticado.
 
 Permisos:
+
 - Navegar contenido público
 - Realizar búsquedas básicas
 
 ---
 
 ## Estudiante Registrado
+
 Usuario autenticado.
 
 Permisos:
+
 - Ver recursos completos
 - Comentar
 - Evaluar recursos
@@ -145,9 +159,11 @@ Permisos:
 ---
 
 ## Colaborador
+
 Usuario que aporta contenido.
 
 Permisos:
+
 - Subir recursos
 - Editar/eliminar sus recursos
 - Comentar y evaluar
@@ -155,9 +171,11 @@ Permisos:
 ---
 
 ## Moderador (Futuro)
+
 Rol orientado al control de calidad.
 
 Permisos:
+
 - Eliminar contenido
 - Gestionar reportes
 - Moderar interacciones
@@ -167,18 +185,22 @@ Permisos:
 # Funcionalidades Principales
 
 ## Autenticación
+
 - Registro de usuarios
 - Inicio de sesión
 - Futuro soporte para autenticación institucional
 
 Posibles proveedores futuros:
+
 - Google OAuth
 - Microsoft / Outlook institucional
 
 ---
 
 ## Navegación Académica
+
 Los usuarios podrán navegar por:
+
 - Carreras
 - Cursos
 - Tipos de recurso
@@ -189,6 +211,7 @@ Los usuarios podrán navegar por:
 ## Sistema de Subida de Recursos
 
 Ejemplos de recursos soportados:
+
 - Apuntes
 - Exámenes
 - Ejercicios resueltos
@@ -196,6 +219,7 @@ Ejemplos de recursos soportados:
 - Código técnico
 
 Cada recurso estará asociado a:
+
 - Curso
 - Carrera
 - Semestre
@@ -209,6 +233,7 @@ Cada recurso estará asociado a:
 La búsqueda es uno de los pilares principales del sistema.
 
 Filtros posibles:
+
 - Curso
 - Carrera
 - Semestre
@@ -218,6 +243,7 @@ Filtros posibles:
 - Ratings
 
 Futuro:
+
 - Búsqueda avanzada
 - Recomendaciones
 - Búsqueda semántica
@@ -227,6 +253,7 @@ Futuro:
 ## Ratings y Comentarios
 
 Los usuarios podrán:
+
 - Evaluar recursos
 - Comentar recursos
 - Validar calidad mediante interacción comunitaria
@@ -238,6 +265,7 @@ Esto resuelve una de las mayores carencias de los sistemas informales actuales.
 # Análisis Competitivo
 
 Vaultio fue comparado contra:
+
 - StuDocu
 - CourseHero
 - Docsity
@@ -246,6 +274,7 @@ Vaultio fue comparado contra:
 - Discord
 
 Conclusiones principales:
+
 - Las plataformas formales ofrecen buena búsqueda y UI
 - Las plataformas informales ofrecen accesibilidad y rapidez
 - Ninguna combina:
@@ -266,14 +295,15 @@ Ejemplo:
 
 Vaultio
 └── Carrera
-    └── Curso
-        └── Tipo de recurso
-            └── Recurso
-                ├── Ratings
-                ├── Comentarios
-                └── Metadatos
+└── Curso
+└── Tipo de recurso
+└── Recurso
+├── Ratings
+├── Comentarios
+└── Metadatos
 
 Metadatos importantes:
+
 - Profesor
 - Semestre
 - Contexto académico
@@ -285,9 +315,11 @@ Metadatos importantes:
 # Entidades Principales
 
 ## Usuario
+
 Representa los usuarios del sistema.
 
 Campos potenciales:
+
 - id
 - nombre
 - email
@@ -298,18 +330,22 @@ Campos potenciales:
 ---
 
 ## Carrera
+
 Programa académico.
 
 Ejemplos:
+
 - Ingeniería en Computación
 - Ingeniería Electrónica
 
 ---
 
 ## Curso
+
 Curso universitario.
 
 Campos potenciales:
+
 - id
 - código
 - nombre
@@ -319,9 +355,11 @@ Campos potenciales:
 ---
 
 ## Recurso
+
 Material académico subido por usuarios.
 
 Campos potenciales:
+
 - id
 - título
 - descripción
@@ -338,6 +376,7 @@ Campos potenciales:
 ## TipoDeRecurso
 
 Ejemplos:
+
 - Apuntes
 - Exámenes
 - Ejercicios
@@ -347,14 +386,17 @@ Ejemplos:
 ---
 
 ## Comentario
+
 Retroalimentación de usuarios sobre recursos.
 
 ---
 
 ## Rating
+
 Evaluación de calidad de los recursos.
 
 Posibles enfoques:
+
 - 1–5 estrellas
 - Likes/dislikes
 - Reputación ponderada
@@ -362,6 +404,7 @@ Posibles enfoques:
 ---
 
 ## Profesor
+
 Entidad contextual opcional asociada a cursos y recursos.
 
 ---
@@ -369,17 +412,21 @@ Entidad contextual opcional asociada a cursos y recursos.
 # Stack Tecnológico Inicial Propuesto
 
 ## Backend
+
 - Node.js
 - Express.js
 
 ## Frontend
+
 - HTML/CSS/JavaScript
 - Posible frontend en React
 
 ## Base de Datos
+
 - PostgreSQL
 
 ## Control de Versiones
+
 - Git
 - GitHub
 
@@ -388,6 +435,7 @@ Entidad contextual opcional asociada a cursos y recursos.
 # Visión Arquitectónica Extendida
 
 El proyecto puede evolucionar hacia:
+
 - Sistemas de recomendación
 - Búsqueda semántica
 - IA aplicada a descubrimiento de contenido
@@ -396,6 +444,7 @@ El proyecto puede evolucionar hacia:
 - Integración con repositorios externos
 
 Posibles preocupaciones futuras:
+
 - Escalabilidad
 - Motores de búsqueda
 - Object storage
@@ -408,6 +457,7 @@ Posibles preocupaciones futuras:
 # Funcionalidades Futuras con IA
 
 Posibles capacidades futuras:
+
 - Búsqueda semántica
 - Recomendaciones inteligentes
 - Sugerencias personalizadas
@@ -425,6 +475,7 @@ Ejemplo:
 Se realizó una encuesta informal dentro de comunidades estudiantiles del TEC con resultados altamente positivos.
 
 Los estudiantes mostraron interés especialmente en:
+
 - Organización estructurada
 - Filtros por profesor y semestre
 - Descubrimiento de recursos
@@ -435,21 +486,25 @@ Los estudiantes mostraron interés especialmente en:
 # Principios del Producto
 
 ## Accesibilidad
+
 La plataforma debe mantenerse abierta y accesible para estudiantes del TEC.
 
 ---
 
 ## Contextualización Académica
+
 La estructura académica del TEC es central en el diseño del sistema.
 
 ---
 
 ## Colaboración Comunitaria
+
 La plataforma depende de la contribución y validación de la comunidad.
 
 ---
 
 ## Organización Estructurada
+
 La calidad organizacional es una de las propuestas de valor principales.
 
 ---
@@ -457,33 +512,17 @@ La calidad organizacional es una de las propuestas de valor principales.
 # Visión a Largo Plazo
 
 Vaultio puede evolucionar hacia:
+
 - Un ecosistema académico completo
 - Una plataforma multiuniversidad
 - Un sistema educativo impulsado por IA
 - Infraestructura colaborativa para aprendizaje
 
 Posibles componentes futuros:
+
 - Repositorios académicos
 - Sistemas de reputación
 - Recomendaciones de estudio
 - Asistentes IA
 - Analíticas académicas
 - Comunidades colaborativas
-
----
-
-# Fuentes
-
-Este contexto fue generado a partir de:
-- "Propuesta Vaultio"
-- "Vaultio_ADE.pdf"
-
-Temas extraídos:
-- Propuesta del proyecto
-- Análisis competitivo
-- Personas objetivo
-- Matriz de necesidades
-- Inventario de contenidos
-- Arquitectura de información
-- Requerimientos funcionales
-- Visión futura

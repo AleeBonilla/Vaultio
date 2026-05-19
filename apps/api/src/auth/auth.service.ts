@@ -20,7 +20,9 @@ export class AuthService {
   ) {}
 
   async register(input: any) {
-    const email = String(input.email || "").trim().toLowerCase();
+    const email = String(input.email || "")
+      .trim()
+      .toLowerCase();
     const password = String(input.password || "");
     const firstName = String(input.firstName || "").trim();
     const lastName = String(input.lastName || "").trim();
@@ -39,7 +41,12 @@ export class AuthService {
 
     const username = requestedUsername
       ? await this.ensureAvailableUsername(requestedUsername)
-      : await this.uniqueUsername(email.split("@")[0].replace(/[^a-z0-9_]/gi, "").slice(0, 24) || "usuario");
+      : await this.uniqueUsername(
+          email
+            .split("@")[0]
+            .replace(/[^a-z0-9_]/gi, "")
+            .slice(0, 24) || "usuario",
+        );
 
     const user = await this.prisma.$transaction(async (tx) => {
       const createdUser = await tx.users.create({
@@ -89,7 +96,9 @@ export class AuthService {
   }
 
   async login(input: any) {
-    const email = String(input.email || "").trim().toLowerCase();
+    const email = String(input.email || "")
+      .trim()
+      .toLowerCase();
     const password = String(input.password || "");
     if (!email || !password) unauthorized("Credenciales invalidas");
     if (password !== "demo123") unauthorized("Credenciales invalidas");
@@ -131,7 +140,9 @@ export class AuthService {
     }
 
     const decodedToken = await this.firebase.verifyIdToken(bearerToken);
-    const email = String(decodedToken.email || "").trim().toLowerCase();
+    const email = String(decodedToken.email || "")
+      .trim()
+      .toLowerCase();
     if (!email) unauthorized("El token de Firebase no contiene correo");
     if (config.auth.allowedEmailDomain && !email.endsWith(`@${config.auth.allowedEmailDomain}`)) {
       unauthorized(`El correo debe pertenecer al dominio ${config.auth.allowedEmailDomain}`);
@@ -210,7 +221,10 @@ export class AuthService {
         },
         data: { email: input.email, last_login: new Date(), is_active: true },
       });
-      return this.prisma.users.findUniqueOrThrow({ where: { id: existingIdentity.user_id }, include: userInclude });
+      return this.prisma.users.findUniqueOrThrow({
+        where: { id: existingIdentity.user_id },
+        include: userInclude,
+      });
     }
 
     const existingEmailIdentity = await this.prisma.identities.findFirst({
@@ -226,7 +240,12 @@ export class AuthService {
             provider_uid: input.firebaseUid,
           },
         },
-        update: { email: input.email, user_id: existingEmailIdentity.user_id, last_login: new Date(), is_active: true },
+        update: {
+          email: input.email,
+          user_id: existingEmailIdentity.user_id,
+          last_login: new Date(),
+          is_active: true,
+        },
         create: {
           provider_name: "firebase",
           provider_uid: input.firebaseUid,
@@ -234,11 +253,17 @@ export class AuthService {
           user_id: existingEmailIdentity.user_id,
         },
       });
-      return this.prisma.users.findUniqueOrThrow({ where: { id: existingEmailIdentity.user_id }, include: userInclude });
+      return this.prisma.users.findUniqueOrThrow({
+        where: { id: existingEmailIdentity.user_id },
+        include: userInclude,
+      });
     }
 
     const username = await this.uniqueUsername(
-      input.email.split("@")[0].replace(/[^a-z0-9_]/gi, "").slice(0, 24) || "usuario",
+      input.email
+        .split("@")[0]
+        .replace(/[^a-z0-9_]/gi, "")
+        .slice(0, 24) || "usuario",
     );
 
     return this.prisma.$transaction(async (tx) => {
@@ -280,11 +305,16 @@ export class AuthService {
   private firstNameFromDecodedToken(decodedToken: { name?: string; email?: string }) {
     const name = String(decodedToken.name || "").trim();
     if (name) return name.split(/\s+/)[0].slice(0, 30);
-    return String(decodedToken.email || "Usuario").split("@")[0].slice(0, 30);
+    return String(decodedToken.email || "Usuario")
+      .split("@")[0]
+      .slice(0, 30);
   }
 
   private lastNameFromDecodedToken(decodedToken: { name?: string }) {
-    const parts = String(decodedToken.name || "").trim().split(/\s+/).filter(Boolean);
+    const parts = String(decodedToken.name || "")
+      .trim()
+      .split(/\s+/)
+      .filter(Boolean);
     return (parts.length > 1 ? parts.slice(1).join(" ") : "Firebase").slice(0, 255);
   }
 }

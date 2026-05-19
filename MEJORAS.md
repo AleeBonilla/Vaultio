@@ -9,6 +9,34 @@ Cada propuesta indica:
 - **Esfuerzo**: orientativo en horas.
 - **Riesgo**: qué se puede romper si se hace mal.
 
+## Estado de aplicación
+
+| #   | Mejora                                                  | Estado                                                             |
+| --- | ------------------------------------------------------- | ------------------------------------------------------------------ |
+| 1   | Reorganizar `database/` → `apps/api/prisma/migrations/` | ✅ Aplicado                                                        |
+| 3   | Prisma Migrate                                          | ✅ Aplicado (migración inicial `0_init`)                           |
+| 10  | CI/CD con GitHub Actions                                | ✅ Aplicado (`.github/workflows/ci.yml`)                           |
+| 12  | ESLint + Prettier + EditorConfig                        | ✅ Aplicado                                                        |
+| 13  | Pre-commit hooks con Husky + lint-staged                | ✅ Aplicado                                                        |
+| 14  | Helmet + CORS restrictivo + rate limiting               | ✅ Aplicado (`@nestjs/throttler` + helmet)                         |
+| 20  | Multi-stage Dockerfile                                  | ✅ Aplicado (`apps/api/Dockerfile`, `apps/web/Dockerfile` + nginx) |
+| 23  | Cleanup final                                           | ✅ Aplicado (db.json eliminado, encoding pendiente)                |
+| 2   | Reorganizar `infra/` con compose modular                | ⏳ Pendiente                                                       |
+| 4   | DTOs con Zod                                            | ⏳ Pendiente                                                       |
+| 5   | `packages/shared`                                       | ⏳ Pendiente (workspace ya soporta `packages/*`)                   |
+| 6   | Paginación DB-side                                      | ⏳ Pendiente                                                       |
+| 7   | Full-text search                                        | ⏳ Índice GIN ya creado, falta exponer en API                      |
+| 8   | Moderación real                                         | ⏳ Pendiente                                                       |
+| 9   | Observabilidad (pino)                                   | ⏳ Pendiente                                                       |
+| 11  | Tests E2E con Playwright                                | ⏳ Pendiente                                                       |
+| 15  | S3/GCS productivo                                       | ⏳ Pendiente                                                       |
+| 16  | AV + MIME real                                          | ⏳ Pendiente                                                       |
+| 17  | Thumbnails                                              | ⏳ Pendiente                                                       |
+| 18  | Cuotas + rate limit por acción                          | ⏳ Throttler global puesto, falta granular                         |
+| 19  | Audit logs                                              | ⏳ Tabla `audit_log` en DB, falta interceptor                      |
+| 21  | Deployment                                              | ⏳ Pendiente                                                       |
+| 22  | OpenAPI auto-generado                                   | ⏳ Pendiente                                                       |
+
 ---
 
 ## Índice
@@ -151,15 +179,17 @@ Opción A — **Zod** (recomendada por su simplicidad):
 // apps/api/src/resources/resources.dto.ts
 import { z } from "zod";
 
-export const createResourceSchema = z.object({
-  title: z.string().min(1).max(80),
-  description: z.string().min(1),
-  courseId: z.number().int().positive(),
-  resourceTypeId: z.number().int().positive(),
-  tags: z.array(z.string()).optional(),
-  storageKey: z.string().optional(),
-  externalUrl: z.string().url().optional(),
-}).refine(d => d.storageKey || d.externalUrl, { message: "Storage o URL externa requerido" });
+export const createResourceSchema = z
+  .object({
+    title: z.string().min(1).max(80),
+    description: z.string().min(1),
+    courseId: z.number().int().positive(),
+    resourceTypeId: z.number().int().positive(),
+    tags: z.array(z.string()).optional(),
+    storageKey: z.string().optional(),
+    externalUrl: z.string().url().optional(),
+  })
+  .refine((d) => d.storageKey || d.externalUrl, { message: "Storage o URL externa requerido" });
 
 export type CreateResourceInput = z.infer<typeof createResourceSchema>;
 ```
@@ -728,28 +758,28 @@ Después: paginación (#6), moderación (#8), observabilidad (#9), containerizac
 
 ## Resumen tabular
 
-| #   | Mejora                            | Esfuerzo | Impacto | Riesgo |
-| --- | --------------------------------- | -------- | ------- | ------ |
-| 1   | Reorganizar `database/`           | 4h       | Alto    | Medio  |
-| 2   | `infra/` con compose modular      | 2h       | Medio   | Bajo   |
-| 3   | Prisma Migrate                    | 6h       | Alto    | Alto   |
-| 4   | DTOs con Zod                      | 12h      | Alto    | Bajo   |
-| 5   | `packages/shared`                 | 4h       | Medio   | Bajo   |
-| 6   | Paginación DB-side                | 6h       | Alto    | Bajo   |
-| 7   | Full-text search                  | 4h       | Medio   | Bajo   |
-| 8   | Moderación real                   | 16h      | Alto    | Medio  |
-| 9   | Observabilidad                    | 3h       | Alto    | Bajo   |
-| 10  | CI/CD                             | 2h       | Alto    | Bajo   |
-| 11  | Tests E2E                         | 8h       | Medio   | Bajo   |
-| 12  | ESLint/Prettier                   | 2h       | Medio   | Bajo   |
-| 13  | Pre-commit hooks                  | 1h       | Medio   | Bajo   |
-| 14  | Helmet + rate limit + CORS        | 2h       | Alto    | Bajo   |
-| 15  | S3/GCS productivo                 | 8h       | Alto    | Medio  |
-| 16  | AV + MIME real                    | 8h       | Alto    | Medio  |
-| 17  | Thumbnails                        | 10h      | Medio   | Bajo   |
-| 18  | Cuotas + rate limit por acción    | 6h       | Medio   | Bajo   |
-| 19  | Audit logs                        | 6h       | Alto    | Bajo   |
-| 20  | Multi-stage Dockerfile            | 3h       | Alto    | Bajo   |
-| 21  | Deployment                        | 8h       | Alto    | Medio  |
-| 22  | OpenAPI auto-generado             | 3h       | Alto    | Bajo   |
-| 23  | Cleanup final                     | 1h       | Medio   | Bajo   |
+| #   | Mejora                         | Esfuerzo | Impacto | Riesgo |
+| --- | ------------------------------ | -------- | ------- | ------ |
+| 1   | Reorganizar `database/`        | 4h       | Alto    | Medio  |
+| 2   | `infra/` con compose modular   | 2h       | Medio   | Bajo   |
+| 3   | Prisma Migrate                 | 6h       | Alto    | Alto   |
+| 4   | DTOs con Zod                   | 12h      | Alto    | Bajo   |
+| 5   | `packages/shared`              | 4h       | Medio   | Bajo   |
+| 6   | Paginación DB-side             | 6h       | Alto    | Bajo   |
+| 7   | Full-text search               | 4h       | Medio   | Bajo   |
+| 8   | Moderación real                | 16h      | Alto    | Medio  |
+| 9   | Observabilidad                 | 3h       | Alto    | Bajo   |
+| 10  | CI/CD                          | 2h       | Alto    | Bajo   |
+| 11  | Tests E2E                      | 8h       | Medio   | Bajo   |
+| 12  | ESLint/Prettier                | 2h       | Medio   | Bajo   |
+| 13  | Pre-commit hooks               | 1h       | Medio   | Bajo   |
+| 14  | Helmet + rate limit + CORS     | 2h       | Alto    | Bajo   |
+| 15  | S3/GCS productivo              | 8h       | Alto    | Medio  |
+| 16  | AV + MIME real                 | 8h       | Alto    | Medio  |
+| 17  | Thumbnails                     | 10h      | Medio   | Bajo   |
+| 18  | Cuotas + rate limit por acción | 6h       | Medio   | Bajo   |
+| 19  | Audit logs                     | 6h       | Alto    | Bajo   |
+| 20  | Multi-stage Dockerfile         | 3h       | Alto    | Bajo   |
+| 21  | Deployment                     | 8h       | Alto    | Medio  |
+| 22  | OpenAPI auto-generado          | 3h       | Alto    | Bajo   |
+| 23  | Cleanup final                  | 1h       | Medio   | Bajo   |

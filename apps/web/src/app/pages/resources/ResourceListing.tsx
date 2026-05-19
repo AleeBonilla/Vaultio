@@ -27,7 +27,9 @@ const EMPTY_FILTERS: FilterValues = {
 };
 
 function formatDate(value: string) {
-  return new Intl.DateTimeFormat("es-CR", { day: "2-digit", month: "short", year: "numeric" }).format(new Date(value));
+  return new Intl.DateTimeFormat("es-CR", { day: "2-digit", month: "short", year: "numeric" }).format(
+    new Date(value),
+  );
 }
 
 export function ResourceListing() {
@@ -71,8 +73,16 @@ export function ResourceListing() {
         if (!active) return;
         setResources(loadedResources);
         setTypeOptions(types.map((type) => ({ label: type.name, value: String(type.id) })));
-        setCareerOptions(careers.map((career) => ({ label: career.name, value: String(career.id), description: career.code })));
-        setCourseOptions(courses.map((course) => ({ label: `${course.code} - ${course.name}`, value: String(course.id) })));
+        setCareerOptions(
+          careers.map((career) => ({
+            label: career.name,
+            value: String(career.id),
+            description: career.code,
+          })),
+        );
+        setCourseOptions(
+          courses.map((course) => ({ label: `${course.code} - ${course.name}`, value: String(course.id) })),
+        );
         setProfessorOptions(
           professors.map((professor) => ({
             label: `${professor.firstName} ${professor.lastName}`,
@@ -119,7 +129,9 @@ export function ResourceListing() {
         <SortSelect value={sort} onChange={setSort} options={SORT_OPTIONS} />
       </div>
 
-      {error && <div className="mb-6 rounded-2xl border border-red-200 bg-red-50 p-4 text-red-700">{error}</div>}
+      {error && (
+        <div className="mb-6 rounded-2xl border border-red-200 bg-red-50 p-4 text-red-700">{error}</div>
+      )}
 
       <div className="flex flex-col lg:flex-row gap-6">
         {showFilters && (

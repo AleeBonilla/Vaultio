@@ -70,7 +70,9 @@ let CatalogService = class CatalogService {
             },
             orderBy: { id: "asc" },
         });
-        return { items: items.map((course) => (0, serializers_1.serializeCourse)({ ...course, resourcesCount: course.resources.length })) };
+        return {
+            items: items.map((course) => (0, serializers_1.serializeCourse)({ ...course, resourcesCount: course.resources.length })),
+        };
     }
     async resourceTypes() {
         const items = await this.prisma.resource_types.findMany({ orderBy: { id: "asc" } });
@@ -101,7 +103,9 @@ let CatalogService = class CatalogService {
                 id: item.id,
                 firstName: item.first_name,
                 lastName: item.last_name,
-                courseIds: item.professor_courses.filter((course) => course.is_active).map((course) => course.course_id),
+                courseIds: item.professor_courses
+                    .filter((course) => course.is_active)
+                    .map((course) => course.course_id),
             })),
         };
     }

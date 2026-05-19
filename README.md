@@ -30,22 +30,22 @@ Plataforma web para que estudiantes del **Instituto Tecnológico de Costa Rica**
 
 ## Stack y herramientas
 
-| Capa            | Herramienta                  | Rol                                                                                                  |
-| --------------- | ---------------------------- | ---------------------------------------------------------------------------------------------------- |
-| Lenguaje        | **TypeScript 5.x**           | Tipado estricto en API y web.                                                                        |
-| Backend         | **NestJS 11**                | Framework modular del API (controllers, services, DI).                                               |
-| ORM             | **Prisma 7 + adapter-pg**    | Tipado SQL, queries y client generado desde el schema introspectado de Postgres.                     |
-| Base de datos   | **PostgreSQL 16**            | Fuente de verdad de usuarios, recursos, comentarios, ratings, guardados, reportes, auditoría.        |
-| Auth            | **Firebase Authentication**  | Emisión de ID tokens (Google y Email/Password). El backend los valida con `firebase-admin`.          |
-| Storage         | **MinIO** (S3-compatible)    | Objetos subidos por usuarios. URLs pre-firmadas PUT/GET.                                             |
-| Infra local     | **Docker Compose**           | Levanta Postgres y MinIO de forma reproducible.                                                      |
-| Frontend        | **Vite 6 + React 18**        | Dev server con HMR, build optimizado.                                                                |
-| Routing         | **react-router 7**           | Rutas declarativas con guard `RequireAuth`.                                                          |
-| UI              | **Tailwind CSS 4**           | Sistema de utilidades. Sin librería de componentes externa.                                          |
-| Iconos          | **lucide-react**             | Iconos consistentes en toda la app.                                                                  |
-| Toasts          | **sonner**                   | Notificaciones en acciones (guardar, calificar, comentar, etc.).                                     |
-| Tests API       | **node:test + tsx**          | Suite integral contra Postgres real (12 casos).                                                      |
-| AWS SDK v3      | **`@aws-sdk/client-s3`**     | Cliente S3 que firma URLs contra MinIO.                                                              |
+| Capa          | Herramienta                 | Rol                                                                                           |
+| ------------- | --------------------------- | --------------------------------------------------------------------------------------------- |
+| Lenguaje      | **TypeScript 5.x**          | Tipado estricto en API y web.                                                                 |
+| Backend       | **NestJS 11**               | Framework modular del API (controllers, services, DI).                                        |
+| ORM           | **Prisma 7 + adapter-pg**   | Tipado SQL, queries y client generado desde el schema introspectado de Postgres.              |
+| Base de datos | **PostgreSQL 16**           | Fuente de verdad de usuarios, recursos, comentarios, ratings, guardados, reportes, auditoría. |
+| Auth          | **Firebase Authentication** | Emisión de ID tokens (Google y Email/Password). El backend los valida con `firebase-admin`.   |
+| Storage       | **MinIO** (S3-compatible)   | Objetos subidos por usuarios. URLs pre-firmadas PUT/GET.                                      |
+| Infra local   | **Docker Compose**          | Levanta Postgres y MinIO de forma reproducible.                                               |
+| Frontend      | **Vite 6 + React 18**       | Dev server con HMR, build optimizado.                                                         |
+| Routing       | **react-router 7**          | Rutas declarativas con guard `RequireAuth`.                                                   |
+| UI            | **Tailwind CSS 4**          | Sistema de utilidades. Sin librería de componentes externa.                                   |
+| Iconos        | **lucide-react**            | Iconos consistentes en toda la app.                                                           |
+| Toasts        | **sonner**                  | Notificaciones en acciones (guardar, calificar, comentar, etc.).                              |
+| Tests API     | **node:test + tsx**         | Suite integral contra Postgres real (12 casos).                                               |
+| AWS SDK v3    | **`@aws-sdk/client-s3`**    | Cliente S3 que firma URLs contra MinIO.                                                       |
 
 Para detalles de configuración y por qué cada pieza está aquí, ver [docs/stack.md](docs/stack.md).
 
@@ -58,7 +58,11 @@ vaultio/
 ├── apps/
 │   ├── api/                       # Backend NestJS (workspace @vaultio/api)
 │   │   ├── prisma/
-│   │   │   └── schema.prisma      # Schema introspectado desde Postgres
+│   │   │   ├── schema.prisma      # Schema Prisma (fuente del client tipado)
+│   │   │   └── migrations/        # Migraciones versionadas (prisma migrate)
+│   │   │       ├── migration_lock.toml
+│   │   │       └── 0_init/
+│   │   │           └── migration.sql
 │   │   ├── src/
 │   │   │   ├── main.ts            # Bootstrap NestJS
 │   │   │   ├── app.module.ts      # Módulo raíz que registra controllers/providers
@@ -97,11 +101,14 @@ vaultio/
 │       ├── vite.config.ts
 │       ├── tsconfig.json
 │       ├── package.json
+│       ├── nginx.conf             # Nginx config para servir el bundle en runtime
+│       ├── Dockerfile             # Multi-stage build → imagen Nginx
 │       └── .env.example
-├── database/                      # SQL inicial montado por docker-compose
-│   ├── schema.sql                 # DDL completo
-│   ├── logic.sql                  # Triggers y funciones (audit, contadores)
-│   └── seed.sql                   # Datos iniciales (catálogos)
+├── .github/
+│   └── workflows/
+│       └── ci.yml                 # Lint + typecheck + build + tests
+├── .husky/
+│   └── pre-commit                 # lint-staged
 ├── docs/                          # Documentación técnica
 │   ├── stack.md                   # Rol de cada herramienta
 │   ├── arquitectura.md            # Flujos y decisiones
@@ -110,6 +117,9 @@ vaultio/
 │   ├── plan-tecnico.md            # Plan técnico inicial (histórico)
 │   └── reporte-limpieza-y-mejoras.md
 ├── docker-compose.yml             # Postgres + MinIO
+├── eslint.config.js               # ESLint flat config (TS + React)
+├── .prettierrc.json
+├── .editorconfig
 ├── package.json                   # Workspace root (npm workspaces)
 ├── package-lock.json
 ├── CONTEXT.md                     # Contexto funcional/producto
@@ -119,20 +129,24 @@ vaultio/
 
 ### Archivos importantes (mapa rápido)
 
-| Archivo                                           | Rol                                                                                  |
-| ------------------------------------------------- | ------------------------------------------------------------------------------------ |
-| `docker-compose.yml`                              | Postgres + MinIO listos para dev.                                                    |
-| `apps/api/src/config.ts`                          | Variables de entorno y defaults del backend.                                         |
-| `apps/api/src/main.ts`                            | Bootstrap del API (CORS, exception filter, listen).                                  |
-| `apps/api/src/app.module.ts`                      | Único lugar donde se declaran controllers/providers.                                 |
-| `apps/api/src/auth/auth.service.ts`               | Verificación de ID token Firebase + sync `users`/`identities`.                       |
-| `apps/api/src/storage/storage.service.ts`         | MinIO/S3: bootstrap del bucket, presigned PUT/GET.                                   |
-| `apps/api/prisma/schema.prisma`                   | Modelo de datos (introspectado desde `database/schema.sql`).                         |
-| `apps/api/test/api.test.ts`                       | 12 tests integrales que validan flujos end-to-end del API.                           |
-| `apps/web/src/app/lib/api.ts`                     | Cliente HTTP del frontend (inyecta ID token automáticamente).                        |
-| `apps/web/src/app/lib/auth-context.tsx`           | Sesión Firebase + perfil del backend + acciones (signIn, signUp, signOut, update).   |
-| `apps/web/src/app/lib/RequireAuth.tsx`            | Guard para rutas `/app/*`.                                                           |
-| `database/schema.sql` / `logic.sql` / `seed.sql`  | Init de Postgres en el contenedor (primera vez que arranca).                         |
+| Archivo                                       | Rol                                                                                |
+| --------------------------------------------- | ---------------------------------------------------------------------------------- |
+| `docker-compose.yml`                          | Postgres + MinIO listos para dev.                                                  |
+| `apps/api/src/config.ts`                      | Variables de entorno y defaults del backend.                                       |
+| `apps/api/src/main.ts`                        | Bootstrap del API (CORS, exception filter, listen).                                |
+| `apps/api/src/app.module.ts`                  | Único lugar donde se declaran controllers/providers.                               |
+| `apps/api/src/auth/auth.service.ts`           | Verificación de ID token Firebase + sync `users`/`identities`.                     |
+| `apps/api/src/storage/storage.service.ts`     | MinIO/S3: bootstrap del bucket, presigned PUT/GET.                                 |
+| `apps/api/prisma/schema.prisma`               | Modelo Prisma (introspectado, fuente de tipos para el client).                     |
+| `apps/api/prisma/migrations/`                 | Migraciones versionadas (`prisma migrate`).                                        |
+| `apps/api/test/api.test.ts`                   | 12 tests integrales que validan flujos end-to-end del API.                         |
+| `apps/api/Dockerfile` / `apps/web/Dockerfile` | Builds multi-stage para deploy.                                                    |
+| `apps/web/src/app/lib/api.ts`                 | Cliente HTTP del frontend (inyecta ID token automáticamente).                      |
+| `apps/web/src/app/lib/auth-context.tsx`       | Sesión Firebase + perfil del backend + acciones (signIn, signUp, signOut, update). |
+| `apps/web/src/app/lib/RequireAuth.tsx`        | Guard para rutas `/app/*`.                                                         |
+| `eslint.config.js` / `.prettierrc.json`       | Estándar de código común a todo el monorepo.                                       |
+| `.github/workflows/ci.yml`                    | CI: lint + typecheck + build + tests con Postgres y MinIO efímeros.                |
+| `.husky/pre-commit`                           | Corre lint-staged antes de cada commit.                                            |
 
 ---
 
@@ -168,20 +182,25 @@ docker compose up -d
 
 Esto levanta:
 
-| Servicio | Imagen                        | Puertos      | Credenciales por defecto                                  |
-| -------- | ----------------------------- | ------------ | --------------------------------------------------------- |
-| Postgres | `postgres:16-alpine`          | 5432         | DB `vaultio`, user `vaultio`, password `vaultio`          |
-| MinIO    | `minio/minio:RELEASE.2025-…`  | 9000, 9001   | user `vaultio`, password `vaultio-demo-secret`            |
+| Servicio | Imagen                       | Puertos    | Credenciales por defecto                         |
+| -------- | ---------------------------- | ---------- | ------------------------------------------------ |
+| Postgres | `postgres:16-alpine`         | 5432       | DB `vaultio`, user `vaultio`, password `vaultio` |
+| MinIO    | `minio/minio:RELEASE.2025-…` | 9000, 9001 | user `vaultio`, password `vaultio-demo-secret`   |
 
-Los scripts `database/{schema,logic,seed}.sql` se ejecutan automáticamente la primera vez que Postgres arranca con un volumen limpio.
+Postgres arranca **vacío** — el schema se aplica vía Prisma Migrate en el paso siguiente. El bucket de MinIO se crea automáticamente al bootear el API.
 
-### 3. Generar Prisma Client
+### 3. Aplicar migraciones de Prisma y generar el client
 
 ```bash
-npm run prisma:generate
+npm run prisma:migrate:deploy      # aplica todas las migraciones a la DB
+npm run prisma:generate            # genera el client en node_modules/@prisma
 ```
 
-Genera el client a `node_modules/@prisma/client`. Hay que volver a correrlo si cambia `prisma/schema.prisma`.
+Si después cambias `apps/api/prisma/schema.prisma`, generá una migración con:
+
+```bash
+npm run prisma:migrate:dev -- --name <descripcion-corta>
+```
 
 ### 4. Configurar Firebase para el frontend
 
@@ -231,34 +250,34 @@ Abrir `http://localhost:5173` y registrarse.
 
 ### Frontend (`apps/web/.env.local`)
 
-| Variable                       | Default                  | Rol                                                       |
-| ------------------------------ | ------------------------ | --------------------------------------------------------- |
-| `VITE_FIREBASE_API_KEY`        | _(requerido)_            | Firebase Web SDK config.                                  |
-| `VITE_FIREBASE_AUTH_DOMAIN`    | _(requerido)_            | Firebase Web SDK config.                                  |
-| `VITE_FIREBASE_PROJECT_ID`     | _(requerido)_            | Firebase Web SDK config.                                  |
-| `VITE_FIREBASE_APP_ID`         | _(requerido)_            | Firebase Web SDK config.                                  |
-| `VITE_API_URL`                 | `http://localhost:4000`  | URL base del backend.                                     |
+| Variable                    | Default                 | Rol                      |
+| --------------------------- | ----------------------- | ------------------------ |
+| `VITE_FIREBASE_API_KEY`     | _(requerido)_           | Firebase Web SDK config. |
+| `VITE_FIREBASE_AUTH_DOMAIN` | _(requerido)_           | Firebase Web SDK config. |
+| `VITE_FIREBASE_PROJECT_ID`  | _(requerido)_           | Firebase Web SDK config. |
+| `VITE_FIREBASE_APP_ID`      | _(requerido)_           | Firebase Web SDK config. |
+| `VITE_API_URL`              | `http://localhost:4000` | URL base del backend.    |
 
 ### Backend
 
-| Variable                                | Default                                                              | Rol                                                                            |
-| --------------------------------------- | -------------------------------------------------------------------- | ------------------------------------------------------------------------------ |
-| `VAULTIO_API_PORT`                      | `4000`                                                               | Puerto HTTP del API.                                                           |
-| `VAULTIO_API_PUBLIC_URL`                | `http://localhost:{port}`                                            | URL pública (para construir links absolutos).                                  |
-| `DATABASE_URL`                          | `postgresql://vaultio:vaultio@localhost:5432/vaultio?schema=public`  | Conexión a Postgres.                                                           |
-| `GOOGLE_APPLICATION_CREDENTIALS`        | (auto-detect en repo root)                                           | Path absoluto al service account JSON. Tiene prioridad.                        |
-| `VAULTIO_FIREBASE_SERVICE_ACCOUNT`      | (auto-detect)                                                        | Path relativo al root, si no usás `GOOGLE_APPLICATION_CREDENTIALS`.            |
-| `VAULTIO_AUTH_PROVIDER`                 | `firebase`                                                           | Proveedor de auth.                                                             |
-| `VAULTIO_AUTH_ALLOWED_DOMAIN`           | _(vacío)_                                                            | Si se setea (ej. `estudiantec.cr`), solo acepta correos de ese dominio.        |
-| `VAULTIO_ALLOW_DEMO_TOKENS`             | `false`                                                              | `true` solo para tests; habilita `POST /auth/login` y `POST /auth/register`.   |
-| `VAULTIO_STORAGE_PROVIDER`              | `minio`                                                              | Etiqueta del proveedor (informativa).                                          |
-| `VAULTIO_STORAGE_BUCKET`                | `vaultio-demo`                                                       | Nombre del bucket S3/MinIO.                                                    |
-| `VAULTIO_STORAGE_REGION`                | `us-east-1`                                                          | Región S3 (MinIO la ignora pero requiere algo).                                |
-| `VAULTIO_STORAGE_ENDPOINT`              | `http://localhost:9000`                                              | Endpoint S3/MinIO para firmar y subir.                                         |
-| `VAULTIO_STORAGE_PUBLIC_ENDPOINT`       | `http://localhost:9000`                                              | Endpoint público para construir URLs descargables.                             |
-| `VAULTIO_STORAGE_ACCESS_KEY_ID`         | `vaultio`                                                            | Access key MinIO/S3.                                                           |
-| `VAULTIO_STORAGE_SECRET_ACCESS_KEY`     | `vaultio-demo-secret`                                                | Secret key MinIO/S3.                                                           |
-| `VAULTIO_STORAGE_FORCE_PATH_STYLE`      | `true`                                                               | `path-style` URLs (necesario para MinIO).                                      |
+| Variable                            | Default                                                             | Rol                                                                          |
+| ----------------------------------- | ------------------------------------------------------------------- | ---------------------------------------------------------------------------- |
+| `VAULTIO_API_PORT`                  | `4000`                                                              | Puerto HTTP del API.                                                         |
+| `VAULTIO_API_PUBLIC_URL`            | `http://localhost:{port}`                                           | URL pública (para construir links absolutos).                                |
+| `DATABASE_URL`                      | `postgresql://vaultio:vaultio@localhost:5432/vaultio?schema=public` | Conexión a Postgres.                                                         |
+| `GOOGLE_APPLICATION_CREDENTIALS`    | (auto-detect en repo root)                                          | Path absoluto al service account JSON. Tiene prioridad.                      |
+| `VAULTIO_FIREBASE_SERVICE_ACCOUNT`  | (auto-detect)                                                       | Path relativo al root, si no usás `GOOGLE_APPLICATION_CREDENTIALS`.          |
+| `VAULTIO_AUTH_PROVIDER`             | `firebase`                                                          | Proveedor de auth.                                                           |
+| `VAULTIO_AUTH_ALLOWED_DOMAIN`       | _(vacío)_                                                           | Si se setea (ej. `estudiantec.cr`), solo acepta correos de ese dominio.      |
+| `VAULTIO_ALLOW_DEMO_TOKENS`         | `false`                                                             | `true` solo para tests; habilita `POST /auth/login` y `POST /auth/register`. |
+| `VAULTIO_STORAGE_PROVIDER`          | `minio`                                                             | Etiqueta del proveedor (informativa).                                        |
+| `VAULTIO_STORAGE_BUCKET`            | `vaultio-demo`                                                      | Nombre del bucket S3/MinIO.                                                  |
+| `VAULTIO_STORAGE_REGION`            | `us-east-1`                                                         | Región S3 (MinIO la ignora pero requiere algo).                              |
+| `VAULTIO_STORAGE_ENDPOINT`          | `http://localhost:9000`                                             | Endpoint S3/MinIO para firmar y subir.                                       |
+| `VAULTIO_STORAGE_PUBLIC_ENDPOINT`   | `http://localhost:9000`                                             | Endpoint público para construir URLs descargables.                           |
+| `VAULTIO_STORAGE_ACCESS_KEY_ID`     | `vaultio`                                                           | Access key MinIO/S3.                                                         |
+| `VAULTIO_STORAGE_SECRET_ACCESS_KEY` | `vaultio-demo-secret`                                               | Secret key MinIO/S3.                                                         |
+| `VAULTIO_STORAGE_FORCE_PATH_STYLE`  | `true`                                                              | `path-style` URLs (necesario para MinIO).                                    |
 
 Para producción se recomienda mover **toda** la configuración a variables de entorno reales (no defaults), incluyendo passwords de Postgres y MinIO/S3.
 
@@ -268,17 +287,25 @@ Para producción se recomienda mover **toda** la configuración a variables de e
 
 Desde la raíz del repo:
 
-| Comando                       | Qué hace                                                                          |
-| ----------------------------- | --------------------------------------------------------------------------------- |
-| `npm run dev:api`             | Inicia el API en watch mode (NestJS via `tsx`).                                   |
-| `npm run dev:web`             | Inicia el frontend en watch mode (Vite).                                          |
-| `npm run start:api`           | Corre el API desde el build (`apps/api/dist/main.js`).                            |
-| `npm run build:api`           | Compila NestJS con `tsc`.                                                         |
-| `npm run build:web`           | Typecheck + build de Vite.                                                        |
-| `npm run build`               | Build de ambos workspaces.                                                        |
-| `npm run typecheck:web`       | Typecheck del frontend (sin emitir).                                              |
-| `npm run test:api`            | Corre la suite integral del API contra la DB local (12 casos).                    |
-| `npm run prisma:generate`     | Genera el Prisma Client tras cambios al schema.                                   |
+| Comando                         | Qué hace                                                       |
+| ------------------------------- | -------------------------------------------------------------- |
+| `npm run dev:api`               | Inicia el API en watch mode (NestJS via `tsx`).                |
+| `npm run dev:web`               | Inicia el frontend en watch mode (Vite).                       |
+| `npm run start:api`             | Corre el API desde el build (`apps/api/dist/main.js`).         |
+| `npm run build:api`             | Compila NestJS con `tsc`.                                      |
+| `npm run build:web`             | Typecheck + build de Vite.                                     |
+| `npm run build`                 | Build de ambos workspaces.                                     |
+| `npm run typecheck:web`         | Typecheck del frontend (sin emitir).                           |
+| `npm run test:api`              | Corre la suite integral del API contra la DB local (12 casos). |
+| `npm run lint`                  | ESLint sobre todo el monorepo.                                 |
+| `npm run lint:fix`              | ESLint con autofix.                                            |
+| `npm run format`                | Prettier sobre todo el repo.                                   |
+| `npm run format:check`          | Verifica formato sin escribir (lo usa CI).                     |
+| `npm run prisma:generate`       | Genera el Prisma Client tras cambios al schema.                |
+| `npm run prisma:migrate:dev`    | Crea una migración nueva y la aplica en dev.                   |
+| `npm run prisma:migrate:deploy` | Aplica migraciones pendientes (prod / CI).                     |
+| `npm run prisma:migrate:reset`  | Resetea la DB y reaplica todas las migraciones.                |
+| `npm run prisma:studio`         | Abre Prisma Studio para inspeccionar la DB.                    |
 
 ---
 
@@ -378,15 +405,15 @@ Pasan 12 tests integrales contra la base real:
 
 ## Troubleshooting
 
-| Síntoma                                                       | Causa probable                                            | Solución                                                                                                |
-| ------------------------------------------------------------- | --------------------------------------------------------- | ------------------------------------------------------------------------------------------------------- |
-| `Firebase no está configurado…` en el login                   | Falta `apps/web/.env.local` o las vars VITE_FIREBASE_*    | Crear el archivo desde `.env.example` y **reiniciar `npm run dev:web`** (Vite no recarga env vars).     |
-| `Token invalido` en cada request                              | El service account no se está cargando                    | Verificar que el JSON está en el repo root o `GOOGLE_APPLICATION_CREDENTIALS` apunta a un path válido.  |
-| `auth/operation-not-allowed` en login con Google              | Proveedor no habilitado en Firebase                       | Firebase Console → Authentication → Sign-in method → habilitar Google y Email/Password.                 |
-| `EADDRINUSE :::4000`                                          | Otra instancia del API corriendo                          | Matar el proceso o cambiar `VAULTIO_API_PORT`.                                                          |
-| Tests fallan con `relation "..." does not exist`              | Postgres se levantó con volumen viejo                     | `docker compose down -v && docker compose up -d`.                                                       |
-| MinIO devuelve `SignatureDoesNotMatch` al subir               | `VAULTIO_STORAGE_PUBLIC_ENDPOINT` distinto del firmado    | Ambos endpoints deben apuntar al **mismo** host visible desde el navegador.                             |
-| El frontend muestra recursos pero los archivos no descargan   | Bucket sin policy pública o URL firmada expirada          | El API genera una URL nueva en cada click; si falla, revisar logs del API y del contenedor MinIO.       |
+| Síntoma                                                     | Causa probable                                          | Solución                                                                                               |
+| ----------------------------------------------------------- | ------------------------------------------------------- | ------------------------------------------------------------------------------------------------------ |
+| `Firebase no está configurado…` en el login                 | Falta `apps/web/.env.local` o las vars VITE*FIREBASE*\* | Crear el archivo desde `.env.example` y **reiniciar `npm run dev:web`** (Vite no recarga env vars).    |
+| `Token invalido` en cada request                            | El service account no se está cargando                  | Verificar que el JSON está en el repo root o `GOOGLE_APPLICATION_CREDENTIALS` apunta a un path válido. |
+| `auth/operation-not-allowed` en login con Google            | Proveedor no habilitado en Firebase                     | Firebase Console → Authentication → Sign-in method → habilitar Google y Email/Password.                |
+| `EADDRINUSE :::4000`                                        | Otra instancia del API corriendo                        | Matar el proceso o cambiar `VAULTIO_API_PORT`.                                                         |
+| Tests fallan con `relation "..." does not exist`            | Postgres se levantó con volumen viejo                   | `docker compose down -v && docker compose up -d`.                                                      |
+| MinIO devuelve `SignatureDoesNotMatch` al subir             | `VAULTIO_STORAGE_PUBLIC_ENDPOINT` distinto del firmado  | Ambos endpoints deben apuntar al **mismo** host visible desde el navegador.                            |
+| El frontend muestra recursos pero los archivos no descargan | Bucket sin policy pública o URL firmada expirada        | El API genera una URL nueva en cada click; si falla, revisar logs del API y del contenedor MinIO.      |
 
 ---
 

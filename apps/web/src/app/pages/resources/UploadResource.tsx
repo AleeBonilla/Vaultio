@@ -150,20 +150,30 @@ export function UploadResource() {
   if (step === 3) {
     return (
       <div className="max-w-2xl mx-auto">
-        <div className="rounded-2xl border border-blue-100 bg-white/85 p-12 text-center shadow-sm shadow-blue-900/5" role="status" aria-live="polite">
+        <div
+          className="rounded-2xl border border-blue-100 bg-white/85 p-12 text-center shadow-sm shadow-blue-900/5"
+          role="status"
+          aria-live="polite"
+        >
           <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-6">
             <CheckCircle aria-hidden="true" className="w-8 h-8 text-green-600" />
           </div>
           <h1 className="mb-3 text-3xl font-bold text-slate-900">Recurso publicado</h1>
           <p className="mb-8 text-slate-600">Tu material ya esta disponible para el resto de la comunidad.</p>
           <div className="flex flex-wrap gap-3 justify-center">
-            <Button variant="secondary" className="rounded-full border-blue-100 hover:bg-blue-50" onClick={() => window.location.reload()}>
+            <Button
+              variant="secondary"
+              className="rounded-full border-blue-100 hover:bg-blue-50"
+              onClick={() => window.location.reload()}
+            >
               Subir otro
             </Button>
             <Button
               variant="primary"
               className="rounded-full bg-blue-600 hover:bg-blue-700"
-              onClick={() => navigate(createdResourceId ? `/app/resources/${createdResourceId}` : "/app/resources")}
+              onClick={() =>
+                navigate(createdResourceId ? `/app/resources/${createdResourceId}` : "/app/resources")
+              }
             >
               Ver recurso
             </Button>
@@ -197,7 +207,9 @@ export function UploadResource() {
           <li key={s} className="flex items-center gap-2" aria-current={step === s ? "step" : undefined}>
             <span
               className={`w-8 h-8 rounded-full flex items-center justify-center font-medium ${
-                step >= s ? "bg-blue-600 text-white shadow-md shadow-blue-600/20" : "bg-blue-50 text-slate-500"
+                step >= s
+                  ? "bg-blue-600 text-white shadow-md shadow-blue-600/20"
+                  : "bg-blue-50 text-slate-500"
               }`}
             >
               {s}
@@ -212,7 +224,10 @@ export function UploadResource() {
 
       <div className="rounded-2xl border border-blue-100 bg-white/85 p-8 shadow-sm shadow-blue-900/5">
         {error && (
-          <div className="mb-6 rounded-xl border border-red-200 bg-red-50 p-3 text-sm text-red-700" role="alert">
+          <div
+            className="mb-6 rounded-xl border border-red-200 bg-red-50 p-3 text-sm text-red-700"
+            role="alert"
+          >
             {error}
           </div>
         )}
@@ -282,7 +297,8 @@ export function UploadResource() {
                   Seleccionar archivo
                 </button>
                 <p className="mt-4 text-xs text-slate-500">
-                  Maximo {MAX_FILE_SIZE_MB} MB. Documentos, hojas de calculo, presentaciones, codigo, comprimidos e imagenes.
+                  Maximo {MAX_FILE_SIZE_MB} MB. Documentos, hojas de calculo, presentaciones, codigo,
+                  comprimidos e imagenes.
                 </p>
               </div>
             ) : (
@@ -454,10 +470,20 @@ export function UploadResource() {
             )}
 
             <div className="flex gap-3 mt-8">
-              <Button variant="secondary" onClick={() => setStep(1)} className="flex-1 rounded-full border-blue-100 hover:bg-blue-50" disabled={submitting}>
+              <Button
+                variant="secondary"
+                onClick={() => setStep(1)}
+                className="flex-1 rounded-full border-blue-100 hover:bg-blue-50"
+                disabled={submitting}
+              >
                 Atras
               </Button>
-              <Button variant="primary" onClick={handleSubmit} className="flex-1 rounded-full bg-blue-600 shadow-lg shadow-blue-600/15 hover:bg-blue-700" disabled={!canSubmit}>
+              <Button
+                variant="primary"
+                onClick={handleSubmit}
+                className="flex-1 rounded-full bg-blue-600 shadow-lg shadow-blue-600/15 hover:bg-blue-700"
+                disabled={!canSubmit}
+              >
                 {submitting ? (mode === "file" ? "Subiendo..." : "Publicando...") : "Publicar recurso"}
               </Button>
             </div>

@@ -1,5 +1,5 @@
-import { Star } from 'lucide-react';
-import type { KeyboardEvent } from 'react';
+import { Star } from "lucide-react";
+import type { KeyboardEvent } from "react";
 
 interface RatingStarsProps {
   rating: number;
@@ -14,7 +14,7 @@ export function RatingStars({
   maxRating = 5,
   size = 16,
   interactive = false,
-  onRate
+  onRate,
 }: RatingStarsProps) {
   if (interactive) {
     const handleKeyDown = (event: KeyboardEvent<HTMLButtonElement>, value: number) => {
@@ -58,7 +58,7 @@ export function RatingStars({
               <Star
                 size={size}
                 aria-hidden="true"
-                className={value <= rating ? 'fill-yellow-400 text-yellow-400' : 'fill-none text-gray-300'}
+                className={value <= rating ? "fill-yellow-400 text-yellow-400" : "fill-none text-gray-300"}
               />
             </button>
           );
@@ -68,7 +68,11 @@ export function RatingStars({
   }
 
   return (
-    <div className="flex items-center gap-0.5" role="img" aria-label={`${rating.toFixed(1)} de ${maxRating} estrellas`}>
+    <div
+      className="flex items-center gap-0.5"
+      role="img"
+      aria-label={`${rating.toFixed(1)} de ${maxRating} estrellas`}
+    >
       {Array.from({ length: maxRating }, (_, i) => {
         const filled = i < Math.floor(rating);
         const partial = i < rating && i >= Math.floor(rating);
@@ -80,10 +84,10 @@ export function RatingStars({
             aria-hidden="true"
             className={`${
               filled
-                ? 'fill-yellow-400 text-yellow-400'
+                ? "fill-yellow-400 text-yellow-400"
                 : partial
-                ? 'fill-yellow-200 text-yellow-400'
-                : 'fill-none text-gray-300'
+                  ? "fill-yellow-200 text-yellow-400"
+                  : "fill-none text-gray-300"
             }`}
           />
         );

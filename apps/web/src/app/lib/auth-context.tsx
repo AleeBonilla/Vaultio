@@ -22,11 +22,21 @@ interface AuthContextValue {
   clearError: () => void;
   signInWithGoogle: () => Promise<void>;
   signInWithEmail: (email: string, password: string) => Promise<void>;
-  signUpWithEmail: (input: { email: string; password: string; username?: string; firstName: string; lastName: string }) => Promise<void>;
+  signUpWithEmail: (input: {
+    email: string;
+    password: string;
+    username?: string;
+    firstName: string;
+    lastName: string;
+  }) => Promise<void>;
   sendPasswordReset: (email: string) => Promise<void>;
   signOut: () => Promise<void>;
   refreshProfile: () => Promise<void>;
-  updateProfile: (input: Partial<Pick<VaultioUser, "username" | "firstName" | "lastName" | "bio" | "photoUrl">> & { careerIds?: number[] }) => Promise<VaultioUser>;
+  updateProfile: (
+    input: Partial<Pick<VaultioUser, "username" | "firstName" | "lastName" | "bio" | "photoUrl">> & {
+      careerIds?: number[];
+    },
+  ) => Promise<VaultioUser>;
 }
 
 const AuthContext = createContext<AuthContextValue | undefined>(undefined);
@@ -194,7 +204,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const updateProfile = useCallback(
-    async (input: Partial<Pick<VaultioUser, "username" | "firstName" | "lastName" | "bio" | "photoUrl">> & { careerIds?: number[] }) => {
+    async (
+      input: Partial<Pick<VaultioUser, "username" | "firstName" | "lastName" | "bio" | "photoUrl">> & {
+        careerIds?: number[];
+      },
+    ) => {
       const updated = await usersApi.updateMe(input);
       setProfile(updated);
       return updated;

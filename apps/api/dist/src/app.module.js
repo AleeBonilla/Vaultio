@@ -8,10 +8,13 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.AppModule = void 0;
 const common_1 = require("@nestjs/common");
+const core_1 = require("@nestjs/core");
+const throttler_1 = require("@nestjs/throttler");
 const auth_controller_1 = require("./auth/auth.controller");
 const auth_service_1 = require("./auth/auth.service");
 const catalog_controller_1 = require("./catalog/catalog.controller");
 const catalog_service_1 = require("./catalog/catalog.service");
+const config_1 = require("./config");
 const firebase_admin_service_1 = require("./firebase/firebase-admin.service");
 const health_controller_1 = require("./health/health.controller");
 const prisma_service_1 = require("./prisma/prisma.service");
@@ -28,6 +31,14 @@ let AppModule = class AppModule {
 exports.AppModule = AppModule;
 exports.AppModule = AppModule = __decorate([
     (0, common_1.Module)({
+        imports: [
+            throttler_1.ThrottlerModule.forRoot([
+                {
+                    ttl: config_1.config.throttle.ttlMs,
+                    limit: config_1.config.throttle.limit,
+                },
+            ]),
+        ],
         controllers: [
             health_controller_1.HealthController,
             auth_controller_1.AuthController,
@@ -39,6 +50,10 @@ exports.AppModule = AppModule = __decorate([
             stats_controller_1.StatsController,
         ],
         providers: [
+            {
+                provide: core_1.APP_GUARD,
+                useClass: throttler_1.ThrottlerGuard,
+            },
             prisma_service_1.PrismaService,
             seed_service_1.SeedService,
             firebase_admin_service_1.FirebaseAdminService,

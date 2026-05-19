@@ -137,7 +137,9 @@ function SearchSelect({
                 className="w-full rounded-xl px-3 py-2 text-left text-sm transition-colors hover:bg-blue-50"
               >
                 <span className="block font-medium text-slate-900">{option.label}</span>
-                {option.description && <span className="block text-xs text-slate-500">{option.description}</span>}
+                {option.description && (
+                  <span className="block text-xs text-slate-500">{option.description}</span>
+                )}
               </button>
             ))
           )}
@@ -200,7 +202,12 @@ export function FilterPanel({
       <div className="mb-5 flex items-center justify-between">
         <h3 className="font-semibold text-slate-900">Filtros</h3>
         {onClose && (
-          <button type="button" onClick={onClose} aria-label="Cerrar filtros" className="rounded p-1 hover:bg-blue-50">
+          <button
+            type="button"
+            onClick={onClose}
+            aria-label="Cerrar filtros"
+            className="rounded p-1 hover:bg-blue-50"
+          >
             <X className="w-4 h-4 text-slate-600" />
           </button>
         )}
@@ -259,7 +266,9 @@ export function FilterPanel({
               <label
                 key={option.value}
                 className={`cursor-pointer rounded-xl px-3 py-2 text-center text-sm transition-colors ${
-                  values.kind === option.value ? "bg-blue-50 text-blue-900" : "bg-white text-slate-600 hover:bg-blue-50/50"
+                  values.kind === option.value
+                    ? "bg-blue-50 text-blue-900"
+                    : "bg-white text-slate-600 hover:bg-blue-50/50"
                 } focus-within:ring-2 focus-within:ring-blue-500 focus-within:ring-offset-2`}
               >
                 <input
@@ -295,7 +304,10 @@ export function FilterPanel({
                 {option.value === 0 ? (
                   <span className="text-sm text-slate-600">{option.label}</span>
                 ) : (
-                  <span className="inline-flex items-center gap-0.5 text-sm text-slate-600" aria-label={option.label}>
+                  <span
+                    className="inline-flex items-center gap-0.5 text-sm text-slate-600"
+                    aria-label={option.label}
+                  >
                     {Array.from({ length: option.value }, (_, index) => (
                       <Star key={index} className="h-3.5 w-3.5 fill-blue-500 text-blue-500" />
                     ))}

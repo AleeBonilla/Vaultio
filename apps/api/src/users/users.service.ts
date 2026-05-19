@@ -73,8 +73,8 @@ export class UsersService {
       const requested = Array.isArray(input.careerIds)
         ? input.careerIds.map((id: unknown) => Number(id))
         : input.careerId !== undefined && input.careerId !== null
-        ? [Number(input.careerId)]
-        : [];
+          ? [Number(input.careerId)]
+          : [];
       const validIds = requested.filter((id: number) => Number.isFinite(id));
 
       const careers = validIds.length
@@ -261,10 +261,7 @@ export class UsersService {
     });
     if (!user) badRequest("Usuario no encontrado");
 
-    const [uploads, stats] = await Promise.all([
-      this.publicUploads(id),
-      this.publicStatsForUser(id),
-    ]);
+    const [uploads, stats] = await Promise.all([this.publicUploads(id), this.publicStatsForUser(id)]);
 
     return {
       user: publicUser(user),
@@ -412,8 +409,12 @@ export class UsersService {
           FOREIGN KEY (course_id) REFERENCES courses(id) ON DELETE CASCADE
       )
     `);
-    await this.prisma.$executeRawUnsafe("CREATE INDEX IF NOT EXISTS idx_user_courses_user ON user_courses(user_id)");
-    await this.prisma.$executeRawUnsafe("CREATE INDEX IF NOT EXISTS idx_user_courses_course ON user_courses(course_id)");
+    await this.prisma.$executeRawUnsafe(
+      "CREATE INDEX IF NOT EXISTS idx_user_courses_user ON user_courses(user_id)",
+    );
+    await this.prisma.$executeRawUnsafe(
+      "CREATE INDEX IF NOT EXISTS idx_user_courses_course ON user_courses(course_id)",
+    );
   }
 
   private normalizeUsername(value: string) {

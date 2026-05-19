@@ -256,10 +256,7 @@ let UsersService = class UsersService {
         });
         if (!user)
             (0, errors_1.badRequest)("Usuario no encontrado");
-        const [uploads, stats] = await Promise.all([
-            this.publicUploads(id),
-            this.publicStatsForUser(id),
-        ]);
+        const [uploads, stats] = await Promise.all([this.publicUploads(id), this.publicStatsForUser(id)]);
         return {
             user: (0, serializers_1.publicUser)(user),
             stats,

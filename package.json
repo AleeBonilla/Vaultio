@@ -2,8 +2,10 @@
   "name": "vaultio",
   "private": true,
   "version": "0.1.0",
+  "type": "module",
   "workspaces": [
-    "apps/*"
+    "apps/*",
+    "packages/*"
   ],
   "scripts": {
     "dev:api": "npm run dev --workspace @vaultio/api",
@@ -15,6 +17,36 @@
     "typecheck:web": "npm run typecheck --workspace @vaultio/web",
     "test": "npm run test:api",
     "build": "npm run build:api && npm run build:web",
-    "prisma:generate": "npm run prisma:generate --workspace @vaultio/api"
+    "lint": "eslint .",
+    "lint:fix": "eslint . --fix",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
+    "prisma:generate": "npm run prisma:generate --workspace @vaultio/api",
+    "prisma:migrate:dev": "npm run prisma:migrate:dev --workspace @vaultio/api",
+    "prisma:migrate:deploy": "npm run prisma:migrate:deploy --workspace @vaultio/api",
+    "prisma:migrate:reset": "npm run prisma:migrate:reset --workspace @vaultio/api",
+    "prisma:studio": "npm run prisma:studio --workspace @vaultio/api",
+    "prepare": "husky"
+  },
+  "devDependencies": {
+    "@eslint/js": "^9.18.0",
+    "eslint": "^9.18.0",
+    "eslint-config-prettier": "^9.1.0",
+    "eslint-plugin-react-hooks": "^5.1.0",
+    "eslint-plugin-react-refresh": "^0.4.16",
+    "globals": "^15.14.0",
+    "husky": "^9.1.7",
+    "lint-staged": "^15.4.0",
+    "prettier": "^3.4.2",
+    "typescript-eslint": "^8.20.0"
+  },
+  "lint-staged": {
+    "*.{ts,tsx,js,jsx}": [
+      "eslint --fix",
+      "prettier --write"
+    ],
+    "*.{json,md,yml,yaml,css}": [
+      "prettier --write"
+    ]
   }
 }

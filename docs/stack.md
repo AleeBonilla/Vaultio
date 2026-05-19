@@ -143,30 +143,80 @@ Raíz `package.json` con `"workspaces": ["apps/*"]`. Permite:
 
 ## Tabla resumen de paquetes principales
 
-| Paquete                              | Versión   | Dónde se usa                                                     |
-| ------------------------------------ | --------- | ---------------------------------------------------------------- |
-| `@nestjs/common` `core` `platform-express` | 11.x      | API base                                                          |
-| `@prisma/client` `@prisma/adapter-pg`     | 7.x       | DB tipada                                                         |
-| `firebase-admin`                     | 13.x      | Verificación de ID tokens                                         |
-| `@aws-sdk/client-s3` `@aws-sdk/s3-request-presigner` | 3.x | Cliente MinIO/S3                                                  |
-| `pg`                                 | 8.x       | Driver Postgres usado por el adapter                              |
-| `tsx`                                | 4.x       | Ejecutor de TS para dev y tests                                   |
-| `react` `react-dom`                  | 18.3.x    | Frontend                                                          |
-| `react-router`                       | 7.x       | Routing                                                           |
-| `firebase` (web)                     | 12.x      | Firebase Web SDK                                                  |
-| `lucide-react`                       | 0.487.0   | Iconos                                                            |
-| `sonner`                             | 2.x       | Toasts                                                            |
-| `tailwindcss` `@tailwindcss/vite`    | 4.x       | Estilos                                                           |
-| `vite` `@vitejs/plugin-react`        | 6.x / 4.x | Dev/build frontend                                                |
+| Paquete                                              | Versión   | Dónde se usa                         |
+| ---------------------------------------------------- | --------- | ------------------------------------ |
+| `@nestjs/common` `core` `platform-express`           | 11.x      | API base                             |
+| `@prisma/client` `@prisma/adapter-pg`                | 7.x       | DB tipada                            |
+| `firebase-admin`                                     | 13.x      | Verificación de ID tokens            |
+| `@aws-sdk/client-s3` `@aws-sdk/s3-request-presigner` | 3.x       | Cliente MinIO/S3                     |
+| `pg`                                                 | 8.x       | Driver Postgres usado por el adapter |
+| `tsx`                                                | 4.x       | Ejecutor de TS para dev y tests      |
+| `react` `react-dom`                                  | 18.3.x    | Frontend                             |
+| `react-router`                                       | 7.x       | Routing                              |
+| `firebase` (web)                                     | 12.x      | Firebase Web SDK                     |
+| `lucide-react`                                       | 0.487.0   | Iconos                               |
+| `sonner`                                             | 2.x       | Toasts                               |
+| `tailwindcss` `@tailwindcss/vite`                    | 4.x       | Estilos                              |
+| `vite` `@vitejs/plugin-react`                        | 6.x / 4.x | Dev/build frontend                   |
 
 ---
+
+## Tooling de calidad y seguridad
+
+### ESLint 9 (flat config)
+
+- **Config**: `eslint.config.js` en la raíz.
+- **Reglas**: `@typescript-eslint/recommended`, `eslint-plugin-react-hooks`, `eslint-plugin-react-refresh`, `eslint-config-prettier` (apaga reglas que pelean con Prettier).
+- **Script**: `npm run lint` (y `npm run lint:fix`).
+
+### Prettier 3 + EditorConfig
+
+- **Config**: `.prettierrc.json` (110 cols, comillas dobles, trailing commas en todo).
+- **Ignore**: `.prettierignore` excluye `node_modules`, `dist`, migraciones Prisma y `package-lock.json`.
+- **Editor**: `.editorconfig` para coherencia entre IDEs.
+
+### Husky + lint-staged
+
+- **Pre-commit**: `npx lint-staged` en `.husky/pre-commit` corre ESLint + Prettier solo sobre los archivos staged.
+- Se instala automáticamente con `npm install` (script `prepare`).
+
+### Helmet
+
+- Aplica headers de seguridad (HSTS, X-Frame-Options, etc.).
+- `crossOriginResourcePolicy: cross-origin` permite que el frontend en otro origen consuma archivos firmados de MinIO.
+
+### `@nestjs/throttler`
+
+- Rate limit global: por defecto **120 requests/minuto/IP**.
+- Configurable vía `VAULTIO_THROTTLE_TTL_MS` y `VAULTIO_THROTTLE_LIMIT`.
+- Registrado como `APP_GUARD` en `app.module.ts`.
+
+### CORS configurable
+
+- `VAULTIO_CORS_ORIGINS` (csv) → defaults `http://localhost:5173,http://localhost:4173`.
+- `*` para aceptar cualquier origen (solo recomendado en demo).
+- Rechaza con `Error` orígenes fuera de la lista.
+
+## Tooling de DevOps
+
+### Docker multi-stage
+
+- **`apps/api/Dockerfile`**: 3 etapas (deps, build, runtime). Imagen final `node:20-alpine` con solo runtime deps + dist + Prisma client.
+- **`apps/web/Dockerfile`**: 2 etapas (build + nginx). Imagen final `nginx:1.27-alpine` sirviendo el bundle.
+- **`apps/web/nginx.conf`**: SPA fallback a `index.html`, cache largo en `/assets/*` con hash.
+- `.dockerignore` por workspace evita meter `node_modules`, `dist`, `.env*`, `.git`, etc.
+
+### GitHub Actions
+
+- `.github/workflows/ci.yml` corre en cada push y PR a `main`.
+- Levanta servicios Postgres y MinIO como `services` del job.
+- Pasos: `npm ci` → `prisma:generate` → `prisma:migrate:deploy` → `lint` → `format:check` → `typecheck:web` → `build:api` → `build:web` → `test:api`.
 
 ## Lo que **NO** está y por qué
 
 - **Express directo**: NestJS ya incluye `@nestjs/platform-express`. No hay rutas Express crudas.
-- **ESLint/Prettier**: no instalados. Recomendado agregarlos (ver [MEJORAS.md](../MEJORAS.md)).
-- **Logger estructurado** (pino/winston): se usa `console` por defecto de Nest. Pendiente.
-- **Helmet/rate limiting**: pendiente. CORS está abierto a `*` (solo OK en demo local).
+- **Logger estructurado** (pino/winston): se usa `console` por defecto de Nest. Pendiente (ver MEJORAS #9).
+- **DTOs validados** (Zod o class-validator): pendiente (MEJORAS #4). Hoy los controllers reciben `body: any`.
 - **shadcn/ui u otra librería de componentes**: se descartó tras la limpieza inicial. Todos los componentes propios viven en `apps/web/src/app/components/ui/`.
 - **Redux/Zustand/TanStack Query**: no se usan. El estado vive en componentes + AuthContext. Para listas grandes con cache, ver MEJORAS.
 - **Next.js**: el plan técnico original lo mencionaba, pero se eligió Vite + react-router para mantener el frontend liviano y sin SSR.

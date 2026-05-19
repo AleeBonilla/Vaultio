@@ -1,15 +1,18 @@
-import { BookOpen, Search, Star, Users, TrendingUp, Shield } from 'lucide-react';
-import { useEffect, useState } from 'react';
-import { Link } from 'react-router';
-import { Button } from '../../components/ui/Button';
-import { VaultioLogo } from '../../components/ui/VaultioLogo';
-import { publicApi, type PublicStats } from '../../lib/api';
+import { BookOpen, Search, Star, Users, TrendingUp, Shield } from "lucide-react";
+import { useEffect, useState } from "react";
+import { Link } from "react-router";
+import { Button } from "../../components/ui/Button";
+import { VaultioLogo } from "../../components/ui/VaultioLogo";
+import { publicApi, type PublicStats } from "../../lib/api";
 
 export function LandingPage() {
   const [stats, setStats] = useState<PublicStats | null>(null);
 
   useEffect(() => {
-    publicApi.stats().then(setStats).catch(() => setStats(null));
+    publicApi
+      .stats()
+      .then(setStats)
+      .catch(() => setStats(null));
   }, []);
 
   return (
@@ -23,10 +26,18 @@ export function LandingPage() {
           <VaultioLogo />
           <div className="flex items-center gap-4">
             <Link to="/login">
-              <Button variant="ghost" className="rounded-full text-slate-600 hover:text-blue-700 hover:bg-blue-50 transition-colors">Iniciar Sesión</Button>
+              <Button
+                variant="ghost"
+                className="rounded-full text-slate-600 hover:text-blue-700 hover:bg-blue-50 transition-colors"
+              >
+                Iniciar Sesión
+              </Button>
             </Link>
             <Link to="/register">
-              <Button variant="primary" className="rounded-full bg-blue-600 text-white hover:bg-blue-700 font-semibold shadow-lg shadow-blue-600/15 transition-colors">
+              <Button
+                variant="primary"
+                className="rounded-full bg-blue-600 text-white hover:bg-blue-700 font-semibold shadow-lg shadow-blue-600/15 transition-colors"
+              >
                 Registrarse
               </Button>
             </Link>
@@ -42,7 +53,8 @@ export function LandingPage() {
             </span>
           </h1>
           <p className="text-lg md:text-2xl text-slate-600 leading-relaxed max-w-3xl mx-auto font-light">
-            Descubre, comparte y organiza materiales de estudio. Accede a soluciones, apuntes, ejercicios y código en una plataforma diseñada por y para estudiantes.
+            Descubre, comparte y organiza materiales de estudio. Accede a soluciones, apuntes, ejercicios y
+            código en una plataforma diseñada por y para estudiantes.
           </p>
         </div>
 
@@ -66,17 +78,24 @@ export function LandingPage() {
           <div className="text-center mb-14">
             <div className="mb-4 flex justify-center">
               <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-gradient-to-br from-blue-600 to-cyan-500 shadow-lg shadow-blue-600/20">
-                <svg viewBox="0 0 24 24" className="w-6 h-6 text-white" fill="currentColor" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                <svg
+                  viewBox="0 0 24 24"
+                  className="w-6 h-6 text-white"
+                  fill="currentColor"
+                  xmlns="http://www.w3.org/2000/svg"
+                  aria-hidden="true"
+                >
                   <path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z" />
                 </svg>
               </div>
             </div>
             <h2 className="text-4xl font-bold text-slate-900 mb-4 tracking-tight">¿Por qué Vaultio?</h2>
             <p className="text-slate-600 text-lg max-w-3xl mx-auto leading-relaxed">
-              Conocé perspectivas de estudio de cualquier estudiante, de cualquier carrera dentro de tu comunidad estudiantil.
+              Conocé perspectivas de estudio de cualquier estudiante, de cualquier carrera dentro de tu
+              comunidad estudiantil.
             </p>
           </div>
-          
+
           <div className="grid md:grid-cols-3 gap-6">
             <div className="group bg-white border border-blue-100 rounded-2xl p-8 transition-colors duration-300 hover:border-blue-200 hover:bg-blue-50/40 relative overflow-hidden">
               <div className="absolute top-0 right-0 p-28 bg-blue-100/40 rounded-full blur-3xl -mr-16 -mt-16 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
@@ -85,7 +104,8 @@ export function LandingPage() {
               </div>
               <h3 className="text-xl font-bold text-slate-900 mb-3">Búsqueda Inteligente</h3>
               <p className="text-slate-600 leading-relaxed">
-                Encuentra exactamente lo que necesitas con filtros avanzados por carrera, curso, profesor, tipo de recurso y dificultad.
+                Encuentra exactamente lo que necesitas con filtros avanzados por carrera, curso, profesor,
+                tipo de recurso y dificultad.
               </p>
             </div>
 
@@ -96,18 +116,21 @@ export function LandingPage() {
               </div>
               <h3 className="text-xl font-bold text-slate-900 mb-3">Calidad Verificada</h3>
               <p className="text-slate-600 leading-relaxed">
-                Ve lo que funciona. Lee reseñas y calificaciones de estudiantes que han usado los materiales para asegurar su utilidad.
+                Ve lo que funciona. Lee reseñas y calificaciones de estudiantes que han usado los materiales
+                para asegurar su utilidad.
               </p>
             </div>
 
             <div className="group bg-white border border-blue-100 rounded-2xl p-8 transition-colors duration-300 hover:border-indigo-200 hover:bg-indigo-50/40 relative overflow-hidden">
-               <div className="absolute top-0 right-0 p-28 bg-indigo-100/40 rounded-full blur-3xl -mr-16 -mt-16 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+              <div className="absolute top-0 right-0 p-28 bg-indigo-100/40 rounded-full blur-3xl -mr-16 -mt-16 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
               <div className="w-14 h-14 bg-indigo-100 border border-indigo-200 rounded-xl flex items-center justify-center mb-6 text-indigo-600">
                 <BookOpen className="w-7 h-7" />
               </div>
               <h3 className="text-xl font-bold text-slate-900 mb-3">Organizado por Curso</h3>
               <p className="text-slate-600 leading-relaxed">
-                Navega por recursos organizados por carrera, curso y categoría. Olvídate de los desordenados repositorios en Drive, los grupos de WhatsApp, los servidores de Discord y otras herramientas dispersas.
+                Navega por recursos organizados por carrera, curso y categoría. Olvídate de los desordenados
+                repositorios en Drive, los grupos de WhatsApp, los servidores de Discord y otras herramientas
+                dispersas.
               </p>
             </div>
           </div>
@@ -122,7 +145,9 @@ export function LandingPage() {
                 <Users className="w-8 h-8 text-blue-600" />
               </div>
             </div>
-            <div className="text-5xl font-black text-transparent bg-clip-text bg-gradient-to-r from-blue-700 to-cyan-500 mb-2 tracking-tight">{stats?.users ?? "—"}</div>
+            <div className="text-5xl font-black text-transparent bg-clip-text bg-gradient-to-r from-blue-700 to-cyan-500 mb-2 tracking-tight">
+              {stats?.users ?? "—"}
+            </div>
             <div className="text-slate-500 font-medium">Estudiantes registrados</div>
           </div>
           <div className="rounded-2xl border border-blue-100 bg-white/80 p-8 shadow-sm shadow-blue-900/5">
@@ -131,7 +156,9 @@ export function LandingPage() {
                 <TrendingUp className="w-8 h-8 text-cyan-600" />
               </div>
             </div>
-            <div className="text-5xl font-black text-transparent bg-clip-text bg-gradient-to-r from-cyan-600 to-blue-500 mb-2 tracking-tight">{stats?.resources ?? "—"}</div>
+            <div className="text-5xl font-black text-transparent bg-clip-text bg-gradient-to-r from-cyan-600 to-blue-500 mb-2 tracking-tight">
+              {stats?.resources ?? "—"}
+            </div>
             <div className="text-slate-500 font-medium">Recursos compartidos</div>
           </div>
           <div className="rounded-2xl border border-blue-100 bg-white/80 p-8 shadow-sm shadow-blue-900/5">
@@ -140,7 +167,9 @@ export function LandingPage() {
                 <Shield className="w-8 h-8 text-indigo-600" />
               </div>
             </div>
-            <div className="text-5xl font-black text-transparent bg-clip-text bg-gradient-to-r from-indigo-600 to-blue-600 mb-2 tracking-tight">{stats?.courses ?? "—"}</div>
+            <div className="text-5xl font-black text-transparent bg-clip-text bg-gradient-to-r from-indigo-600 to-blue-600 mb-2 tracking-tight">
+              {stats?.courses ?? "—"}
+            </div>
             <div className="text-slate-500 font-medium">Cursos cubiertos</div>
           </div>
         </div>

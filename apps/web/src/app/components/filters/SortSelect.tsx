@@ -7,13 +7,20 @@ interface SortSelectProps<T extends string> {
   label?: string;
 }
 
-export function SortSelect<T extends string>({ value, onChange, options, label = "Ordenar" }: SortSelectProps<T>) {
+export function SortSelect<T extends string>({
+  value,
+  onChange,
+  options,
+  label = "Ordenar",
+}: SortSelectProps<T>) {
   return (
     <label className="inline-flex items-center gap-2 rounded-full border border-blue-100 bg-white/90 px-3 py-2 shadow-sm shadow-blue-900/5 transition-colors focus-within:border-blue-300 focus-within:ring-2 focus-within:ring-blue-500/20">
       <span className="flex h-8 w-8 items-center justify-center rounded-full bg-blue-50 text-blue-600">
         <ArrowDownUp className="h-4 w-4" />
       </span>
-      <span className="hidden text-xs font-semibold uppercase tracking-[0.16em] text-slate-400 sm:inline">{label}</span>
+      <span className="hidden text-xs font-semibold uppercase tracking-[0.16em] text-slate-400 sm:inline">
+        {label}
+      </span>
       <select
         aria-label="Ordenar resultados"
         value={value}

@@ -56,8 +56,12 @@ function authHeaders(token) {
             await prisma.resources.deleteMany({ where: { id: { in: createdResourceIds } } });
         }
         // Limpia ratings/saved creados por tests
-        await prisma.ratings.deleteMany({ where: { resource_id: { in: ["33333333-3333-4333-8333-333333333333"] } } });
-        await prisma.saved_resources.deleteMany({ where: { resource_id: { in: ["33333333-3333-4333-8333-333333333333"] } } });
+        await prisma.ratings.deleteMany({
+            where: { resource_id: { in: ["33333333-3333-4333-8333-333333333333"] } },
+        });
+        await prisma.saved_resources.deleteMany({
+            where: { resource_id: { in: ["33333333-3333-4333-8333-333333333333"] } },
+        });
         await app.close();
     });
     (0, node_test_1.it)("responde health check", async () => {
@@ -171,7 +175,10 @@ function authHeaders(token) {
         strict_1.default.equal(save.body.saved, true);
         const list = await request(baseUrl, "/users/me/saved", { headers });
         strict_1.default.ok(list.body.items.some((item) => item.id === seededResourceId));
-        const unsave = await request(baseUrl, `/resources/${seededResourceId}/save`, { method: "DELETE", headers });
+        const unsave = await request(baseUrl, `/resources/${seededResourceId}/save`, {
+            method: "DELETE",
+            headers,
+        });
         strict_1.default.equal(unsave.body.saved, false);
     });
     (0, node_test_1.it)("permite calificar y reemplaza rating previo del mismo usuario", async () => {

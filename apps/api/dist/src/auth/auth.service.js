@@ -33,7 +33,9 @@ let AuthService = class AuthService {
         this.firebase = firebase;
     }
     async register(input) {
-        const email = String(input.email || "").trim().toLowerCase();
+        const email = String(input.email || "")
+            .trim()
+            .toLowerCase();
         const password = String(input.password || "");
         const firstName = String(input.firstName || "").trim();
         const lastName = String(input.lastName || "").trim();
@@ -50,7 +52,10 @@ let AuthService = class AuthService {
             (0, errors_1.badRequest)("Ya existe un usuario con ese correo");
         const username = requestedUsername
             ? await this.ensureAvailableUsername(requestedUsername)
-            : await this.uniqueUsername(email.split("@")[0].replace(/[^a-z0-9_]/gi, "").slice(0, 24) || "usuario");
+            : await this.uniqueUsername(email
+                .split("@")[0]
+                .replace(/[^a-z0-9_]/gi, "")
+                .slice(0, 24) || "usuario");
         const user = await this.prisma.$transaction(async (tx) => {
             const createdUser = await tx.users.create({
                 data: {
@@ -92,7 +97,9 @@ let AuthService = class AuthService {
         return { user: safeUser, token: (0, auth_util_1.createToken)({ sub: user.id, email }) };
     }
     async login(input) {
-        const email = String(input.email || "").trim().toLowerCase();
+        const email = String(input.email || "")
+            .trim()
+            .toLowerCase();
         const password = String(input.password || "");
         if (!email || !password)
             (0, errors_1.unauthorized)("Credenciales invalidas");
@@ -130,7 +137,9 @@ let AuthService = class AuthService {
                 return demoUser;
         }
         const decodedToken = await this.firebase.verifyIdToken(bearerToken);
-        const email = String(decodedToken.email || "").trim().toLowerCase();
+        const email = String(decodedToken.email || "")
+            .trim()
+            .toLowerCase();
         if (!email)
             (0, errors_1.unauthorized)("El token de Firebase no contiene correo");
         if (config_1.config.auth.allowedEmailDomain && !email.endsWith(`@${config_1.config.auth.allowedEmailDomain}`)) {
@@ -201,7 +210,10 @@ let AuthService = class AuthService {
                 },
                 data: { email: input.email, last_login: new Date(), is_active: true },
             });
-            return this.prisma.users.findUniqueOrThrow({ where: { id: existingIdentity.user_id }, include: userInclude });
+            return this.prisma.users.findUniqueOrThrow({
+                where: { id: existingIdentity.user_id },
+                include: userInclude,
+            });
         }
         const existingEmailIdentity = await this.prisma.identities.findFirst({
             where: { email: input.email, is_active: true },
@@ -215,7 +227,12 @@ let AuthService = class AuthService {
                         provider_uid: input.firebaseUid,
                     },
                 },
-                update: { email: input.email, user_id: existingEmailIdentity.user_id, last_login: new Date(), is_active: true },
+                update: {
+                    email: input.email,
+                    user_id: existingEmailIdentity.user_id,
+                    last_login: new Date(),
+                    is_active: true,
+                },
                 create: {
                     provider_name: "firebase",
                     provider_uid: input.firebaseUid,
@@ -223,9 +240,15 @@ let AuthService = class AuthService {
                     user_id: existingEmailIdentity.user_id,
                 },
             });
-            return this.prisma.users.findUniqueOrThrow({ where: { id: existingEmailIdentity.user_id }, include: userInclude });
+            return this.prisma.users.findUniqueOrThrow({
+                where: { id: existingEmailIdentity.user_id },
+                include: userInclude,
+            });
         }
-        const username = await this.uniqueUsername(input.email.split("@")[0].replace(/[^a-z0-9_]/gi, "").slice(0, 24) || "usuario");
+        const username = await this.uniqueUsername(input.email
+            .split("@")[0]
+            .replace(/[^a-z0-9_]/gi, "")
+            .slice(0, 24) || "usuario");
         return this.prisma.$transaction(async (tx) => {
             const user = await tx.users.create({
                 data: {
@@ -261,10 +284,15 @@ let AuthService = class AuthService {
         const name = String(decodedToken.name || "").trim();
         if (name)
             return name.split(/\s+/)[0].slice(0, 30);
-        return String(decodedToken.email || "Usuario").split("@")[0].slice(0, 30);
+        return String(decodedToken.email || "Usuario")
+            .split("@")[0]
+            .slice(0, 30);
     }
     lastNameFromDecodedToken(decodedToken) {
-        const parts = String(decodedToken.name || "").trim().split(/\s+/).filter(Boolean);
+        const parts = String(decodedToken.name || "")
+            .trim()
+            .split(/\s+/)
+            .filter(Boolean);
         return (parts.length > 1 ? parts.slice(1).join(" ") : "Firebase").slice(0, 255);
     }
 };

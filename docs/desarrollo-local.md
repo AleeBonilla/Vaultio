@@ -11,6 +11,7 @@ npm install
 docker compose up -d
 cp apps/web/.env.example apps/web/.env.local      # y completar
 # colocar el service account JSON en la raíz
+npm run prisma:migrate:deploy
 npm run prisma:generate
 npm run dev:api
 npm run dev:web
@@ -29,12 +30,12 @@ URLs:
 
 ### 1. Dependencias del sistema
 
-| Herramienta             | Versión mínima | Verificar                |
-| ----------------------- | -------------- | ------------------------ |
-| Node.js                 | 20.x           | `node --version`         |
-| npm                     | 10.x           | `npm --version`          |
-| Docker                  | 24.x           | `docker --version`       |
-| Docker Compose v2       | 2.x            | `docker compose version` |
+| Herramienta       | Versión mínima | Verificar                |
+| ----------------- | -------------- | ------------------------ |
+| Node.js           | 20.x           | `node --version`         |
+| npm               | 10.x           | `npm --version`          |
+| Docker            | 24.x           | `docker --version`       |
+| Docker Compose v2 | 2.x            | `docker compose version` |
 
 ### 2. Instalar dependencias del repo
 
@@ -75,7 +76,7 @@ Copiar y completar:
 cp apps/web/.env.example apps/web/.env.local
 ```
 
-Los 4 valores VITE_FIREBASE_* salen de Firebase Console → Project Settings → General → "Tus apps" → Config del SDK.
+Los 4 valores VITE*FIREBASE*\* salen de Firebase Console → Project Settings → General → "Tus apps" → Config del SDK.
 
 #### Backend
 
@@ -97,13 +98,24 @@ Firebase Console → Authentication → Sign-in method:
 - **Google**: enable + email de soporte.
 - **Email/Password**: enable.
 
-### 5. Generar Prisma Client
+### 5. Aplicar migraciones de Prisma y generar Client
 
 ```bash
-npm run prisma:generate
+npm run prisma:migrate:deploy    # aplica migraciones a la DB
+npm run prisma:generate          # genera el client tipado
 ```
 
-Regenera tras cualquier cambio en `apps/api/prisma/schema.prisma`.
+Para crear una migración nueva (cuando cambias `schema.prisma`):
+
+```bash
+npm run prisma:migrate:dev -- --name agrega_nueva_tabla
+```
+
+Para resetear todo:
+
+```bash
+npm run prisma:migrate:reset     # ⚠️ borra y reaplica todas las migraciones
+```
 
 ### 6. Arrancar dev
 
@@ -152,9 +164,16 @@ Ver la tabla completa en el [README](../README.md#variables-de-entorno).
 ```bash
 docker compose down -v
 docker compose up -d
+npm run prisma:migrate:deploy
 ```
 
-Esto borra **ambos** volúmenes (Postgres y MinIO) y vuelve a ejecutar `database/*.sql` desde cero.
+Esto borra **ambos** volúmenes (Postgres y MinIO), arranca Postgres vacío y reaplica todas las migraciones. La data demo se siembra automáticamente al arrancar el API (`seed.service.ts`).
+
+Alternativa con un solo comando:
+
+```bash
+npm run prisma:migrate:reset
+```
 
 > Si solo querés borrar MinIO sin perder Postgres: `docker compose down && docker volume rm vaultio_vaultio-minio-data && docker compose up -d`.
 
@@ -180,11 +199,17 @@ DATABASE_URL=postgresql://... npm run test:api
 ## Verificaciones recomendadas antes de commitear
 
 ```bash
-npm run build:api       # tsc del API
+npm run lint            # ESLint
+npm run format:check    # Prettier (sin escribir)
 npm run typecheck:web   # typecheck del frontend
+npm run build:api       # tsc del API
 npm run build:web       # build completo de Vite
 npm run test:api        # suite integral
 ```
+
+> Husky corre `lint-staged` automáticamente en cada `git commit` (lint + format de los archivos staged). Si te incomoda, lo podés saltar con `git commit --no-verify`.
+
+> GitHub Actions corre exactamente los mismos pasos en cada push/PR a `main` (ver `.github/workflows/ci.yml`).
 
 ---
 

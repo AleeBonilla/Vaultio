@@ -102,14 +102,19 @@ export function EditResource() {
   if (error || !resource) {
     return (
       <div className="max-w-3xl mx-auto">
-        <div className="rounded-2xl border border-red-200 bg-red-50 p-4 text-red-700">{error || "Recurso no encontrado"}</div>
+        <div className="rounded-2xl border border-red-200 bg-red-50 p-4 text-red-700">
+          {error || "Recurso no encontrado"}
+        </div>
       </div>
     );
   }
 
   return (
     <div className="max-w-3xl mx-auto">
-      <Link to="/app/profile" className="mb-6 inline-flex items-center gap-2 text-blue-600 hover:text-blue-800">
+      <Link
+        to="/app/profile"
+        className="mb-6 inline-flex items-center gap-2 text-blue-600 hover:text-blue-800"
+      >
         <ArrowLeft className="h-4 w-4" />
         Volver al perfil
       </Link>
@@ -120,11 +125,14 @@ export function EditResource() {
           Editar recurso
         </h1>
         <p className="mb-8 text-slate-600">
-          Puedes editar la información del recurso. El archivo o link original solo puede eliminarse borrando el recurso.
+          Puedes editar la información del recurso. El archivo o link original solo puede eliminarse borrando
+          el recurso.
         </p>
 
         <form onSubmit={handleSubmit} className="space-y-5">
-          {error && <div className="rounded-xl border border-red-200 bg-red-50 p-3 text-sm text-red-700">{error}</div>}
+          {error && (
+            <div className="rounded-xl border border-red-200 bg-red-50 p-3 text-sm text-red-700">{error}</div>
+          )}
 
           <Input label="Titulo" value={title} onChange={(event) => setTitle(event.target.value)} required />
 
@@ -182,15 +190,29 @@ export function EditResource() {
             </SelectField>
           </div>
 
-          <Input label="Etiquetas" value={tags} onChange={(event) => setTags(event.target.value)} placeholder="final, algoritmos" />
+          <Input
+            label="Etiquetas"
+            value={tags}
+            onChange={(event) => setTags(event.target.value)}
+            placeholder="final, algoritmos"
+          />
 
           <div className="flex gap-3 border-t border-blue-100 pt-5">
             <Link to="/app/profile" className="flex-1">
-              <Button type="button" variant="secondary" className="w-full rounded-full border-blue-100 hover:bg-blue-50">
+              <Button
+                type="button"
+                variant="secondary"
+                className="w-full rounded-full border-blue-100 hover:bg-blue-50"
+              >
                 Cancelar
               </Button>
             </Link>
-            <Button type="submit" variant="primary" className="flex-1 rounded-full bg-blue-600 hover:bg-blue-700" disabled={submitting}>
+            <Button
+              type="submit"
+              variant="primary"
+              className="flex-1 rounded-full bg-blue-600 hover:bg-blue-700"
+              disabled={submitting}
+            >
               <Save className="h-4 w-4" />
               {submitting ? "Guardando..." : "Guardar cambios"}
             </Button>

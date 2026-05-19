@@ -6,7 +6,9 @@ import { ResourceCard } from "../../components/resources/ResourceCard";
 import { usersApi, type ResourceSummary } from "../../lib/api";
 
 function formatDate(value: string) {
-  return new Intl.DateTimeFormat("es-CR", { day: "2-digit", month: "short", year: "numeric" }).format(new Date(value));
+  return new Intl.DateTimeFormat("es-CR", { day: "2-digit", month: "short", year: "numeric" }).format(
+    new Date(value),
+  );
 }
 
 type SortMode = "recent" | "rating" | "downloads" | "alphabetical";
@@ -49,7 +51,9 @@ export function SavedResources() {
     <div className="max-w-7xl mx-auto">
       <div className="mb-10 flex flex-wrap items-center justify-between gap-3 rounded-3xl border border-blue-100 bg-white/80 p-8 shadow-sm shadow-blue-900/5">
         <div>
-          <p className="mb-3 text-xs font-semibold uppercase tracking-[0.22em] text-blue-600">Biblioteca personal</p>
+          <p className="mb-3 text-xs font-semibold uppercase tracking-[0.22em] text-blue-600">
+            Biblioteca personal
+          </p>
           <h1 className="mb-3 pb-1 text-4xl font-extrabold leading-tight tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-blue-700 via-blue-500 to-cyan-500">
             Recursos guardados
           </h1>
@@ -68,7 +72,9 @@ export function SavedResources() {
             <Bookmark className="w-7 h-7 text-blue-600" />
           </div>
           <h2 className="mb-2 text-lg font-semibold text-slate-900">Aun no tenes recursos guardados</h2>
-          <p className="mb-4 text-slate-600">Hace clic en el marcador de cualquier recurso para guardarlo aqui.</p>
+          <p className="mb-4 text-slate-600">
+            Hace clic en el marcador de cualquier recurso para guardarlo aqui.
+          </p>
           <Link to="/app/resources" className="text-blue-600 hover:underline">
             Explorar recursos
           </Link>

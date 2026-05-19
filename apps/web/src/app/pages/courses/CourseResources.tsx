@@ -27,7 +27,9 @@ const EMPTY_FILTERS: FilterValues = {
 };
 
 function formatDate(value: string) {
-  return new Intl.DateTimeFormat("es-CR", { day: "2-digit", month: "short", year: "numeric" }).format(new Date(value));
+  return new Intl.DateTimeFormat("es-CR", { day: "2-digit", month: "short", year: "numeric" }).format(
+    new Date(value),
+  );
 }
 
 export function CourseResources() {
@@ -103,7 +105,9 @@ export function CourseResources() {
   if (error || !course || !career) {
     return (
       <div className="max-w-7xl mx-auto">
-        <div className="rounded-2xl border border-red-200 bg-red-50 p-4 text-red-700">{error || "Curso no encontrado"}</div>
+        <div className="rounded-2xl border border-red-200 bg-red-50 p-4 text-red-700">
+          {error || "Curso no encontrado"}
+        </div>
       </div>
     );
   }
@@ -112,11 +116,17 @@ export function CourseResources() {
     <div className="max-w-7xl mx-auto">
       <div className="mb-10">
         <nav className="flex items-center gap-2 text-sm text-slate-600 mb-4 flex-wrap">
-          <Link to="/app" className="hover:text-blue-700">Inicio</Link>
+          <Link to="/app" className="hover:text-blue-700">
+            Inicio
+          </Link>
           <ChevronRight className="w-4 h-4" />
-          <Link to="/app/courses" className="hover:text-blue-700">Carreras</Link>
+          <Link to="/app/courses" className="hover:text-blue-700">
+            Carreras
+          </Link>
           <ChevronRight className="w-4 h-4" />
-          <Link to={`/app/courses/${careerId}`} className="hover:text-blue-700">{career.name}</Link>
+          <Link to={`/app/courses/${careerId}`} className="hover:text-blue-700">
+            {career.name}
+          </Link>
           <ChevronRight className="w-4 h-4" />
           <span className="font-medium text-slate-900">{course.name}</span>
         </nav>

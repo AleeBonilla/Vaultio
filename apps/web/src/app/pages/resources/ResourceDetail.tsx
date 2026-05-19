@@ -17,11 +17,18 @@ import { ResourceTypeIcon } from "../../components/resources/ResourceTypeIcon";
 import { Badge } from "../../components/ui/Badge";
 import { Button } from "../../components/ui/Button";
 import { RatingStars } from "../../components/ui/RatingStars";
-import { resourcesApi, storageApi, type ResourceComment, type ResourceDetail as ResourceDetailData } from "../../lib/api";
+import {
+  resourcesApi,
+  storageApi,
+  type ResourceComment,
+  type ResourceDetail as ResourceDetailData,
+} from "../../lib/api";
 import { useAuth } from "../../lib/auth-context";
 
 function formatDate(value: string) {
-  return new Intl.DateTimeFormat("es-CR", { day: "2-digit", month: "long", year: "numeric" }).format(new Date(value));
+  return new Intl.DateTimeFormat("es-CR", { day: "2-digit", month: "long", year: "numeric" }).format(
+    new Date(value),
+  );
 }
 
 function formatFileSize(value?: number) {
@@ -39,20 +46,27 @@ interface UiComment extends ResourceComment {
 const IMAGE_EXTENSIONS = new Set(["gif", "jpeg", "jpg", "png", "svg", "webp"]);
 
 function normalizedExtension(resource: ResourceDetailData) {
-  return (resource.fileExtension || resource.originalFilename.split(".").pop() || "").replace(/^\./, "").toLowerCase();
+  return (resource.fileExtension || resource.originalFilename.split(".").pop() || "")
+    .replace(/^\./, "")
+    .toLowerCase();
 }
 
 function ResourcePreview({ resource }: { resource: ResourceDetailData }) {
   const extension = normalizedExtension(resource);
   const isExternalResource = resource.storageProvider === "external" || extension === "link";
-  const previewUrl = !isExternalResource && resource.storageKey ? storageApi.publicObjectUrl(resource.storageKey) : "";
+  const previewUrl =
+    !isExternalResource && resource.storageKey ? storageApi.publicObjectUrl(resource.storageKey) : "";
   const isImage = IMAGE_EXTENSIONS.has(extension) || resource.mimeType.startsWith("image/");
   const isPdf = extension === "pdf" || resource.mimeType === "application/pdf";
 
   if (previewUrl && isImage) {
     return (
       <div className="mb-6 overflow-hidden rounded-2xl border border-blue-100 bg-slate-50 shadow-inner">
-        <img src={previewUrl} alt={`Vista previa de ${resource.title}`} className="max-h-[720px] w-full object-contain" />
+        <img
+          src={previewUrl}
+          alt={`Vista previa de ${resource.title}`}
+          className="max-h-[720px] w-full object-contain"
+        />
       </div>
     );
   }
@@ -60,7 +74,11 @@ function ResourcePreview({ resource }: { resource: ResourceDetailData }) {
   if (previewUrl && isPdf) {
     return (
       <div className="mb-6 overflow-hidden rounded-2xl border border-blue-100 bg-slate-50 shadow-inner">
-        <iframe title={`Vista previa de ${resource.title}`} src={previewUrl} className="h-[720px] w-full bg-white" />
+        <iframe
+          title={`Vista previa de ${resource.title}`}
+          src={previewUrl}
+          className="h-[720px] w-full bg-white"
+        />
       </div>
     );
   }
@@ -68,12 +86,20 @@ function ResourcePreview({ resource }: { resource: ResourceDetailData }) {
   return (
     <div className="mb-6 flex aspect-[4/3] items-center justify-center rounded-2xl border border-blue-100 bg-blue-50/60">
       <div className="text-center">
-        <ResourceTypeIcon type={resource.type} fileExtension={resource.fileExtension} className="mx-auto mb-3 !p-4" />
+        <ResourceTypeIcon
+          type={resource.type}
+          fileExtension={resource.fileExtension}
+          className="mx-auto mb-3 !p-4"
+        />
         <p className="text-slate-600">
-          {isExternalResource ? "Enlace externo" : `Archivo ${resource.fileExtension?.toUpperCase() || "digital"}`}
+          {isExternalResource
+            ? "Enlace externo"
+            : `Archivo ${resource.fileExtension?.toUpperCase() || "digital"}`}
         </p>
         <p className="text-sm text-slate-500">{resource.originalFilename}</p>
-        {!isExternalResource && <p className="mt-2 text-xs text-slate-500">Vista previa no disponible para este tipo de archivo.</p>}
+        {!isExternalResource && (
+          <p className="mt-2 text-xs text-slate-500">Vista previa no disponible para este tipo de archivo.</p>
+        )}
       </div>
     </div>
   );
@@ -121,7 +147,9 @@ export function ResourceDetail() {
     if (!resource) return [];
     return resource.comments.map((comment) => ({
       ...comment,
-      authorName: comment.author ? `${comment.author.firstName} ${comment.author.lastName}`.trim() : "Comentario eliminado",
+      authorName: comment.author
+        ? `${comment.author.firstName} ${comment.author.lastName}`.trim()
+        : "Comentario eliminado",
       dateLabel: formatDate(comment.createdAt),
     }));
   }, [resource]);
@@ -150,7 +178,9 @@ export function ResourceDetail() {
   if (error || !resource) {
     return (
       <div className="max-w-7xl mx-auto">
-        <div className="rounded-2xl border border-red-200 bg-red-50 p-4 text-red-700">{error || "Recurso no encontrado"}</div>
+        <div className="rounded-2xl border border-red-200 bg-red-50 p-4 text-red-700">
+          {error || "Recurso no encontrado"}
+        </div>
       </div>
     );
   }
@@ -298,9 +328,13 @@ export function ResourceDetail() {
   return (
     <div className="max-w-7xl mx-auto">
       <nav className="flex items-center gap-2 text-sm text-slate-600 mb-6 flex-wrap">
-        <Link to="/app" className="hover:text-blue-700">Inicio</Link>
+        <Link to="/app" className="hover:text-blue-700">
+          Inicio
+        </Link>
         <span>/</span>
-        <Link to="/app/resources" className="hover:text-blue-700">Recursos</Link>
+        <Link to="/app/resources" className="hover:text-blue-700">
+          Recursos
+        </Link>
         <span>/</span>
         <span className="line-clamp-1 text-slate-900">{resource.title}</span>
       </nav>
@@ -312,7 +346,9 @@ export function ResourceDetail() {
               <div className="min-w-0">
                 <div className="flex items-center gap-2 mb-3 flex-wrap">
                   <Badge variant="blue">{resource.type}</Badge>
-                  {resource.courseCode && <span className="text-sm text-slate-500">{resource.courseCode}</span>}
+                  {resource.courseCode && (
+                    <span className="text-sm text-slate-500">{resource.courseCode}</span>
+                  )}
                 </div>
                 <h1 className="mb-2 text-3xl font-bold text-slate-900">{resource.title}</h1>
                 <p className="mb-4 text-lg text-slate-600">{resource.course}</p>
@@ -347,9 +383,17 @@ export function ResourceDetail() {
                 disabled={downloading}
               >
                 {isExternalResource ? <ExternalLink className="w-4 h-4" /> : <Download className="w-4 h-4" />}
-                {downloading ? "Generando enlace..." : isExternalResource ? "Abrir link" : "Descargar recurso"}
+                {downloading
+                  ? "Generando enlace..."
+                  : isExternalResource
+                    ? "Abrir link"
+                    : "Descargar recurso"}
               </Button>
-              <Button variant="secondary" className="flex items-center gap-2 rounded-full border-blue-100 hover:bg-blue-50" onClick={handleShare}>
+              <Button
+                variant="secondary"
+                className="flex items-center gap-2 rounded-full border-blue-100 hover:bg-blue-50"
+                onClick={handleShare}
+              >
                 <Share2 className="w-4 h-4" />
                 Compartir
               </Button>
@@ -357,7 +401,9 @@ export function ResourceDetail() {
 
             <div className="border-t border-blue-100 pt-6">
               <h2 className="mb-3 text-lg font-semibold text-slate-900">Descripción</h2>
-              <p className="mb-4 whitespace-pre-line leading-relaxed text-slate-700">{resource.description}</p>
+              <p className="mb-4 whitespace-pre-line leading-relaxed text-slate-700">
+                {resource.description}
+              </p>
               {resource.tags.length > 0 && (
                 <div className="flex flex-wrap gap-2 mt-4">
                   {resource.tags.map((tag) => (
@@ -374,7 +420,9 @@ export function ResourceDetail() {
               <div className="flex items-center gap-3">
                 <RatingStars rating={userRating} size={24} interactive onRate={handleRate} />
                 <span className="text-sm text-slate-600">
-                  {userRating ? `Calificaste con ${userRating} estrellas` : "Hacé clic en una estrella para calificar"}
+                  {userRating
+                    ? `Calificaste con ${userRating} estrellas`
+                    : "Hacé clic en una estrella para calificar"}
                 </span>
               </div>
             </div>
@@ -399,7 +447,13 @@ export function ResourceDetail() {
                 placeholder="¿Te resultó útil este recurso?"
               />
               <div className="flex justify-end mt-2">
-                <Button type="submit" variant="primary" size="sm" className="rounded-full bg-blue-600 hover:bg-blue-700" disabled={submittingComment || !commentDraft.trim()}>
+                <Button
+                  type="submit"
+                  variant="primary"
+                  size="sm"
+                  className="rounded-full bg-blue-600 hover:bg-blue-700"
+                  disabled={submittingComment || !commentDraft.trim()}
+                >
                   {submittingComment ? "Publicando..." : "Comentar"}
                 </Button>
               </div>
@@ -427,7 +481,11 @@ export function ResourceDetail() {
                 value={formatDate(resource.date)}
               />
               {resource.professor && (
-                <InfoRow icon={<User className="w-5 h-5 text-blue-400" />} label="Profesor" value={resource.professor} />
+                <InfoRow
+                  icon={<User className="w-5 h-5 text-blue-400" />}
+                  label="Profesor"
+                  value={resource.professor}
+                />
               )}
               <InfoRow
                 icon={<Tag className="w-5 h-5 text-blue-400" />}
@@ -442,7 +500,11 @@ export function ResourceDetail() {
               <InfoRow
                 icon={<FileText className="w-5 h-5 text-blue-400" />}
                 label={isExternalResource ? "Tipo de recurso" : "Tipo de archivo"}
-                value={isExternalResource ? "Link externo" : `${resource.fileExtension?.toUpperCase() || "Archivo"} (${formatFileSize(resource.fileSize)})`}
+                value={
+                  isExternalResource
+                    ? "Link externo"
+                    : `${resource.fileExtension?.toUpperCase() || "Archivo"} (${formatFileSize(resource.fileSize)})`
+                }
               />
             </div>
           </div>

@@ -108,11 +108,13 @@ export class ResourcesService {
   }
 
   async detail(id: string, authorizationHeader?: string) {
-    const item = await this.prisma.resources.update({
-      where: { id },
-      data: { views_count: { increment: 1 } },
-      include: resourceInclude,
-    }).catch(() => null);
+    const item = await this.prisma.resources
+      .update({
+        where: { id },
+        data: { views_count: { increment: 1 } },
+        include: resourceInclude,
+      })
+      .catch(() => null);
 
     if (!item?.is_active) notFound("Recurso no encontrado");
 
@@ -169,7 +171,9 @@ export class ResourcesService {
       }
     }
 
-    const originalFilename = String(input.originalFilename || (externalUrl ? parsedExternalUrl?.hostname : "recurso")).trim();
+    const originalFilename = String(
+      input.originalFilename || (externalUrl ? parsedExternalUrl?.hostname : "recurso"),
+    ).trim();
     const extension = originalFilename.includes(".")
       ? originalFilename.split(".").pop()?.toLowerCase() || ""
       : "";
@@ -180,12 +184,20 @@ export class ResourcesService {
     const storageBucket = externalUrl ? "links" : String(input.storageBucket || this.storage.bucket);
     const storageKey = externalUrl
       ? providedStorageKey || `links/${user.id}/${id}`
-      : providedStorageKey || `resources/${user.id}/${id}/${originalFilename.replace(/[^a-zA-Z0-9._-]/g, "_")}`;
-    const fileUrl = externalUrl || String(input.publicUrl || input.fileUrl || this.storage.publicObjectUrl(storageKey));
+      : providedStorageKey ||
+        `resources/${user.id}/${id}/${originalFilename.replace(/[^a-zA-Z0-9._-]/g, "_")}`;
+    const fileUrl =
+      externalUrl || String(input.publicUrl || input.fileUrl || this.storage.publicObjectUrl(storageKey));
 
     const tags = Array.isArray(input.tags)
-      ? input.tags.map(String).map((tag: string) => tag.trim().toLowerCase()).filter(Boolean)
-      : String(input.tags || "").split(",").map((tag: string) => tag.trim().toLowerCase()).filter(Boolean);
+      ? input.tags
+          .map(String)
+          .map((tag: string) => tag.trim().toLowerCase())
+          .filter(Boolean)
+      : String(input.tags || "")
+          .split(",")
+          .map((tag: string) => tag.trim().toLowerCase())
+          .filter(Boolean);
 
     const item = await this.prisma.resources.create({
       data: {
@@ -233,8 +245,14 @@ export class ResourcesService {
     }
     if (Array.isArray(input.tags) || typeof input.tags === "string") {
       data.tags = Array.isArray(input.tags)
-        ? input.tags.map(String).map((tag: string) => tag.trim().toLowerCase()).filter(Boolean)
-        : String(input.tags).split(",").map((tag: string) => tag.trim().toLowerCase()).filter(Boolean);
+        ? input.tags
+            .map(String)
+            .map((tag: string) => tag.trim().toLowerCase())
+            .filter(Boolean)
+        : String(input.tags)
+            .split(",")
+            .map((tag: string) => tag.trim().toLowerCase())
+            .filter(Boolean);
     }
     if (input.courseId !== undefined) {
       const courseId = Number(input.courseId);
@@ -421,7 +439,8 @@ export class ResourcesService {
     const content = String(input.content || "").trim();
     if (!content) badRequest("El comentario no puede estar vacio");
 
-    const parentId = typeof input.parentId === "string" && input.parentId.trim() ? input.parentId.trim() : null;
+    const parentId =
+      typeof input.parentId === "string" && input.parentId.trim() ? input.parentId.trim() : null;
     if (parentId) {
       const parent = await this.prisma.comments.findFirst({
         where: { id: parentId, resource_id: id, is_active: true },

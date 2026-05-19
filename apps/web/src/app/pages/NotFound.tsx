@@ -11,13 +11,20 @@ export function NotFound() {
         <div className="mb-8 inline-flex items-center gap-2">
           <VaultioLogo />
         </div>
-        <p className="mb-3 text-7xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-blue-700 via-blue-500 to-cyan-500">404</p>
+        <p className="mb-3 text-7xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-blue-700 via-blue-500 to-cyan-500">
+          404
+        </p>
         <h1 className="mb-3 text-2xl font-semibold text-slate-900">Página no encontrada</h1>
         <p className="mb-8 text-slate-600">
           No pudimos encontrar lo que buscás. Verificá la URL o volvé al inicio.
         </p>
         <Link to="/app">
-          <Button variant="primary" className="rounded-full bg-blue-600 shadow-lg shadow-blue-600/15 hover:bg-blue-700">Ir al inicio</Button>
+          <Button
+            variant="primary"
+            className="rounded-full bg-blue-600 shadow-lg shadow-blue-600/15 hover:bg-blue-700"
+          >
+            Ir al inicio
+          </Button>
         </Link>
       </div>
     </div>

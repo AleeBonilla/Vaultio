@@ -245,7 +245,8 @@ export class SeedService implements OnApplicationBootstrap {
       {
         id: demoResources.examen,
         title: "Examen final 2025 resuelto",
-        description: "Examen final de Estructuras de Datos con soluciones detalladas y explicacion paso a paso.",
+        description:
+          "Examen final de Estructuras de Datos con soluciones detalladas y explicacion paso a paso.",
         tags: ["examen", "final", "estructuras"],
         storage_key: "resources/demo/examen-final-2025.pdf",
         original_filename: "examen-final-2025.pdf",

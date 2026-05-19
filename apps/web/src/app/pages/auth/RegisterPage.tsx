@@ -34,7 +34,10 @@ export function RegisterPage() {
   const [localError, setLocalError] = useState<string | null>(null);
 
   useEffect(() => {
-    catalogApi.careers().then(setCareers).catch(() => setCareers([]));
+    catalogApi
+      .careers()
+      .then(setCareers)
+      .catch(() => setCareers([]));
   }, []);
 
   useEffect(() => {
@@ -50,11 +53,34 @@ export function RegisterPage() {
     }
   }, [profile]);
 
+  const hasSession = Boolean(firebaseUser && profile);
+
+  // Completa carrera automáticamente apenas el perfil llega tras el signUp.
+  // Debe declararse antes del early return para no romper las reglas de hooks.
+  useEffect(() => {
+    if (!hasSession || !profile) return;
+    if (profile.careerIds.length > 0) return;
+    if (!careerId) return;
+    (async () => {
+      try {
+        await updateProfile({
+          username: username.trim().toLowerCase() || profile.username,
+          firstName: firstName.trim() || profile.firstName,
+          lastName: lastName.trim() || profile.lastName,
+          careerIds: [Number(careerId)],
+        });
+        toast.success("¡Bienvenido a Vaultio!");
+        navigate("/app");
+      } catch (err) {
+        setLocalError(err instanceof Error ? err.message : "No se pudo guardar la carrera");
+      }
+    })();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [profile?.id, hasSession]);
+
   if (!loading && firebaseUser && profile && profile.careerIds.length > 0) {
     return <Navigate to="/app" replace />;
   }
-
-  const hasSession = Boolean(firebaseUser && profile);
   const heading = hasSession ? "Completá tu perfil" : "Crear cuenta";
   const subheading = hasSession
     ? `Hola ${profile?.email || firebaseUser?.email || ""}. Solo necesitamos un par de datos más.`
@@ -120,28 +146,6 @@ export function RegisterPage() {
     }
   };
 
-  // Completa carrera automáticamente apenas el perfil llega tras el signUp
-  useEffect(() => {
-    if (!hasSession || !profile) return;
-    if (profile.careerIds.length > 0) return;
-    if (!careerId) return;
-    (async () => {
-      try {
-        await updateProfile({
-          username: username.trim().toLowerCase() || profile.username,
-          firstName: firstName.trim() || profile.firstName,
-          lastName: lastName.trim() || profile.lastName,
-          careerIds: [Number(careerId)],
-        });
-        toast.success("¡Bienvenido a Vaultio!");
-        navigate("/app");
-      } catch (err) {
-        setLocalError(err instanceof Error ? err.message : "No se pudo guardar la carrera");
-      }
-    })();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [profile?.id, hasSession]);
-
   return (
     <div className="relative flex min-h-screen items-center justify-center overflow-hidden bg-slate-50 p-6 text-slate-900">
       <div className="absolute left-1/2 top-0 h-[420px] w-[700px] -translate-x-1/2 rounded-full bg-blue-400/20 blur-[120px]" />
@@ -160,12 +164,18 @@ export function RegisterPage() {
 
         <div className="rounded-2xl border border-blue-100 bg-white/85 p-8 shadow-2xl shadow-blue-900/10 backdrop-blur">
           {configError && (
-            <div className="mb-4 rounded-xl border border-amber-200 bg-amber-50 p-3 text-sm text-amber-800" role="alert">
+            <div
+              className="mb-4 rounded-xl border border-amber-200 bg-amber-50 p-3 text-sm text-amber-800"
+              role="alert"
+            >
               {configError}
             </div>
           )}
           {localError && !configError && (
-            <div className="mb-4 rounded-xl border border-red-200 bg-red-50 p-3 text-sm text-red-700" role="alert">
+            <div
+              className="mb-4 rounded-xl border border-red-200 bg-red-50 p-3 text-sm text-red-700"
+              role="alert"
+            >
               {localError}
             </div>
           )}
@@ -246,7 +256,12 @@ export function RegisterPage() {
               </select>
             </div>
 
-            <Button type="submit" variant="primary" className="mt-6 w-full rounded-full bg-blue-600 shadow-lg shadow-blue-600/15 hover:bg-blue-700" disabled={submitting || Boolean(configError)}>
+            <Button
+              type="submit"
+              variant="primary"
+              className="mt-6 w-full rounded-full bg-blue-600 shadow-lg shadow-blue-600/15 hover:bg-blue-700"
+              disabled={submitting || Boolean(configError)}
+            >
               {submitting ? "Guardando..." : hasSession ? "Guardar y continuar" : "Crear cuenta"}
             </Button>
           </form>

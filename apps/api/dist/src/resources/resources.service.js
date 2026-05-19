@@ -127,11 +127,13 @@ let ResourcesService = class ResourcesService {
         return { items: summaries };
     }
     async detail(id, authorizationHeader) {
-        const item = await this.prisma.resources.update({
+        const item = await this.prisma.resources
+            .update({
             where: { id },
             data: { views_count: { increment: 1 } },
             include: resourceInclude,
-        }).catch(() => null);
+        })
+            .catch(() => null);
         if (!item?.is_active)
             (0, errors_1.notFound)("Recurso no encontrado");
         let saved = false;
@@ -195,11 +197,18 @@ let ResourcesService = class ResourcesService {
         const storageBucket = externalUrl ? "links" : String(input.storageBucket || this.storage.bucket);
         const storageKey = externalUrl
             ? providedStorageKey || `links/${user.id}/${id}`
-            : providedStorageKey || `resources/${user.id}/${id}/${originalFilename.replace(/[^a-zA-Z0-9._-]/g, "_")}`;
+            : providedStorageKey ||
+                `resources/${user.id}/${id}/${originalFilename.replace(/[^a-zA-Z0-9._-]/g, "_")}`;
         const fileUrl = externalUrl || String(input.publicUrl || input.fileUrl || this.storage.publicObjectUrl(storageKey));
         const tags = Array.isArray(input.tags)
-            ? input.tags.map(String).map((tag) => tag.trim().toLowerCase()).filter(Boolean)
-            : String(input.tags || "").split(",").map((tag) => tag.trim().toLowerCase()).filter(Boolean);
+            ? input.tags
+                .map(String)
+                .map((tag) => tag.trim().toLowerCase())
+                .filter(Boolean)
+            : String(input.tags || "")
+                .split(",")
+                .map((tag) => tag.trim().toLowerCase())
+                .filter(Boolean);
         const item = await this.prisma.resources.create({
             data: {
                 id,
@@ -247,8 +256,14 @@ let ResourcesService = class ResourcesService {
         }
         if (Array.isArray(input.tags) || typeof input.tags === "string") {
             data.tags = Array.isArray(input.tags)
-                ? input.tags.map(String).map((tag) => tag.trim().toLowerCase()).filter(Boolean)
-                : String(input.tags).split(",").map((tag) => tag.trim().toLowerCase()).filter(Boolean);
+                ? input.tags
+                    .map(String)
+                    .map((tag) => tag.trim().toLowerCase())
+                    .filter(Boolean)
+                : String(input.tags)
+                    .split(",")
+                    .map((tag) => tag.trim().toLowerCase())
+                    .filter(Boolean);
         }
         if (input.courseId !== undefined) {
             const courseId = Number(input.courseId);

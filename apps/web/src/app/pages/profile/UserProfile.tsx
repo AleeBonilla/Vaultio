@@ -5,11 +5,21 @@ import { toast } from "sonner";
 import { ResourceCard } from "../../components/resources/ResourceCard";
 import { Badge } from "../../components/ui/Badge";
 import { Button } from "../../components/ui/Button";
-import { catalogApi, resourcesApi, usersApi, type Career, type Course, type ResourceSummary, type UserStats } from "../../lib/api";
+import {
+  catalogApi,
+  resourcesApi,
+  usersApi,
+  type Career,
+  type Course,
+  type ResourceSummary,
+  type UserStats,
+} from "../../lib/api";
 import { useAuth } from "../../lib/auth-context";
 
 function formatDate(value: string) {
-  return new Intl.DateTimeFormat("es-CR", { day: "2-digit", month: "short", year: "numeric" }).format(new Date(value));
+  return new Intl.DateTimeFormat("es-CR", { day: "2-digit", month: "short", year: "numeric" }).format(
+    new Date(value),
+  );
 }
 
 export function UserProfile() {
@@ -123,7 +133,10 @@ export function UserProfile() {
             </div>
           </div>
           <Link to="/app/profile/edit">
-            <Button variant="secondary" className="flex min-w-40 items-center justify-center gap-2 whitespace-nowrap rounded-full border-blue-100 hover:bg-blue-50">
+            <Button
+              variant="secondary"
+              className="flex min-w-40 items-center justify-center gap-2 whitespace-nowrap rounded-full border-blue-100 hover:bg-blue-50"
+            >
               <Edit className="w-4 h-4" />
               Editar perfil
             </Button>
@@ -131,8 +144,16 @@ export function UserProfile() {
         </div>
 
         <div className="mt-8 grid grid-cols-2 gap-4 border-t border-blue-100 pt-8 md:grid-cols-4">
-          <Stat label="Recursos subidos" value={stats?.uploads ?? 0} icon={<Upload className="w-5 h-5 text-blue-600" />} />
-          <Stat label="Guardados" value={stats?.saved ?? 0} icon={<BookOpen className="w-5 h-5 text-blue-600" />} />
+          <Stat
+            label="Recursos subidos"
+            value={stats?.uploads ?? 0}
+            icon={<Upload className="w-5 h-5 text-blue-600" />}
+          />
+          <Stat
+            label="Guardados"
+            value={stats?.saved ?? 0}
+            icon={<BookOpen className="w-5 h-5 text-blue-600" />}
+          />
           <Stat
             label="Calificaciones dadas"
             value={stats?.ratingsGiven ?? 0}

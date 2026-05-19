@@ -1,8 +1,11 @@
 import { Module } from "@nestjs/common";
+import { APP_GUARD } from "@nestjs/core";
+import { ThrottlerGuard, ThrottlerModule } from "@nestjs/throttler";
 import { AuthController } from "./auth/auth.controller";
 import { AuthService } from "./auth/auth.service";
 import { CatalogController } from "./catalog/catalog.controller";
 import { CatalogService } from "./catalog/catalog.service";
+import { config } from "./config";
 import { FirebaseAdminService } from "./firebase/firebase-admin.service";
 import { HealthController } from "./health/health.controller";
 import { PrismaService } from "./prisma/prisma.service";
@@ -16,6 +19,14 @@ import { PublicUsersController, UsersController } from "./users/users.controller
 import { UsersService } from "./users/users.service";
 
 @Module({
+  imports: [
+    ThrottlerModule.forRoot([
+      {
+        ttl: config.throttle.ttlMs,
+        limit: config.throttle.limit,
+      },
+    ]),
+  ],
   controllers: [
     HealthController,
     AuthController,
@@ -27,6 +38,10 @@ import { UsersService } from "./users/users.service";
     StatsController,
   ],
   providers: [
+    {
+      provide: APP_GUARD,
+      useClass: ThrottlerGuard,
+    },
     PrismaService,
     SeedService,
     FirebaseAdminService,
