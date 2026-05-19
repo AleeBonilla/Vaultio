@@ -17,7 +17,7 @@ import { ResourceTypeIcon } from "../../components/resources/ResourceTypeIcon";
 import { Badge } from "../../components/ui/Badge";
 import { Button } from "../../components/ui/Button";
 import { RatingStars } from "../../components/ui/RatingStars";
-import { resourcesApi, type ResourceComment, type ResourceDetail as ResourceDetailData } from "../../lib/api";
+import { resourcesApi, storageApi, type ResourceComment, type ResourceDetail as ResourceDetailData } from "../../lib/api";
 import { useAuth } from "../../lib/auth-context";
 
 function formatDate(value: string) {
@@ -34,6 +34,49 @@ function formatFileSize(value?: number) {
 interface UiComment extends ResourceComment {
   authorName: string;
   dateLabel: string;
+}
+
+const IMAGE_EXTENSIONS = new Set(["gif", "jpeg", "jpg", "png", "svg", "webp"]);
+
+function normalizedExtension(resource: ResourceDetailData) {
+  return (resource.fileExtension || resource.originalFilename.split(".").pop() || "").replace(/^\./, "").toLowerCase();
+}
+
+function ResourcePreview({ resource }: { resource: ResourceDetailData }) {
+  const extension = normalizedExtension(resource);
+  const isExternalResource = resource.storageProvider === "external" || extension === "link";
+  const previewUrl = !isExternalResource && resource.storageKey ? storageApi.publicObjectUrl(resource.storageKey) : "";
+  const isImage = IMAGE_EXTENSIONS.has(extension) || resource.mimeType.startsWith("image/");
+  const isPdf = extension === "pdf" || resource.mimeType === "application/pdf";
+
+  if (previewUrl && isImage) {
+    return (
+      <div className="mb-6 overflow-hidden rounded-2xl border border-blue-100 bg-slate-50 shadow-inner">
+        <img src={previewUrl} alt={`Vista previa de ${resource.title}`} className="max-h-[720px] w-full object-contain" />
+      </div>
+    );
+  }
+
+  if (previewUrl && isPdf) {
+    return (
+      <div className="mb-6 overflow-hidden rounded-2xl border border-blue-100 bg-slate-50 shadow-inner">
+        <iframe title={`Vista previa de ${resource.title}`} src={previewUrl} className="h-[720px] w-full bg-white" />
+      </div>
+    );
+  }
+
+  return (
+    <div className="mb-6 flex aspect-[4/3] items-center justify-center rounded-2xl border border-blue-100 bg-blue-50/60">
+      <div className="text-center">
+        <ResourceTypeIcon type={resource.type} fileExtension={resource.fileExtension} className="mx-auto mb-3 !p-4" />
+        <p className="text-slate-600">
+          {isExternalResource ? "Enlace externo" : `Archivo ${resource.fileExtension?.toUpperCase() || "digital"}`}
+        </p>
+        <p className="text-sm text-slate-500">{resource.originalFilename}</p>
+        {!isExternalResource && <p className="mt-2 text-xs text-slate-500">Vista previa no disponible para este tipo de archivo.</p>}
+      </div>
+    </div>
+  );
 }
 
 export function ResourceDetail() {
@@ -294,13 +337,7 @@ export function ResourceDetail() {
               </button>
             </div>
 
-            <div className="mb-6 flex aspect-[4/3] items-center justify-center rounded-2xl border border-blue-100 bg-blue-50/60">
-              <div className="text-center">
-                <ResourceTypeIcon type={resource.type} fileExtension={resource.fileExtension} className="mx-auto mb-3 !p-4" />
-                <p className="text-slate-600">{isExternalResource ? "Enlace externo" : `Archivo ${resource.fileExtension?.toUpperCase() || "digital"}`}</p>
-                <p className="text-sm text-slate-500">{resource.originalFilename}</p>
-              </div>
-            </div>
+            <ResourcePreview resource={resource} />
 
             <div className="flex flex-wrap gap-3 mb-6">
               <Button

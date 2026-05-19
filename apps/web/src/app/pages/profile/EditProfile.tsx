@@ -17,6 +17,7 @@ export function EditProfile() {
   const [lastName, setLastName] = useState("");
   const [bio, setBio] = useState("");
   const [careerId, setCareerId] = useState("");
+  const [careerQuery, setCareerQuery] = useState("");
   const [courseIds, setCourseIds] = useState<number[]>([]);
   const [courseQuery, setCourseQuery] = useState("");
   const [photoFile, setPhotoFile] = useState<File | null>(null);
@@ -105,9 +106,17 @@ export function EditProfile() {
   };
 
   const selectedCourses = courses.filter((course) => courseIds.includes(course.id));
+  const selectedCareer = careers.find((career) => String(career.id) === careerId);
+  const matchingCareers = useMemo(() => {
+    const normalized = careerQuery.trim().toLowerCase();
+    if (!normalized) return [];
+    return careers
+      .filter((career) => `${career.code} ${career.name}`.toLowerCase().includes(normalized))
+      .slice(0, 8);
+  }, [careers, careerQuery]);
   const matchingCourses = useMemo(() => {
     const normalized = courseQuery.trim().toLowerCase();
-    if (!normalized) return courses.filter((course) => !courseIds.includes(course.id)).slice(0, 8);
+    if (!normalized) return [];
     return courses
       .filter((course) => !courseIds.includes(course.id))
       .filter((course) => `${course.code} ${course.name}`.toLowerCase().includes(normalized))
@@ -204,22 +213,52 @@ export function EditProfile() {
           <Input label="Correo electrónico" type="email" value={profile.email} disabled readOnly />
 
           <div>
-            <label htmlFor="career" className="mb-2 block text-sm font-medium text-slate-900">
-              Carrera
-            </label>
-            <select
-              id="career"
-              value={careerId}
-              onChange={(event) => setCareerId(event.target.value)}
-              className="w-full rounded-md border border-blue-100 bg-white px-4 py-2.5 focus:outline-none focus-visible:border-blue-500 focus-visible:ring-2 focus-visible:ring-blue-500"
-            >
-              <option value="">Sin carrera asignada</option>
-              {careers.map((career) => (
-                <option key={career.id} value={career.id}>
-                  {career.name}
-                </option>
-              ))}
-            </select>
+            <label className="mb-2 block text-sm font-medium text-slate-900">Carrera</label>
+            <div className="rounded-2xl border border-blue-100 bg-white/80 p-3">
+              {selectedCareer && (
+                <div className="mb-3 flex items-center justify-between gap-3 rounded-xl border border-blue-100 bg-blue-50 px-3 py-2">
+                  <div>
+                    <span className="block text-sm font-semibold text-blue-900">{selectedCareer.code}</span>
+                    <span className="block text-xs text-slate-600">{selectedCareer.name}</span>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setCareerId("");
+                      setCareerQuery("");
+                    }}
+                    className="rounded-full px-3 py-1 text-xs font-semibold text-blue-700 hover:bg-blue-100"
+                  >
+                    Quitar
+                  </button>
+                </div>
+              )}
+              <Input
+                label="Buscar carrera"
+                value={careerQuery}
+                onChange={(event) => setCareerQuery(event.target.value)}
+                placeholder="Buscar por codigo o nombre..."
+              />
+              {careerQuery.trim() && (
+                <div className="mt-3 grid max-h-72 grid-cols-1 gap-2 overflow-y-auto">
+                  {matchingCareers.map((career) => (
+                    <button
+                      type="button"
+                      key={career.id}
+                      onClick={() => {
+                        setCareerId(String(career.id));
+                        setCareerQuery("");
+                      }}
+                      className="rounded-xl border border-transparent p-3 text-left transition-colors hover:border-blue-100 hover:bg-blue-50/50"
+                    >
+                      <span className="block text-sm font-semibold text-slate-900">{career.code}</span>
+                      <span className="block text-xs text-slate-600">{career.name}</span>
+                    </button>
+                  ))}
+                  {matchingCareers.length === 0 && <p className="p-3 text-sm text-slate-500">Sin carreras para esa busqueda.</p>}
+                </div>
+              )}
+            </div>
           </div>
 
           <div>
@@ -249,23 +288,25 @@ export function EditProfile() {
                 onChange={(event) => setCourseQuery(event.target.value)}
                 placeholder="Buscar por codigo o nombre..."
               />
-              <div className="mt-3 grid max-h-72 grid-cols-1 gap-2 overflow-y-auto sm:grid-cols-2">
-                {matchingCourses.map((course) => (
-                  <button
-                    type="button"
-                    key={course.id}
-                    onClick={() => {
-                      toggleCourse(course.id);
-                      setCourseQuery("");
-                    }}
-                    className="rounded-xl border border-transparent p-3 text-left transition-colors hover:border-blue-100 hover:bg-blue-50/50"
-                  >
-                    <span className="block text-sm font-semibold text-slate-900">{course.code}</span>
-                    <span className="block text-xs text-slate-600">{course.name}</span>
-                  </button>
-                ))}
-                {matchingCourses.length === 0 && <p className="p-3 text-sm text-slate-500">Sin cursos para esa busqueda.</p>}
-              </div>
+              {courseQuery.trim() && (
+                <div className="mt-3 grid max-h-72 grid-cols-1 gap-2 overflow-y-auto sm:grid-cols-2">
+                  {matchingCourses.map((course) => (
+                    <button
+                      type="button"
+                      key={course.id}
+                      onClick={() => {
+                        toggleCourse(course.id);
+                        setCourseQuery("");
+                      }}
+                      className="rounded-xl border border-transparent p-3 text-left transition-colors hover:border-blue-100 hover:bg-blue-50/50"
+                    >
+                      <span className="block text-sm font-semibold text-slate-900">{course.code}</span>
+                      <span className="block text-xs text-slate-600">{course.name}</span>
+                    </button>
+                  ))}
+                  {matchingCourses.length === 0 && <p className="p-3 text-sm text-slate-500">Sin cursos para esa busqueda.</p>}
+                </div>
+              )}
             </div>
           </div>
 
