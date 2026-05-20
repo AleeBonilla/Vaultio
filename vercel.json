@@ -1,6 +1,6 @@
 {
   "framework": "vite",
-  "installCommand": "npm install",
+  "installCommand": "npm install --workspaces --include-workspace-root --include=dev",
   "buildCommand": "npm run build --workspace @vaultio/web",
   "outputDirectory": "apps/web/dist",
   "rewrites": [
