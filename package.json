@@ -3,6 +3,10 @@
   "private": true,
   "version": "0.1.0",
   "type": "module",
+  "engines": {
+    "node": ">=20 <23",
+    "npm": ">=10"
+  },
   "workspaces": [
     "apps/*",
     "packages/*"
@@ -26,7 +30,7 @@
     "prisma:migrate:deploy": "npm run prisma:migrate:deploy --workspace @vaultio/api",
     "prisma:migrate:reset": "npm run prisma:migrate:reset --workspace @vaultio/api",
     "prisma:studio": "npm run prisma:studio --workspace @vaultio/api",
-    "prepare": "husky"
+    "prepare": "node -e \"if (!process.env.CI && !process.env.VERCEL) require('child_process').execSync('husky', { stdio: 'inherit' })\""
   },
   "devDependencies": {
     "@eslint/js": "^9.18.0",
