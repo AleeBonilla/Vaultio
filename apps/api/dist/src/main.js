@@ -34,7 +34,6 @@ async function createNestApp() {
 async function bootstrap() {
     const app = await createNestApp();
     await app.listen(config_1.config.port);
-    // eslint-disable-next-line no-console
     console.info(`Vaultio API escuchando en http://localhost:${config_1.config.port}`);
 }
 if (require.main === module) {
