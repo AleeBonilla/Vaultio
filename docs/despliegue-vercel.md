@@ -23,6 +23,12 @@ VITE_FIREBASE_APP_ID=
 
 `VITE_API_URL` debe apuntar al API público. En local se mantiene `http://localhost:4000`.
 
+Para previews de Vercel, agregar el dominio generado al backend:
+
+```text
+VAULTIO_CORS_ORIGINS=https://vaultio.vercel.app,https://vaultio-git-main-equipo.vercel.app
+```
+
 ## Build local
 
 Antes de abrir un preview deployment, correr:
