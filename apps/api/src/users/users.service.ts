@@ -43,7 +43,7 @@ export class UsersService {
 
     if (typeof input.firstName === "string") {
       const value = input.firstName.trim();
-      if (!value) badRequest("El nombre no puede estar vacio");
+      if (!value) badRequest("El nombre no puede estar vacío");
       data.first_name = value.slice(0, 80);
     }
     if (typeof input.username === "string") {
@@ -52,7 +52,7 @@ export class UsersService {
         where: { username, id: { not: user.id } },
         select: { id: true },
       });
-      if (existing) badRequest("Ese username ya esta en uso");
+      if (existing) badRequest("Ese username ya está en uso");
       data.username = username;
     }
     if (typeof input.lastName === "string") {

@@ -159,7 +159,7 @@ export function UploadResource() {
             <CheckCircle aria-hidden="true" className="w-8 h-8 text-green-600" />
           </div>
           <h1 className="mb-3 text-3xl font-bold text-slate-900">Recurso publicado</h1>
-          <p className="mb-8 text-slate-600">Tu material ya esta disponible para el resto de la comunidad.</p>
+          <p className="mb-8 text-slate-600">Tu material ya está disponible para el resto de la comunidad.</p>
           <div className="flex flex-wrap gap-3 justify-center">
             <Button
               variant="secondary"

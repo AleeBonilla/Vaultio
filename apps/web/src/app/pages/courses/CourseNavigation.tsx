@@ -133,7 +133,7 @@ export function CourseNavigation() {
 
       {courses.length === 0 ? (
         <div className="rounded-2xl border border-blue-100 bg-white/85 p-6 text-slate-600 shadow-sm shadow-blue-900/5">
-          No hay cursos registrados para esta carrera todavia.
+          No hay cursos registrados para esta carrera todavía.
         </div>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">

@@ -146,7 +146,7 @@ export class ResourcesService {
     const resourceTypeId = Number(input.resourceTypeId);
 
     if (!title || !description || !courseId || !resourceTypeId) {
-      badRequest("Titulo, descripcion, curso y tipo de recurso son requeridos");
+      badRequest("Título, descripción, curso y tipo de recurso son requeridos");
     }
 
     const [course, resourceType] = await Promise.all([
@@ -154,8 +154,8 @@ export class ResourcesService {
       this.prisma.resource_types.findUnique({ where: { id: resourceTypeId } }),
     ]);
 
-    if (!course) badRequest("Curso invalido");
-    if (!resourceType) badRequest("Tipo de recurso invalido");
+    if (!course) badRequest("Curso inválido");
+    if (!resourceType) badRequest("Tipo de recurso inválido");
 
     const externalUrl = typeof input.externalUrl === "string" ? input.externalUrl.trim() : "";
     if (externalUrl) await this.ensureResourceModelConstraints();
@@ -164,7 +164,7 @@ export class ResourcesService {
       try {
         parsedExternalUrl = new URL(externalUrl);
       } catch {
-        badRequest("El enlace no es valido");
+        badRequest("El enlace no es válido");
       }
       if (!["http:", "https:"].includes(parsedExternalUrl.protocol)) {
         badRequest("El enlace debe iniciar con http:// o https://");
@@ -235,12 +235,12 @@ export class ResourcesService {
     const data: Record<string, unknown> = {};
     if (typeof input.title === "string") {
       const title = input.title.trim();
-      if (!title) badRequest("El titulo no puede estar vacio");
+      if (!title) badRequest("El título no puede estar vacío");
       data.title = title.slice(0, 80);
     }
     if (typeof input.description === "string") {
       const description = input.description.trim();
-      if (!description) badRequest("La descripcion no puede estar vacia");
+      if (!description) badRequest("La descripción no puede estar vacía");
       data.description = description;
     }
     if (Array.isArray(input.tags) || typeof input.tags === "string") {
@@ -257,13 +257,13 @@ export class ResourcesService {
     if (input.courseId !== undefined) {
       const courseId = Number(input.courseId);
       const course = await this.prisma.courses.findFirst({ where: { id: courseId, is_active: true } });
-      if (!course) badRequest("Curso invalido");
+      if (!course) badRequest("Curso inválido");
       data.course_id = courseId;
     }
     if (input.resourceTypeId !== undefined) {
       const resourceTypeId = Number(input.resourceTypeId);
       const resourceType = await this.prisma.resource_types.findUnique({ where: { id: resourceTypeId } });
-      if (!resourceType) badRequest("Tipo de recurso invalido");
+      if (!resourceType) badRequest("Tipo de recurso inválido");
       data.resource_type_id = resourceTypeId;
     }
     if (input.academicPeriodId !== undefined) {
@@ -349,7 +349,7 @@ export class ResourcesService {
 
     const stars = Number(input?.stars);
     if (!Number.isFinite(stars) || stars < 1 || stars > 5) {
-      badRequest("La calificacion debe estar entre 1 y 5");
+      badRequest("La calificación debe estar entre 1 y 5");
     }
 
     const existing = await this.prisma.ratings.findUnique({
@@ -437,7 +437,7 @@ export class ResourcesService {
     if (!resource) notFound("Recurso no encontrado");
 
     const content = String(input.content || "").trim();
-    if (!content) badRequest("El comentario no puede estar vacio");
+    if (!content) badRequest("El comentario no puede estar vacío");
 
     const parentId =
       typeof input.parentId === "string" && input.parentId.trim() ? input.parentId.trim() : null;

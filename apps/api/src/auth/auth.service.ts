@@ -173,14 +173,14 @@ export class AuthService {
       badRequest("El username debe tener 3 a 30 caracteres y solo usar letras, numeros o guion bajo");
     }
     const existing = await this.prisma.users.findUnique({ where: { username } });
-    if (existing) badRequest("Ese username ya esta en uso");
+    if (existing) badRequest("Ese username ya está en uso");
     return username;
   }
 
   private readBearerToken(authorizationHeader?: string) {
     if (!authorizationHeader) unauthorized();
     const [scheme, token] = authorizationHeader.split(" ");
-    if (scheme !== "Bearer" || !token) unauthorized("Token invalido");
+    if (scheme !== "Bearer" || !token) unauthorized("Token inválido");
     return token;
   }
 

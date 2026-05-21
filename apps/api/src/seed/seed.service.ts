@@ -27,22 +27,22 @@ export class SeedService implements OnApplicationBootstrap {
 
   private async seedCatalogs() {
     await this.prisma.institutions.upsert({
-      where: { name: "Instituto Tecnologico de Costa Rica" },
+      where: { name: "Instituto Tecnológico de Costa Rica" },
       update: {},
       create: {
         id: 1,
-        name: "Instituto Tecnologico de Costa Rica",
+        name: "Instituto Tecnológico de Costa Rica",
         acronym: "TEC",
         email_domain: "estudiantec.cr",
       },
     });
 
     const careers = [
-      { id: 1, code: "IC", name: "Ingenieria en Computacion", study_plan: "2024-IC" },
-      { id: 2, code: "IE", name: "Ingenieria en Electronica", study_plan: "2024-IE" },
-      { id: 3, code: "IM", name: "Ingenieria en Mecatronica", study_plan: "2024-IM" },
-      { id: 4, code: "IP", name: "Ingenieria en Produccion Industrial", study_plan: "2024-IP" },
-      { id: 5, code: "ATI", name: "Administracion de Tecnologia de Informacion", study_plan: "2024-ATI" },
+      { id: 1, code: "IC", name: "Ingeniería en Computación", study_plan: "2024-IC" },
+      { id: 2, code: "IE", name: "Ingeniería en Electrónica", study_plan: "2024-IE" },
+      { id: 3, code: "IM", name: "Ingeniería en Mecatrónica", study_plan: "2024-IM" },
+      { id: 4, code: "IP", name: "Ingeniería en Producción Industrial", study_plan: "2024-IP" },
+      { id: 5, code: "ATI", name: "Administración de Tecnología de Información", study_plan: "2024-ATI" },
     ];
 
     for (const career of careers) {
@@ -60,13 +60,13 @@ export class SeedService implements OnApplicationBootstrap {
     }
 
     const courses = [
-      { id: 1, code: "IC-1800", name: "Introduccion a la Programacion", careerIds: [1] },
-      { id: 2, code: "IC-1802", name: "Programacion Orientada a Objetos", careerIds: [1] },
+      { id: 1, code: "IC-1800", name: "Introducción a la Programación", careerIds: [1] },
+      { id: 2, code: "IC-1802", name: "Programación Orientada a Objetos", careerIds: [1] },
       { id: 3, code: "IC-2001", name: "Estructuras de Datos", careerIds: [1] },
-      { id: 4, code: "IC-3002", name: "Analisis de Algoritmos", careerIds: [1] },
+      { id: 4, code: "IC-3002", name: "Análisis de Algoritmos", careerIds: [1] },
       { id: 5, code: "IC-4301", name: "Bases de Datos I", careerIds: [1, 5] },
-      { id: 6, code: "IC-6821", name: "Diseno de Software", careerIds: [1, 5] },
-      { id: 7, code: "MA-1102", name: "Calculo Diferencial e Integral", careerIds: [1, 2, 3, 4] },
+      { id: 6, code: "IC-6821", name: "Diseño de Software", careerIds: [1, 5] },
+      { id: 7, code: "MA-1102", name: "Cálculo Diferencial e Integral", careerIds: [1, 2, 3, 4] },
     ];
 
     for (const course of courses) {
@@ -119,17 +119,17 @@ export class SeedService implements OnApplicationBootstrap {
 
     const resourceTypes = [
       { id: 1, name: "Apuntes", description: "Notas de clase tomadas por estudiantes" },
-      { id: 2, name: "Examenes anteriores", description: "Parciales y finales de semestres pasados" },
-      { id: 3, name: "Resumenes", description: "Sintesis de temas o unidades del curso" },
-      { id: 4, name: "Ejercicios resueltos", description: "Problemas con solucion paso a paso" },
-      { id: 5, name: "Codigo fuente", description: "Proyectos y snippets de programacion" },
+      { id: 2, name: "Exámenes anteriores", description: "Parciales y finales de semestres pasados" },
+      { id: 3, name: "Resúmenes", description: "Síntesis de temas o unidades del curso" },
+      { id: 4, name: "Ejercicios resueltos", description: "Problemas con solución paso a paso" },
+      { id: 5, name: "Código fuente", description: "Proyectos y snippets de programación" },
       { id: 6, name: "Presentaciones", description: "Diapositivas y material expositivo" },
-      { id: 7, name: "Libros y lecturas", description: "Libros, capitulos y lecturas complementarias" },
-      { id: 8, name: "Guias de estudio", description: "Rutas de repaso y listas de temas" },
-      { id: 9, name: "Laboratorios", description: "Practicas, reportes y materiales de laboratorio" },
+      { id: 7, name: "Libros y lecturas", description: "Libros, capítulos y lecturas complementarias" },
+      { id: 8, name: "Guías de estudio", description: "Rutas de repaso y listas de temas" },
+      { id: 9, name: "Laboratorios", description: "Prácticas, reportes y materiales de laboratorio" },
       { id: 10, name: "Tareas", description: "Enunciados, soluciones y entregables" },
       { id: 11, name: "Proyectos", description: "Proyectos finales o parciales del curso" },
-      { id: 12, name: "Imagenes", description: "Diagramas, capturas e infografias" },
+      { id: 12, name: "Imágenes", description: "Diagramas, capturas e infografías" },
       { id: 13, name: "Dataset", description: "Datos, CSV y archivos tabulares" },
       { id: 14, name: "Link externo", description: "Enlaces a recursos externos confiables" },
     ];
@@ -246,7 +246,7 @@ export class SeedService implements OnApplicationBootstrap {
         id: demoResources.examen,
         title: "Examen final 2025 resuelto",
         description:
-          "Examen final de Estructuras de Datos con soluciones detalladas y explicacion paso a paso.",
+          "Examen final de Estructuras de Datos con soluciones detalladas y explicación paso a paso.",
         tags: ["examen", "final", "estructuras"],
         storage_key: "resources/demo/examen-final-2025.pdf",
         original_filename: "examen-final-2025.pdf",
@@ -263,8 +263,8 @@ export class SeedService implements OnApplicationBootstrap {
       {
         id: demoResources.apuntes,
         title: "Apuntes completos de Bases de Datos I",
-        description: "Resumen de SQL, normalizacion, transacciones e indices para preparar examenes.",
-        tags: ["sql", "normalizacion", "indices"],
+        description: "Resumen de SQL, normalización, transacciones e índices para preparar exámenes.",
+        tags: ["sql", "normalización", "índices"],
         storage_key: "resources/demo/apuntes-bases-datos.pdf",
         original_filename: "apuntes-bases-datos.pdf",
         file_url: "https://example.com/demo/apuntes-bases-datos.pdf",
@@ -303,12 +303,12 @@ export class SeedService implements OnApplicationBootstrap {
 
     await this.prisma.comments.upsert({
       where: { id: "55555555-5555-4555-8555-555555555555" },
-      update: { content: "Muy util para practicar antes del final.", is_active: true },
+      update: { content: "Muy útil para practicar antes del final.", is_active: true },
       create: {
         id: "55555555-5555-4555-8555-555555555555",
         resource_id: demoResources.examen,
         user_id: demoUsers.carlos,
-        content: "Muy util para practicar antes del final.",
+        content: "Muy útil para practicar antes del final.",
       },
     });
 

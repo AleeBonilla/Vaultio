@@ -12,13 +12,13 @@ export function createToken(payload: DemoTokenPayload) {
 export function readToken(authorizationHeader?: string): DemoTokenPayload {
   if (!authorizationHeader) unauthorized();
   const [scheme, token] = authorizationHeader.split(" ");
-  if (scheme !== "Bearer" || !token) unauthorized("Token invalido");
+  if (scheme !== "Bearer" || !token) unauthorized("Token inválido");
 
   try {
     const payload = JSON.parse(Buffer.from(token, "base64url").toString("utf8")) as DemoTokenPayload;
-    if (!payload.sub || !payload.email) unauthorized("Token invalido");
+    if (!payload.sub || !payload.email) unauthorized("Token inválido");
     return payload;
   } catch {
-    unauthorized("Token invalido");
+    unauthorized("Token inválido");
   }
 }

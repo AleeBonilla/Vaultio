@@ -29,13 +29,16 @@ interface ResourceCardProps {
 const TYPE_COLORS: Record<string, "blue" | "green" | "purple" | "orange" | "red"> = {
   Examen: "red",
   "Examenes anteriores": "red",
+  "Exámenes anteriores": "red",
   Apuntes: "green",
   Ejercicios: "purple",
   "Ejercicios resueltos": "purple",
   Codigo: "orange",
   "Codigo fuente": "orange",
+  "Código fuente": "orange",
   Resumen: "blue",
   Resumenes: "blue",
+  Resúmenes: "blue",
 };
 
 export function ResourceCard({

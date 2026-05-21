@@ -37,7 +37,7 @@ export class StorageService implements OnApplicationBootstrap {
       this.bucketReady = true;
     } catch (error) {
       console.warn(
-        `MinIO no esta disponible en ${config.storage.endpoint}; se omitio la creacion automatica del bucket ${this.bucket}.`,
+        `MinIO no está disponible en ${config.storage.endpoint}; se omitió la creación automática del bucket ${this.bucket}.`,
       );
     }
   }
@@ -54,7 +54,7 @@ export class StorageService implements OnApplicationBootstrap {
         await this.ensureBucket();
         this.bucketReady = true;
       } catch (error) {
-        badRequest("Storage no esta disponible. Verifica que MinIO este corriendo.");
+        badRequest("Storage no está disponible. Verifica que MinIO esté corriendo.");
       }
     }
 
@@ -99,7 +99,7 @@ export class StorageService implements OnApplicationBootstrap {
   }
 
   async createReadUrl(storageKey: string) {
-    if (!storageKey || storageKey.includes("..")) badRequest("Objeto invalido");
+    if (!storageKey || storageKey.includes("..")) badRequest("Objeto inválido");
     return getSignedUrl(
       this.client,
       new GetObjectCommand({

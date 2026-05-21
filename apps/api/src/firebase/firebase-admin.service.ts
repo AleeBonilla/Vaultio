@@ -15,7 +15,7 @@ export class FirebaseAdminService {
     try {
       return await getAuth().verifyIdToken(idToken);
     } catch {
-      unauthorized("Token de Firebase invalido");
+      unauthorized("Token de Firebase inválido");
     }
   }
 

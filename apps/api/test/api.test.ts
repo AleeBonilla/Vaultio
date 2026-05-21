@@ -148,7 +148,7 @@ describe("Vaultio API", () => {
       method: "POST",
       headers: authHeaders(token),
       body: JSON.stringify({
-        title: "Resumen de Diseno de Software",
+        title: "Resumen de Diseño de Software",
         description: "Material de repaso para arquitectura, patrones y pruebas.",
         courseId: 6,
         resourceTypeId: 3,
@@ -167,7 +167,7 @@ describe("Vaultio API", () => {
     assert.equal(created.response.status, 201);
     createdResourceIds.push(created.body.item.id);
     assert.equal(created.body.item.courseId, 6);
-    assert.equal(created.body.item.type, "Resumenes");
+    assert.equal(created.body.item.type, "Resúmenes");
 
     const linkResource = await request(baseUrl, "/resources", {
       method: "POST",
