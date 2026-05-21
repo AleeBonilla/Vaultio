@@ -113,6 +113,7 @@ vaultio/
 │   ├── stack.md                   # Rol de cada herramienta
 │   ├── arquitectura.md            # Flujos y decisiones
 │   ├── desarrollo-local.md        # Setup detallado y troubleshooting
+│   ├── despliegue-vercel.md       # Checklist de despliegue del frontend
 │   ├── api.md                     # Referencia de endpoints
 │   ├── plan-tecnico.md            # Plan técnico inicial (histórico)
 │   └── reporte-limpieza-y-mejoras.md
@@ -422,6 +423,7 @@ Pasan 12 tests integrales contra la base real:
 - [docs/stack.md](docs/stack.md) — Qué hace cada herramienta del stack y por qué está acá.
 - [docs/arquitectura.md](docs/arquitectura.md) — Flujos (auth, upload, link externo) y decisiones.
 - [docs/desarrollo-local.md](docs/desarrollo-local.md) — Setup detallado y reset de datos.
+- [docs/despliegue-vercel.md](docs/despliegue-vercel.md) — Checklist para publicar el frontend en Vercel.
 - [docs/api.md](docs/api.md) — Referencia completa de endpoints.
 - [docs/plan-tecnico.md](docs/plan-tecnico.md) — Plan técnico inicial (histórico).
 - [docs/reporte-limpieza-y-mejoras.md](docs/reporte-limpieza-y-mejoras.md) — Reporte de limpieza ejecutada.
