@@ -159,6 +159,18 @@ Ver la tabla completa en el [README](../README.md#variables-de-entorno).
 
 ---
 
+## Prueba previa a Vercel
+
+Antes de subir cambios del frontend, correr el mismo build que usa Vercel:
+
+```bash
+npm run vercel:build
+```
+
+Si falla, revisar primero las variables `VITE_*` y los errores de TypeScript del workspace web.
+
+---
+
 ## Reset de datos
 
 ```bash
