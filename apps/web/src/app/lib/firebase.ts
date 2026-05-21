@@ -27,6 +27,7 @@ export const isFirebaseConfigured = Boolean(
 );
 
 const firebaseApp: FirebaseApp | null = isFirebaseConfigured
+  // Evita reinicializar Firebase durante HMR y en montajes repetidos del frontend.
   ? getApps()[0] || initializeApp(firebaseConfig)
   : null;
 
@@ -34,7 +35,7 @@ export const firebaseAuth: Auth | null = firebaseApp ? getAuth(firebaseApp) : nu
 if (firebaseAuth) void setPersistence(firebaseAuth, browserLocalPersistence);
 
 function requireAuth(): Auth {
-  if (!firebaseAuth) throw new Error("Firebase no esta configurado en el frontend");
+  if (!firebaseAuth) throw new Error("Firebase no está configurado en el frontend");
   return firebaseAuth;
 }
 

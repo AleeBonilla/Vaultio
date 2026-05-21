@@ -16,6 +16,7 @@ function findRepoRoot(start: string) {
 }
 
 function findFirebaseServiceAccount(repoRoot: string) {
+  // En deploy se prefiere un path explicito; el fallback local facilita correr demos sin configurar env vars.
   if (process.env.GOOGLE_APPLICATION_CREDENTIALS) {
     return process.env.GOOGLE_APPLICATION_CREDENTIALS;
   }
@@ -41,6 +42,7 @@ function parseOrigins(value: string | undefined): string[] {
 }
 
 const corsOrigins = parseOrigins(
+  // Vercel agrega dominios por ambiente, por eso se permite configurar varios orígenes separados por coma.
   process.env.VAULTIO_CORS_ORIGINS || "http://localhost:5173,http://localhost:4173",
 );
 

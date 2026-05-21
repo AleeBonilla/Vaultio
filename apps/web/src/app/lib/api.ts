@@ -175,6 +175,7 @@ export function setApiTokenProvider(provider: () => Promise<string | null>) {
 
 async function apiFetch<T>(path: string, init?: RequestInit): Promise<T> {
   const token = await tokenProvider().catch(() => null);
+  // Todas las rutas pasan por el mismo wrapper para mantener el Bearer token sincronizado con Firebase.
   const response = await fetch(`${API_URL}${path}`, {
     ...init,
     headers: {

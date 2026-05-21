@@ -15,6 +15,7 @@ export async function createNestApp() {
     origin: config.cors.allowAny
       ? true
       : (origin: string | undefined, callback: (err: Error | null, allow?: boolean) => void) => {
+          // Las herramientas server-to-server y algunos health checks no envían Origin.
           if (!origin) return callback(null, true);
           if (config.cors.origins.includes(origin)) return callback(null, true);
           return callback(new Error(`Origin ${origin} no permitido por CORS`), false);
