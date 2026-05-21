@@ -1,0 +1,13 @@
+# Dependencias y builds locales
+node_modules
+dist
+apps/*/dist
+
+# Servicios locales que no forman parte del frontend en Vercel
+docker-compose.yml
+apps/api/Dockerfile
+apps/web/Dockerfile
+
+# Credenciales locales
+*.local
+*-firebase-adminsdk-*.json
