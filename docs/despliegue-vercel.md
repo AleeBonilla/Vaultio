@@ -23,6 +23,16 @@ VITE_FIREBASE_APP_ID=
 
 `VITE_API_URL` debe apuntar al API público. En local se mantiene `http://localhost:4000`.
 
+## Build local
+
+Antes de abrir un preview deployment, correr:
+
+```bash
+npm run vercel:build
+```
+
+Ese script usa el mismo comando que Vercel ejecuta en `vercel.json`, por lo que sirve para detectar errores del frontend antes de subir cambios.
+
 ## Checklist
 
 1. Confirmar que `npm install` usa Node 22.x, como indica `package.json`.
