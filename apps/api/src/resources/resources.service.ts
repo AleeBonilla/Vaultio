@@ -346,6 +346,7 @@ export class ResourcesService {
     const user = await this.auth.readUserFromAuthorization(authorizationHeader);
     const resource = await this.prisma.resources.findFirst({ where: { id, is_active: true } });
     if (!resource) notFound("Recurso no encontrado");
+    if (resource.user_id === user.id) badRequest("No puedes calificar tu propio recurso");
 
     const stars = Number(input?.stars);
     if (!Number.isFinite(stars) || stars < 1 || stars > 5) {
