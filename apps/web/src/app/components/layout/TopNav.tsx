@@ -36,7 +36,7 @@ export function TopNav({ onOpenMobileMenu }: TopNavProps) {
           onClick={onOpenMobileMenu}
           className="rounded-md p-2 text-slate-600 hover:bg-blue-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2 lg:hidden"
         >
-          <Menu className="w-5 h-5" />
+          <Menu aria-hidden="true" className="w-5 h-5" />
         </button>
 
         <form role="search" aria-label="Buscar recursos" onSubmit={handleSearch} className="flex-1 max-w-2xl">
@@ -62,7 +62,7 @@ export function TopNav({ onOpenMobileMenu }: TopNavProps) {
               />
             ) : (
               <div className="flex h-8 w-8 items-center justify-center rounded-full bg-gradient-to-br from-blue-600 to-cyan-500 text-sm font-semibold text-white shadow-md shadow-blue-600/20">
-                {initials || <User className="w-4 h-4" />}
+                {initials || <User aria-hidden="true" className="w-4 h-4" />}
               </div>
             )}
             <span className="hidden text-sm font-medium text-slate-900 sm:inline">

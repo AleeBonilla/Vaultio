@@ -21,3 +21,4 @@ apps/api/data/*.json
 
 # Firebase service account credentials
 *-firebase-adminsdk-*.json
+secrets/

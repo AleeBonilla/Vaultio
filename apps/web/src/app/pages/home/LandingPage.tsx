@@ -1,7 +1,6 @@
 import { BookOpen, Search, Star, Users, TrendingUp, Shield } from "lucide-react";
 import { useEffect, useState } from "react";
 import { Link } from "react-router";
-import { Button } from "../../components/ui/Button";
 import { VaultioLogo } from "../../components/ui/VaultioLogo";
 import { publicApi, type PublicStats } from "../../lib/api";
 
@@ -25,21 +24,17 @@ export function LandingPage() {
         <div className="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
           <VaultioLogo />
           <div className="flex items-center gap-4">
-            <Link to="/login">
-              <Button
-                variant="ghost"
-                className="rounded-full text-slate-600 hover:text-blue-700 hover:bg-blue-50 transition-colors"
-              >
-                Iniciar Sesión
-              </Button>
+                        <Link
+              to="/login"
+              className="rounded-full px-4 py-2 font-medium text-slate-600 transition-colors hover:bg-blue-50 hover:text-blue-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2"
+            >
+              Iniciar Sesion
             </Link>
-            <Link to="/register">
-              <Button
-                variant="primary"
-                className="rounded-full bg-blue-600 text-white hover:bg-blue-700 font-semibold shadow-lg shadow-blue-600/15 transition-colors"
-              >
-                Registrarse
-              </Button>
+            <Link
+              to="/register"
+              className="rounded-full bg-blue-600 px-4 py-2 font-semibold text-white shadow-lg shadow-blue-600/15 transition-colors hover:bg-blue-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2"
+            >
+              Registrarse
             </Link>
           </div>
         </div>

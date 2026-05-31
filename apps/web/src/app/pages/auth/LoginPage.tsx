@@ -102,7 +102,7 @@ export function LoginPage() {
 
       <div className="relative z-10 w-full max-w-md">
         <div className="mb-10 text-center">
-          <Link to="/" className="mb-8 inline-flex items-center gap-2">
+          <Link to="/" aria-label="Volver a la pagina principal de Vaultio" className="mb-8 inline-flex items-center gap-2 rounded-sm focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2">
             <VaultioLogo />
           </Link>
           <h1 className="mb-3 text-4xl font-extrabold tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-blue-700 via-blue-500 to-cyan-500">
@@ -132,6 +132,7 @@ export function LoginPage() {
           <Button
             type="button"
             variant="secondary"
+            aria-label="Continuar con Google"
             className="mb-5 flex w-full items-center justify-center gap-3 rounded-full border-blue-100 py-3 shadow-sm hover:bg-blue-50"
             onClick={handleGoogle}
             disabled={googleSubmitting || Boolean(configError)}
@@ -167,7 +168,11 @@ export function LoginPage() {
             />
 
             <div className="flex justify-between text-sm">
-              <button type="button" onClick={handleReset} className="text-blue-600 hover:text-blue-800">
+              <button
+                type="button"
+                onClick={handleReset}
+                className="rounded-sm text-blue-600 hover:text-blue-800 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2"
+              >
                 ¿Olvidaste tu contraseña?
               </button>
             </div>
@@ -184,14 +189,14 @@ export function LoginPage() {
 
           <p className="mt-6 text-center text-sm text-slate-600">
             ¿No tenés cuenta?{" "}
-            <Link to="/register" className="font-semibold text-blue-600 hover:text-blue-800">
+            <Link to="/register" className="rounded-sm font-semibold text-blue-600 hover:text-blue-800 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2">
               Crear una
             </Link>
           </p>
         </div>
 
         <p className="mt-8 text-center text-sm text-slate-500">
-          <Link to="/" className="text-slate-500 hover:text-slate-900">
+          <Link to="/" className="rounded-sm text-slate-500 hover:text-slate-900 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2">
             ← Volver al inicio
           </Link>
         </p>

@@ -89,7 +89,12 @@ const FIREBASE_AUTH_ERROR_MESSAGES: Record<string, string> = {
   "auth/invalid-credential": "Credenciales inválidas. Verificá correo y contraseña.",
   "auth/popup-closed-by-user": "Cancelaste el inicio de sesión con Google.",
   "auth/cancelled-popup-request": "Hay otro inicio de sesión en curso.",
+  "auth/popup-blocked": "El navegador bloqueó la ventana de Google. Permití ventanas emergentes e intentá de nuevo.",
   "auth/operation-not-allowed": "Este método de inicio de sesión no está habilitado en Firebase Auth.",
+  "auth/configuration-not-found": "Firebase Auth no está configurado correctamente para este proyecto.",
+  "auth/unauthorized-domain": "Este dominio no está autorizado en Firebase Auth.",
+  "auth/invalid-api-key": "La configuración de Firebase no es válida.",
+  "auth/api-key-not-valid": "La configuración de Firebase no es válida.",
   "auth/too-many-requests": "Demasiados intentos. Esperá un momento e intentá de nuevo.",
   "auth/network-request-failed": "Sin conexión. Verificá tu red.",
 };
@@ -98,6 +103,10 @@ export function translateFirebaseError(error: unknown): string {
   if (error instanceof Error) {
     const code = (error as { code?: string }).code;
     if (code && FIREBASE_AUTH_ERROR_MESSAGES[code]) return FIREBASE_AUTH_ERROR_MESSAGES[code];
+    if (code?.startsWith("auth/")) return "No se pudo completar la autenticación. Intentá de nuevo.";
+    if (/apiKey|authDomain|projectId|appId|firebaseConfig|Firebase:/i.test(error.message)) {
+      return "No se pudo completar la autenticación. Revisá la configuración de Firebase.";
+    }
     return error.message;
   }
   return "Ocurrió un error inesperado";

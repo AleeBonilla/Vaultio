@@ -38,7 +38,11 @@ export function RatingStars({
     };
 
     return (
-      <div role="radiogroup" aria-label="Calificacion del recurso" className="flex items-center gap-0.5">
+      <div
+        role="radiogroup"
+        aria-label="Calificacion del recurso. Use Tab para recorrer cada cantidad de estrellas y Enter para seleccionar."
+        className="flex items-center gap-0.5"
+      >
         {Array.from({ length: maxRating }, (_, i) => {
           const value = i + 1;
           const selected = value === rating;
@@ -49,10 +53,12 @@ export function RatingStars({
               type="button"
               role="radio"
               aria-checked={selected}
-              aria-label={`${value} de ${maxRating} estrellas${selected ? ", calificacion seleccionada" : ""}`}
+              aria-label={`Calificar con ${value} de ${maxRating} estrellas${
+                selected ? ". Esta calificacion esta seleccionada; presione Enter para quitarla" : ""
+              }`}
               onClick={() => onRate?.(value)}
               onKeyDown={(event) => handleKeyDown(event, value)}
-              tabIndex={selected || (!rating && value === 1) ? 0 : -1}
+              tabIndex={0}
               className="rounded-sm focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2"
             >
               <Star

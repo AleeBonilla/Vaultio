@@ -134,7 +134,11 @@ export function ResourceCard({
         <p>
           Por{" "}
           {authorId ? (
-            <Link to={`/app/users/${authorId}`} className="font-medium text-blue-600 hover:text-blue-800">
+            <Link
+              to={`/app/users/${authorId}`}
+              aria-label={`Ver perfil de ${author}`}
+              className="font-medium text-blue-600 hover:text-blue-800 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2"
+            >
               {author}
             </Link>
           ) : (
@@ -163,7 +167,7 @@ export function ResourceCard({
           <Link
             to={`/app/resources/${id}/edit`}
             aria-label={`Editar recurso ${title}`}
-            className="inline-flex flex-1 items-center justify-center gap-2 rounded-full border border-blue-100 px-3 py-2 text-sm font-medium text-blue-600 transition-colors hover:bg-blue-50"
+            className="inline-flex flex-1 items-center justify-center gap-2 rounded-full border border-blue-100 px-3 py-2 text-sm font-medium text-blue-600 transition-colors hover:bg-blue-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2"
           >
             <Edit3 aria-hidden="true" className="h-4 w-4" />
             Editar
@@ -172,7 +176,7 @@ export function ResourceCard({
             type="button"
             onClick={onDelete}
             aria-label={`Eliminar recurso ${title}`}
-            className="inline-flex flex-1 items-center justify-center gap-2 rounded-full border border-red-100 px-3 py-2 text-sm font-medium text-red-600 transition-colors hover:bg-red-50"
+            className="inline-flex flex-1 items-center justify-center gap-2 rounded-full border border-red-100 px-3 py-2 text-sm font-medium text-red-600 transition-colors hover:bg-red-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-red-500 focus-visible:ring-offset-2"
           >
             <Trash2 aria-hidden="true" className="h-4 w-4" />
             Eliminar

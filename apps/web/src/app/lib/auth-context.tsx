@@ -135,7 +135,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       setLoading(false);
       const message = translateFirebaseError(signInError);
       setError(message);
-      throw signInError;
+      throw new Error(message);
     }
   }, []);
 
@@ -148,7 +148,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       setLoading(false);
       const message = translateFirebaseError(signInError);
       setError(message);
-      throw signInError;
+      throw new Error(message);
     }
   }, []);
 
@@ -176,7 +176,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         setLoading(false);
         const message = translateFirebaseError(signUpError);
         setError(message);
-        throw signUpError;
+        throw new Error(message);
       }
     },
     [],
@@ -189,7 +189,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     } catch (resetError) {
       const message = translateFirebaseError(resetError);
       setError(message);
-      throw resetError;
+      throw new Error(message);
     }
   }, []);
 

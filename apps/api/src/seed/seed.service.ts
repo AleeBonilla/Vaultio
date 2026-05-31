@@ -1,4 +1,4 @@
-import { Inject, Injectable, OnApplicationBootstrap } from "@nestjs/common";
+import { Inject, Injectable, OnApplicationBootstrap, Logger } from "@nestjs/common";
 import { PrismaService } from "../prisma/prisma.service";
 
 const demoUsers = {
@@ -13,10 +13,21 @@ const demoResources = {
 
 @Injectable()
 export class SeedService implements OnApplicationBootstrap {
+  private readonly logger = new Logger(SeedService.name);
+
   constructor(@Inject(PrismaService) private readonly prisma: PrismaService) {}
 
   async onApplicationBootstrap() {
-    await this.seed();
+    try {
+      await this.seed();
+      this.logger.log('Base de datos inicializada/actualizada con datos semilla.');
+    } catch (error: any) {
+      if (error?.code === 'ECONNREFUSED' || error?.message?.includes('ECONNREFUSED')) {
+        this.logger.warn('No se pudo conectar a la base de datos durante el seeding (ECONNREFUSED). Asegúrate de que PostgreSQL esté corriendo.');
+      } else {
+        this.logger.warn(`Error ejecutando el seeding al iniciar: ${error.message}`);
+      }
+    }
   }
 
   async seed() {
@@ -27,8 +38,13 @@ export class SeedService implements OnApplicationBootstrap {
 
   private async seedCatalogs() {
     await this.prisma.institutions.upsert({
-      where: { name: "Instituto Tecnológico de Costa Rica" },
-      update: {},
+      where: { id: 1 },
+      update: {
+        name: "Instituto Tecnológico de Costa Rica",
+        acronym: "TEC",
+        email_domain: "estudiantec.cr",
+        is_active: true,
+      },
       create: {
         id: 1,
         name: "Instituto Tecnológico de Costa Rica",

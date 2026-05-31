@@ -39,6 +39,11 @@ export function UploadResource() {
 
   const fileInputId = useId();
   const descriptionId = useId();
+  const originHintId = useId();
+  const uploadIntroId = useId();
+  const fileDropHintId = useId();
+  const detailsHintId = useId();
+  const linkHintId = useId();
   const fileInputRef = useRef<HTMLInputElement | null>(null);
 
   useEffect(() => {
@@ -194,15 +199,25 @@ export function UploadResource() {
 
   return (
     <div className="max-w-3xl mx-auto">
-      <div className="mb-8 rounded-3xl border border-blue-100 bg-white/80 p-8 shadow-sm shadow-blue-900/5">
+      <div
+        className="mb-8 rounded-3xl border border-blue-100 bg-white/80 p-8 shadow-sm shadow-blue-900/5"
+        aria-labelledby="upload-resource-title"
+        aria-describedby={uploadIntroId}
+      >
         <p className="mb-3 text-xs font-semibold uppercase tracking-[0.22em] text-blue-600">Contribuir</p>
-        <h1 className="mb-3 text-4xl font-extrabold tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-blue-700 via-blue-500 to-cyan-500">
+        <h1
+          id="upload-resource-title"
+          className="mb-3 text-4xl font-extrabold tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-blue-700 via-blue-500 to-cyan-500"
+        >
           Subir recurso
         </h1>
-        <p className="text-slate-600">Comparte tus materiales de estudio con otros estudiantes.</p>
+        <p id={uploadIntroId} className="text-slate-600">
+          Comparte tus materiales de estudio con otros estudiantes. Primero elegi si vas a subir un
+          archivo o registrar un link externo; luego completa los datos academicos del recurso.
+        </p>
       </div>
 
-      <ol className="mb-8 flex flex-wrap items-center gap-4" aria-label="Progreso de subida">
+      <ol className="mb-8 flex flex-wrap items-center gap-4" aria-label="Progreso de subida de recurso">
         {[1, 2].map((s) => (
           <li key={s} className="flex items-center gap-2" aria-current={step === s ? "step" : undefined}>
             <span
@@ -234,29 +249,42 @@ export function UploadResource() {
 
         {step === 1 && (
           <div>
-            <h2 className="mb-6 text-xl font-semibold text-slate-900">Selecciona el origen</h2>
+            <h2 className="mb-6 text-xl font-semibold text-slate-900">
+              Subir recurso: selecciona el origen del recurso
+            </h2>
+            <p id={originHintId} className="sr-only">
+              Elija si va a subir un archivo desde su computadora o registrar un link externo. Ambas
+              opciones se pueden seleccionar con Tab y Enter.
+            </p>
 
-            <div className="mb-6 grid grid-cols-2 gap-3 rounded-2xl border border-blue-100 bg-blue-50/40 p-2">
+            <div
+              role="group"
+              aria-label="Origen del recurso"
+              aria-describedby={originHintId}
+              className="mb-6 grid grid-cols-2 gap-3 rounded-2xl border border-blue-100 bg-blue-50/40 p-2"
+            >
               <button
                 type="button"
                 aria-pressed={mode === "file"}
+                aria-label="Subir archivo desde la computadora"
                 onClick={() => setMode("file")}
                 className={`flex items-center justify-center gap-2 rounded-xl px-4 py-3 text-sm font-semibold transition-colors ${
                   mode === "file" ? "bg-white text-blue-700 shadow-sm" : "text-slate-600 hover:bg-white/70"
                 }`}
               >
-                <Upload className="h-4 w-4" />
+                <Upload aria-hidden="true" className="h-4 w-4" />
                 Archivo
               </button>
               <button
                 type="button"
                 aria-pressed={mode === "link"}
+                aria-label="Registrar link externo"
                 onClick={() => setMode("link")}
                 className={`flex items-center justify-center gap-2 rounded-xl px-4 py-3 text-sm font-semibold transition-colors ${
                   mode === "link" ? "bg-white text-blue-700 shadow-sm" : "text-slate-600 hover:bg-white/70"
                 }`}
               >
-                <LinkIcon className="h-4 w-4" />
+                <LinkIcon aria-hidden="true" className="h-4 w-4" />
                 Link
               </button>
             </div>
@@ -266,6 +294,7 @@ export function UploadResource() {
                 className={`border-2 border-dashed rounded-lg p-12 text-center transition-colors ${
                   dragActive ? "border-blue-500 bg-blue-50" : "border-blue-100 hover:border-blue-300"
                 }`}
+                aria-describedby={fileDropHintId}
                 onDragEnter={handleDrag}
                 onDragLeave={handleDrag}
                 onDragOver={handleDrag}
@@ -276,6 +305,10 @@ export function UploadResource() {
                 </div>
                 <h3 className="mb-2 font-medium text-slate-900">Arrastra y suelta tu archivo aqui</h3>
                 <p className="mb-4 text-sm text-slate-500">o</p>
+                <p id={fileDropHintId} className="sr-only">
+                  Puede arrastrar un archivo a esta zona o usar el boton Seleccionar archivo. El limite
+                  es de {MAX_FILE_SIZE_MB} megabytes.
+                </p>
                 <input
                   id={fileInputId}
                   ref={fileInputRef}
@@ -291,6 +324,7 @@ export function UploadResource() {
                 />
                 <button
                   type="button"
+                  aria-describedby={fileDropHintId}
                   onClick={() => fileInputRef.current?.click()}
                   className="inline-flex rounded-full border border-blue-100 bg-white px-4 py-2 font-medium text-blue-600 transition-colors hover:bg-blue-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2"
                 >
@@ -309,13 +343,21 @@ export function UploadResource() {
                   value={resourceUrl}
                   onChange={(event) => setResourceUrl(event.target.value)}
                   placeholder="https://..."
+                  aria-describedby={linkHintId}
                   required
                 />
+                <p id={linkHintId} className="mt-2 text-xs text-slate-500">
+                  Pegue un enlace completo, por ejemplo https://sitio.com/recurso.
+                </p>
               </div>
             )}
 
             {mode === "file" && selectedFile && (
-              <div className="mt-6 flex items-center gap-3 rounded-2xl border border-blue-100 bg-blue-50/50 p-4">
+              <div
+                className="mt-6 flex items-center gap-3 rounded-2xl border border-blue-100 bg-blue-50/50 p-4"
+                role="status"
+                aria-live="polite"
+              >
                 <FileText aria-hidden="true" className="w-10 h-10 text-blue-600" />
                 <div className="flex-1 min-w-0">
                   <p className="truncate font-medium text-slate-900">{selectedFile.name}</p>
@@ -330,7 +372,11 @@ export function UploadResource() {
             )}
 
             {mode === "link" && resourceUrl.trim() && (
-              <div className="mt-6 flex items-center gap-3 rounded-2xl border border-blue-100 bg-blue-50/50 p-4">
+              <div
+                className="mt-6 flex items-center gap-3 rounded-2xl border border-blue-100 bg-blue-50/50 p-4"
+                role="status"
+                aria-live="polite"
+              >
                 <LinkIcon aria-hidden="true" className="w-10 h-10 text-blue-600" />
                 <div className="flex-1 min-w-0">
                   <p className="truncate font-medium text-slate-900">{resourceUrl.trim()}</p>
@@ -341,7 +387,12 @@ export function UploadResource() {
             )}
 
             <div className="flex justify-end mt-6">
-              <Button variant="primary" onClick={() => setStep(2)} disabled={!canContinue}>
+              <Button
+                variant="primary"
+                aria-label="Continuar a los detalles del recurso"
+                onClick={() => setStep(2)}
+                disabled={!canContinue}
+              >
                 Continuar
               </Button>
             </div>
@@ -350,9 +401,15 @@ export function UploadResource() {
 
         {step === 2 && (
           <div>
-            <h2 className="mb-6 text-xl font-semibold text-slate-900">Detalles del recurso</h2>
+            <h2 className="mb-2 text-xl font-semibold text-slate-900">
+              Subir recurso: completa los detalles del recurso
+            </h2>
+            <p id={detailsHintId} className="mb-6 text-sm text-slate-600">
+              Los campos titulo, descripcion, curso y tipo de recurso son obligatorios. Profesor,
+              semestre y etiquetas son opcionales.
+            </p>
 
-            <div className="space-y-4">
+            <div className="space-y-4" aria-describedby={detailsHintId}>
               <Input
                 label="Titulo"
                 value={title}
@@ -472,6 +529,7 @@ export function UploadResource() {
             <div className="flex gap-3 mt-8">
               <Button
                 variant="secondary"
+                aria-label="Volver al paso de origen del recurso"
                 onClick={() => setStep(1)}
                 className="flex-1 rounded-full border-blue-100 hover:bg-blue-50"
                 disabled={submitting}
@@ -480,6 +538,7 @@ export function UploadResource() {
               </Button>
               <Button
                 variant="primary"
+                aria-label="Publicar recurso en Vaultio"
                 onClick={handleSubmit}
                 className="flex-1 rounded-full bg-blue-600 shadow-lg shadow-blue-600/15 hover:bg-blue-700"
                 disabled={!canSubmit}

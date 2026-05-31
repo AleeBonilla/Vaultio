@@ -10,7 +10,7 @@ Guía detallada para correr Vaultio en tu máquina, debuggear flujos y resetear 
 npm install
 docker compose up -d
 cp apps/web/.env.example apps/web/.env.local      # y completar
-# colocar el service account JSON en la raíz
+# colocar el service account JSON en secrets/vaultio-auth-service-account.json
 npm run prisma:migrate:deploy
 npm run prisma:generate
 npm run dev:api
@@ -82,7 +82,19 @@ Los 4 valores VITE*FIREBASE*\* salen de Firebase Console → Project Settings �
 
 Descargar el service account JSON desde Firebase Console → Project Settings → **Service accounts** → "Generate new private key".
 
-Colocá el archivo donde corresponda según prioridad:
+Para la demo local, coloca el archivo en:
+
+```txt
+secrets/vaultio-auth-service-account.json
+```
+
+Y configura:
+
+```dotenv
+VAULTIO_FIREBASE_SERVICE_ACCOUNT=secrets/vaultio-auth-service-account.json
+```
+
+El backend tambien acepta estas alternativas, en orden de prioridad:
 
 1. Path en `GOOGLE_APPLICATION_CREDENTIALS` (env var).
 2. Path relativo al root en `VAULTIO_FIREBASE_SERVICE_ACCOUNT`.
@@ -149,7 +161,7 @@ Todas tienen defaults sensatos para dev local. Las que típicamente vas a cambia
 ```dotenv
 VAULTIO_API_PORT=4000
 DATABASE_URL=postgresql://vaultio:vaultio@localhost:5432/vaultio?schema=public
-GOOGLE_APPLICATION_CREDENTIALS=/abs/path/al/service-account.json
+VAULTIO_FIREBASE_SERVICE_ACCOUNT=secrets/vaultio-auth-service-account.json
 VAULTIO_AUTH_ALLOWED_DOMAIN=               # vacío = cualquier dominio
 VAULTIO_STORAGE_ENDPOINT=http://localhost:9000
 VAULTIO_STORAGE_PUBLIC_ENDPOINT=http://localhost:9000
@@ -264,10 +276,10 @@ docker compose logs postgres
 El service account JSON no se está cargando. Verificá:
 
 ```bash
-node -e "const fs=require('fs'); const path=require('path'); const m=fs.readdirSync('.').find(n=>/-firebase-adminsdk-.*\.json$/i.test(n)); console.log(m || 'no encontrado')"
+node -e "const fs=require('fs'); console.log(fs.existsSync('secrets/vaultio-auth-service-account.json') ? 'ok' : 'no encontrado')"
 ```
 
-O exportá `GOOGLE_APPLICATION_CREDENTIALS` con un path absoluto.
+O configura `VAULTIO_FIREBASE_SERVICE_ACCOUNT=secrets/vaultio-auth-service-account.json`.
 
 ### MinIO devuelve `SignatureDoesNotMatch`
 

@@ -1,5 +1,5 @@
 # ---- Stage 1: deps -----------------------------------------------------------
-FROM node:20-alpine AS deps
+FROM node:22-alpine AS deps
 WORKDIR /repo
 
 # Copia los manifests para aprovechar la cache de npm
@@ -17,7 +17,7 @@ RUN npm run prisma:generate --workspace @vaultio/api
 RUN npm run build:api
 
 # ---- Stage 3: runtime --------------------------------------------------------
-FROM node:20-alpine AS runtime
+FROM node:22-alpine AS runtime
 ENV NODE_ENV=production
 WORKDIR /app
 

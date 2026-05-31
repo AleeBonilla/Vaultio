@@ -223,14 +223,26 @@ VITE_API_URL=http://localhost:4000
 
 ### 5. Configurar Firebase Admin para el backend
 
-Descargar el _service account JSON_ desde Firebase Console → Project Settings → **Service accounts** → "Generate new private key". El backend lo busca, en orden:
+Descargar el _service account JSON_ desde Firebase Console -> Project Settings -> **Service accounts** -> "Generate new private key". Para la demo local, dejarlo en:
+
+```txt
+secrets/vaultio-auth-service-account.json
+```
+
+Luego configurar:
+
+```env
+VAULTIO_FIREBASE_SERVICE_ACCOUNT=secrets/vaultio-auth-service-account.json
+```
+
+El backend resuelve credenciales en este orden:
 
 1. `GOOGLE_APPLICATION_CREDENTIALS` (path absoluto al JSON).
 2. `VAULTIO_FIREBASE_SERVICE_ACCOUNT` (path relativo al root del repo).
 3. Cualquier archivo `*-firebase-adminsdk-*.json` en la raíz del repo.
 4. `firebase-service-account.json` en la raíz del repo.
 
-Con dejar el JSON en la raíz del repo basta. Está en `.gitignore` para no commitearse.
+La carpeta `secrets/` esta en `.gitignore` para no commitearse. Si se entrega un ZIP manual para demo, incluir esa carpeta dentro del ZIP.
 
 > Este JSON **sí es sensible**: da acceso administrativo al proyecto Firebase. Compartilo con tus compañeros vía gestor de contraseñas o generales uno propio.
 
@@ -266,8 +278,8 @@ Abrir `http://localhost:5173` y registrarse.
 | `VAULTIO_API_PORT`                  | `4000`                                                              | Puerto HTTP del API.                                                         |
 | `VAULTIO_API_PUBLIC_URL`            | `http://localhost:{port}`                                           | URL pública (para construir links absolutos).                                |
 | `DATABASE_URL`                      | `postgresql://vaultio:vaultio@localhost:5432/vaultio?schema=public` | Conexión a Postgres.                                                         |
-| `GOOGLE_APPLICATION_CREDENTIALS`    | (auto-detect en repo root)                                          | Path absoluto al service account JSON. Tiene prioridad.                      |
-| `VAULTIO_FIREBASE_SERVICE_ACCOUNT`  | (auto-detect)                                                       | Path relativo al root, si no usás `GOOGLE_APPLICATION_CREDENTIALS`.          |
+| `GOOGLE_APPLICATION_CREDENTIALS`    | _(vacio)_                                                           | Path absoluto al service account JSON. Tiene prioridad.                      |
+| `VAULTIO_FIREBASE_SERVICE_ACCOUNT`  | `secrets/vaultio-auth-service-account.json`                         | Path relativo al root recomendado para la demo local.                        |
 | `VAULTIO_AUTH_PROVIDER`             | `firebase`                                                          | Proveedor de auth.                                                           |
 | `VAULTIO_AUTH_ALLOWED_DOMAIN`       | _(vacío)_                                                           | Si se setea (ej. `estudiantec.cr`), solo acepta correos de ese dominio.      |
 | `VAULTIO_ALLOW_DEMO_TOKENS`         | `false`                                                             | `true` solo para tests; habilita `POST /auth/login` y `POST /auth/register`. |
@@ -279,8 +291,29 @@ Abrir `http://localhost:5173` y registrarse.
 | `VAULTIO_STORAGE_ACCESS_KEY_ID`     | `vaultio`                                                           | Access key MinIO/S3.                                                         |
 | `VAULTIO_STORAGE_SECRET_ACCESS_KEY` | `vaultio-demo-secret`                                               | Secret key MinIO/S3.                                                         |
 | `VAULTIO_STORAGE_FORCE_PATH_STYLE`  | `true`                                                              | `path-style` URLs (necesario para MinIO).                                    |
+| `VAULTIO_STORAGE_PUBLIC_INCLUDE_BUCKET` | `true` local, `false` si `provider=r2`                          | Incluye el bucket en URLs públicas. Para dominios públicos de R2 debe ser `false`. |
+| `VAULTIO_STORAGE_AUTO_CREATE_BUCKET` | `true` local, `false` si `provider=r2`                            | Permite crear bucket automáticamente. En R2 el bucket debe existir antes.     |
 
 Para producción se recomienda mover **toda** la configuración a variables de entorno reales (no defaults), incluyendo passwords de Postgres y MinIO/S3.
+
+### Cloudflare R2
+
+Para R2 usa el bucket ya creado y configura el backend con:
+
+```env
+VAULTIO_STORAGE_PROVIDER=r2
+VAULTIO_STORAGE_BUCKET=nombre-del-bucket
+VAULTIO_STORAGE_REGION=auto
+VAULTIO_STORAGE_ENDPOINT=https://<ACCOUNT_ID>.r2.cloudflarestorage.com
+VAULTIO_STORAGE_PUBLIC_ENDPOINT=https://<dominio-publico-r2>
+VAULTIO_STORAGE_ACCESS_KEY_ID=...
+VAULTIO_STORAGE_SECRET_ACCESS_KEY=...
+VAULTIO_STORAGE_FORCE_PATH_STYLE=true
+VAULTIO_STORAGE_PUBLIC_INCLUDE_BUCKET=false
+VAULTIO_STORAGE_AUTO_CREATE_BUCKET=false
+```
+
+El bucket necesita CORS para permitir `PUT`, `GET` y `HEAD` desde el dominio de Vercel.
 
 ---
 
@@ -409,7 +442,7 @@ Pasan 12 tests integrales contra la base real:
 | Síntoma                                                     | Causa probable                                          | Solución                                                                                               |
 | ----------------------------------------------------------- | ------------------------------------------------------- | ------------------------------------------------------------------------------------------------------ |
 | `Firebase no está configurado…` en el login                 | Falta `apps/web/.env.local` o las vars VITE*FIREBASE*\* | Crear el archivo desde `.env.example` y **reiniciar `npm run dev:web`** (Vite no recarga env vars).    |
-| `Token invalido` en cada request                            | El service account no se está cargando                  | Verificar que el JSON está en el repo root o `GOOGLE_APPLICATION_CREDENTIALS` apunta a un path válido. |
+| `Token invalido` en cada request                            | El service account no se esta cargando                  | Verificar que exista `secrets/vaultio-auth-service-account.json` y que `VAULTIO_FIREBASE_SERVICE_ACCOUNT` apunte a esa ruta. |
 | `auth/operation-not-allowed` en login con Google            | Proveedor no habilitado en Firebase                     | Firebase Console → Authentication → Sign-in method → habilitar Google y Email/Password.                |
 | `EADDRINUSE :::4000`                                        | Otra instancia del API corriendo                        | Matar el proceso o cambiar `VAULTIO_API_PORT`.                                                         |
 | Tests fallan con `relation "..." does not exist`            | Postgres se levantó con volumen viejo                   | `docker compose down -v && docker compose up -d`.                                                      |

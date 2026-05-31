@@ -63,19 +63,26 @@ export function SavedResources() {
       </div>
 
       {loading ? (
-        <div className="rounded-2xl border border-blue-100 bg-white/85 p-6 text-slate-600 shadow-sm shadow-blue-900/5">
+        <div
+          className="rounded-2xl border border-blue-100 bg-white/85 p-6 text-slate-600 shadow-sm shadow-blue-900/5"
+          role="status"
+          aria-live="polite"
+        >
           Cargando guardados...
         </div>
       ) : resources.length === 0 ? (
         <div className="rounded-2xl border border-blue-100 bg-white/85 p-10 text-center shadow-sm shadow-blue-900/5">
           <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-full bg-blue-100">
-            <Bookmark className="w-7 h-7 text-blue-600" />
+            <Bookmark aria-hidden="true" className="w-7 h-7 text-blue-600" />
           </div>
           <h2 className="mb-2 text-lg font-semibold text-slate-900">Aun no tenes recursos guardados</h2>
           <p className="mb-4 text-slate-600">
             Hace clic en el marcador de cualquier recurso para guardarlo aqui.
           </p>
-          <Link to="/app/resources" className="text-blue-600 hover:underline">
+          <Link
+            to="/app/resources"
+            className="text-blue-600 hover:underline focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2"
+          >
             Explorar recursos
           </Link>
         </div>

@@ -32,18 +32,18 @@ interface FilterPanelProps {
 }
 
 const RATING_OPTIONS = [
-  { label: "Todas", value: 0 },
-  { label: "1+ estrella", value: 1 },
-  { label: "2+ estrellas", value: 2 },
-  { label: "3+ estrellas", value: 3 },
-  { label: "4+ estrellas", value: 4 },
+  { label: "Todas las calificaciones", shortLabel: "Todas", value: 0 },
+  { label: "1 estrella", value: 1 },
+  { label: "2 estrellas", value: 2 },
+  { label: "3 estrellas", value: 3 },
+  { label: "4 estrellas", value: 4 },
   { label: "5 estrellas", value: 5 },
 ];
 
 const KIND_OPTIONS = [
-  { label: "Todos", value: "" },
-  { label: "Archivos", value: "file" },
-  { label: "Links", value: "link" },
+  { label: "Todos", value: "", description: "Mostrar archivos y links" },
+  { label: "Archivos", value: "file", description: "Mostrar solo recursos subidos como archivo" },
+  { label: "Links", value: "link", description: "Mostrar solo recursos guardados como enlace externo" },
 ] as const;
 
 function SearchSelect({
@@ -52,6 +52,8 @@ function SearchSelect({
   value,
   options,
   placeholder,
+  emptyOptionLabel,
+  emptyOptionDescription,
   onChange,
 }: {
   id: string;
@@ -59,6 +61,8 @@ function SearchSelect({
   value: string;
   options: FilterOption[];
   placeholder: string;
+  emptyOptionLabel?: string;
+  emptyOptionDescription?: string;
   onChange: (value: string) => void;
 }) {
   const selected = options.find((option) => option.value === value);
@@ -66,6 +70,7 @@ function SearchSelect({
   const listboxId = useId();
   const [query, setQuery] = useState(selected?.label || "");
   const [open, setOpen] = useState(false);
+  const hintId = useId();
 
   useEffect(() => {
     setQuery(selected?.label || "");
@@ -82,14 +87,26 @@ function SearchSelect({
 
   const matches = useMemo(() => {
     const normalized = query.trim().toLowerCase();
-    if (!normalized || selected?.label === query) return options.slice(0, 8);
+    if (!normalized || selected?.label === query) return [];
     return options
       .filter((option) => `${option.label} ${option.description || ""}`.toLowerCase().includes(normalized))
       .slice(0, 8);
   }, [options, query, selected?.label]);
 
+  const hasEmptyOption = Boolean(emptyOptionLabel);
+  const hasVisibleOptions = hasEmptyOption || matches.length > 0;
+
   return (
-    <div ref={containerRef} className="relative">
+    <div
+      ref={containerRef}
+      className="relative"
+      onKeyDown={(event) => {
+        if (event.key === "Escape") {
+          event.stopPropagation();
+          setOpen(false);
+        }
+      }}
+    >
       <label htmlFor={id} className="mb-2 block text-sm font-semibold text-slate-900">
         {label}
       </label>
@@ -100,6 +117,7 @@ function SearchSelect({
           aria-autocomplete="list"
           aria-expanded={open}
           aria-controls={open ? listboxId : undefined}
+          aria-describedby={hintId}
           value={query}
           onFocus={() => setOpen(true)}
           onChange={(event) => {
@@ -125,6 +143,10 @@ function SearchSelect({
           </button>
         )}
       </div>
+      <p id={hintId} className="sr-only">
+        Escriba para buscar opciones. Use Tab para moverse por las opciones mostradas y Enter para
+        seleccionar una.
+      </p>
       {open && (
         <div
           id={listboxId}
@@ -132,7 +154,25 @@ function SearchSelect({
           aria-label={`Opciones de ${label}`}
           className="absolute z-10 mt-2 max-h-60 w-full overflow-y-auto rounded-2xl border border-blue-100 bg-white p-1 shadow-xl shadow-blue-900/10"
         >
-          {matches.length === 0 ? (
+          {hasEmptyOption && (
+            <button
+              type="button"
+              role="option"
+              aria-selected={!value}
+              onClick={() => {
+                onChange("");
+                setQuery("");
+                setOpen(false);
+              }}
+              className="w-full rounded-xl px-3 py-2 text-left text-sm transition-colors hover:bg-blue-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
+            >
+              <span className="block font-medium text-slate-900">{emptyOptionLabel}</span>
+              {emptyOptionDescription && (
+                <span className="block text-xs text-slate-500">{emptyOptionDescription}</span>
+              )}
+            </button>
+          )}
+          {!hasVisibleOptions ? (
             <p className="px-3 py-2 text-sm text-slate-500">Sin resultados</p>
           ) : (
             matches.map((option) => (
@@ -146,7 +186,7 @@ function SearchSelect({
                   setQuery(option.label);
                   setOpen(false);
                 }}
-                className="w-full rounded-xl px-3 py-2 text-left text-sm transition-colors hover:bg-blue-50"
+                className="w-full rounded-xl px-3 py-2 text-left text-sm transition-colors hover:bg-blue-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
               >
                 <span className="block font-medium text-slate-900">{option.label}</span>
                 {option.description && (
@@ -260,6 +300,8 @@ export function FilterPanel({
           value={values.professorId}
           options={professorOptions}
           placeholder="Buscar profesor..."
+          emptyOptionLabel="Sin profesor"
+          emptyOptionDescription="No filtrar por profesor. Muestra recursos con y sin profesor asignado."
           onChange={(professorId) => onChange({ ...values, professorId })}
         />
         <SelectFilter
@@ -275,23 +317,20 @@ export function FilterPanel({
           <legend className="mb-3 text-sm font-semibold text-slate-900">Origen</legend>
           <div className="grid grid-cols-3 gap-2">
             {KIND_OPTIONS.map((option) => (
-              <label
+              <button
                 key={option.value}
-                className={`cursor-pointer rounded-xl px-3 py-2 text-center text-sm transition-colors ${
+                type="button"
+                aria-pressed={values.kind === option.value}
+                aria-label={`${option.label}. ${option.description}`}
+                onClick={() => onChange({ ...values, kind: option.value })}
+                className={`rounded-xl px-3 py-2 text-center text-sm transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2 ${
                   values.kind === option.value
                     ? "bg-blue-50 text-blue-900"
                     : "bg-white text-slate-600 hover:bg-blue-50/50"
-                } focus-within:ring-2 focus-within:ring-blue-500 focus-within:ring-offset-2`}
+                }`}
               >
-                <input
-                  type="radio"
-                  name="kind"
-                  checked={values.kind === option.value}
-                  onChange={() => onChange({ ...values, kind: option.value })}
-                  className="sr-only"
-                />
                 {option.label}
-              </label>
+              </button>
             ))}
           </div>
         </fieldset>
@@ -300,21 +339,22 @@ export function FilterPanel({
           <legend className="mb-3 text-sm font-semibold text-slate-900">Calificacion minima</legend>
           <div className="grid grid-cols-2 gap-2">
             {RATING_OPTIONS.map((option) => (
-              <label
+              <button
                 key={option.value}
-                className={`flex cursor-pointer items-center gap-2 rounded-xl px-3 py-2 transition-colors ${
+                type="button"
+                aria-pressed={values.minRating === option.value}
+                aria-label={
+                  option.value === 0
+                    ? "Mostrar recursos con cualquier calificacion"
+                    : `Mostrar recursos con calificacion minima de ${option.label}`
+                }
+                onClick={() => onChange({ ...values, minRating: option.value })}
+                className={`flex items-center gap-2 rounded-xl px-3 py-2 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2 ${
                   values.minRating === option.value ? "bg-blue-50 text-blue-900" : "hover:bg-blue-50/50"
                 }`}
               >
-                <input
-                  type="radio"
-                  name="minRating"
-                  checked={values.minRating === option.value}
-                  onChange={() => onChange({ ...values, minRating: option.value })}
-                  className="h-4 w-4 border-blue-100 text-blue-600 focus:ring-2 focus:ring-blue-500"
-                />
                 {option.value === 0 ? (
-                  <span className="text-sm text-slate-600">{option.label}</span>
+                  <span className="text-sm text-slate-600">{option.shortLabel}</span>
                 ) : (
                   <span
                     className="inline-flex items-center gap-0.5 text-sm text-slate-600"
@@ -325,7 +365,7 @@ export function FilterPanel({
                     ))}
                   </span>
                 )}
-              </label>
+              </button>
             ))}
           </div>
         </fieldset>

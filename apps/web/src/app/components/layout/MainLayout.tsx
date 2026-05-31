@@ -1,10 +1,16 @@
-import { useState } from "react";
-import { Outlet } from "react-router";
+import { useEffect, useRef, useState } from "react";
+import { Outlet, useLocation } from "react-router";
 import { Sidebar } from "./Sidebar";
 import { TopNav } from "./TopNav";
 
 export function MainLayout() {
   const [mobileOpen, setMobileOpen] = useState(false);
+  const location = useLocation();
+  const mainRef = useRef<HTMLElement | null>(null);
+
+  useEffect(() => {
+    mainRef.current?.focus();
+  }, [location.pathname]);
 
   return (
     <div className="relative min-h-screen overflow-hidden bg-slate-50 text-slate-900">
@@ -18,7 +24,13 @@ export function MainLayout() {
       </a>
       <Sidebar mobileOpen={mobileOpen} onCloseMobile={() => setMobileOpen(false)} />
       <TopNav onOpenMobileMenu={() => setMobileOpen(true)} />
-      <main id="main-content" className="relative z-0 pt-16 lg:ml-64" tabIndex={-1}>
+      <main
+        id="main-content"
+        ref={mainRef}
+        aria-label="Contenido principal de Vaultio"
+        className="relative z-0 pt-16 lg:ml-64"
+        tabIndex={-1}
+      >
         <div className="p-4 sm:p-6 lg:p-8">
           <Outlet />
         </div>

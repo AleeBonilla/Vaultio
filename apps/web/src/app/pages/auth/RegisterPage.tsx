@@ -153,7 +153,7 @@ export function RegisterPage() {
 
       <div className="relative z-10 w-full max-w-md">
         <div className="mb-10 text-center">
-          <Link to="/" className="mb-8 inline-flex items-center gap-2">
+          <Link to="/" aria-label="Volver a la pagina principal de Vaultio" className="mb-8 inline-flex items-center gap-2 rounded-sm focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2">
             <VaultioLogo />
           </Link>
           <h1 className="mb-3 text-4xl font-extrabold tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-blue-700 via-blue-500 to-cyan-500">
@@ -270,15 +270,15 @@ export function RegisterPage() {
             <button
               type="button"
               onClick={() => signOut().then(() => navigate("/login"))}
-              className="mt-6 inline-flex items-center gap-2 text-sm text-slate-600 hover:text-slate-900"
+              className="mt-6 inline-flex items-center gap-2 rounded-sm text-sm text-slate-600 hover:text-slate-900 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2"
             >
-              <LogOut className="w-4 h-4" />
+              <LogOut aria-hidden="true" className="w-4 h-4" />
               Cerrar sesión
             </button>
           ) : (
             <p className="mt-6 text-center text-sm text-slate-600">
               ¿Ya tenés cuenta?{" "}
-              <Link to="/login" className="font-semibold text-blue-600 hover:text-blue-800">
+              <Link to="/login" className="rounded-sm font-semibold text-blue-600 hover:text-blue-800 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2">
                 Iniciá sesión
               </Link>
             </p>

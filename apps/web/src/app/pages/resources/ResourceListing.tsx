@@ -1,5 +1,5 @@
 import { SlidersHorizontal } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useEffect, useId, useState } from "react";
 import { useSearchParams } from "react-router";
 import { FilterPanel, type FilterOption, type FilterValues } from "../../components/filters/FilterPanel";
 import { SortSelect } from "../../components/filters/SortSelect";
@@ -46,6 +46,7 @@ export function ResourceListing() {
   const [courseOptions, setCourseOptions] = useState<FilterOption[]>([]);
   const [professorOptions, setProfessorOptions] = useState<FilterOption[]>([]);
   const [periodOptions, setPeriodOptions] = useState<FilterOption[]>([]);
+  const filtersPanelId = useId();
 
   useEffect(() => {
     let active = true;
@@ -119,10 +120,12 @@ export function ResourceListing() {
         <Button
           variant="secondary"
           size="sm"
+          aria-expanded={showFilters}
+          aria-controls={filtersPanelId}
           onClick={() => setShowFilters((current) => !current)}
           className="flex items-center gap-2 rounded-full border-blue-100 hover:bg-blue-50"
         >
-          <SlidersHorizontal className="w-4 h-4" />
+          <SlidersHorizontal aria-hidden="true" className="w-4 h-4" />
           {showFilters ? "Ocultar filtros" : "Mostrar filtros"}
         </Button>
 
@@ -135,7 +138,7 @@ export function ResourceListing() {
 
       <div className="flex flex-col lg:flex-row gap-6">
         {showFilters && (
-          <aside className="w-full lg:w-80 flex-shrink-0">
+          <aside id={filtersPanelId} className="w-full lg:w-80 flex-shrink-0" aria-label="Filtros de recursos">
             <div className="lg:sticky lg:top-20">
               <FilterPanel
                 typeOptions={typeOptions}
@@ -153,7 +156,11 @@ export function ResourceListing() {
 
         <div className="flex-1">
           {loading ? (
-            <div className="rounded-2xl border border-blue-100 bg-white/85 p-6 text-slate-600 shadow-sm shadow-blue-900/5">
+            <div
+              className="rounded-2xl border border-blue-100 bg-white/85 p-6 text-slate-600 shadow-sm shadow-blue-900/5"
+              role="status"
+              aria-live="polite"
+            >
               Cargando recursos...
             </div>
           ) : resources.length === 0 ? (

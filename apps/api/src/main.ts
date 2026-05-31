@@ -31,9 +31,9 @@ export async function createNestApp() {
 
 async function bootstrap() {
   const app = await createNestApp();
-  await app.listen(config.port);
+  await app.listen(config.port, "0.0.0.0");
 
-  console.info(`Vaultio API escuchando en http://localhost:${config.port}`);
+  console.info(`Vaultio API escuchando en 0.0.0.0:${config.port}`);
 }
 
 if (require.main === module) {

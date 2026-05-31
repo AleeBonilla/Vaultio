@@ -1,5 +1,4 @@
 import { Link } from "react-router";
-import { Button } from "../components/ui/Button";
 import { VaultioLogo } from "../components/ui/VaultioLogo";
 
 export function NotFound() {
@@ -18,13 +17,11 @@ export function NotFound() {
         <p className="mb-8 text-slate-600">
           No pudimos encontrar lo que buscás. Verificá la URL o volvé al inicio.
         </p>
-        <Link to="/app">
-          <Button
-            variant="primary"
-            className="rounded-full bg-blue-600 shadow-lg shadow-blue-600/15 hover:bg-blue-700"
-          >
-            Ir al inicio
-          </Button>
+        <Link
+          to="/app"
+          className="inline-flex rounded-full bg-blue-600 px-4 py-2 font-medium text-white shadow-lg shadow-blue-600/15 transition-colors hover:bg-blue-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2"
+        >
+          Ir al inicio
         </Link>
       </div>
     </div>

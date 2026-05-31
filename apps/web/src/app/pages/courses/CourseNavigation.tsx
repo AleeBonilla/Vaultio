@@ -45,7 +45,7 @@ export function CourseNavigation() {
   if (loading) {
     return (
       <div className="max-w-7xl mx-auto">
-        <p className="text-slate-600">Cargando catálogo académico...</p>
+        <p className="text-slate-600" role="status" aria-live="polite">Cargando catálogo académico...</p>
       </div>
     );
   }
@@ -76,7 +76,8 @@ export function CourseNavigation() {
             <Link
               key={career.id}
               to={`/app/courses/${career.id}`}
-              className="group rounded-2xl border border-blue-100 bg-white/85 p-6 shadow-sm shadow-blue-900/5 transition-colors hover:border-blue-200 hover:bg-blue-50/40"
+              aria-label={`Abrir carrera ${career.name}, plan ${career.studyPlan}`}
+              className="group rounded-2xl border border-blue-100 bg-white/85 p-6 shadow-sm shadow-blue-900/5 transition-colors hover:border-blue-200 hover:bg-blue-50/40 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2"
             >
               <div className="flex items-start gap-4">
                 <div className="flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-blue-600 to-cyan-500 font-semibold text-white shadow-md shadow-blue-600/20">
@@ -90,7 +91,7 @@ export function CourseNavigation() {
                     <span>Plan {career.studyPlan}</span>
                   </div>
                 </div>
-                <ChevronRight className="h-5 w-5 flex-shrink-0 text-slate-400 transition-colors group-hover:text-blue-600" />
+                <ChevronRight aria-hidden="true" className="h-5 w-5 flex-shrink-0 text-slate-400 transition-colors group-hover:text-blue-600" />
               </div>
             </Link>
           ))}
@@ -102,15 +103,15 @@ export function CourseNavigation() {
   return (
     <div className="max-w-7xl mx-auto">
       <div className="mb-10">
-        <nav className="flex items-center gap-2 text-sm text-slate-600 mb-4">
+        <nav aria-label="Ruta de navegacion de carrera" className="flex items-center gap-2 text-sm text-slate-600 mb-4">
           <Link to="/app" className="hover:text-blue-700 transition-colors">
             Inicio
           </Link>
-          <ChevronRight className="w-4 h-4" />
+          <ChevronRight aria-hidden="true" className="w-4 h-4" />
           <Link to="/app/courses" className="hover:text-blue-700 transition-colors">
             Carreras
           </Link>
-          <ChevronRight className="w-4 h-4" />
+          <ChevronRight aria-hidden="true" className="w-4 h-4" />
           <span className="font-medium text-slate-900">{selectedCareer.name}</span>
         </nav>
 
@@ -118,7 +119,7 @@ export function CourseNavigation() {
           to="/app/courses"
           className="mb-6 inline-flex items-center gap-2 text-blue-600 transition-colors hover:text-blue-800"
         >
-          <ArrowLeft className="w-4 h-4" />
+          <ArrowLeft aria-hidden="true" className="w-4 h-4" />
           Volver a Carreras
         </Link>
 
@@ -141,12 +142,13 @@ export function CourseNavigation() {
             <Link
               key={course.id}
               to={`/app/courses/${careerId}/${course.id}`}
-              className="group rounded-2xl border border-blue-100 bg-white/85 p-6 shadow-sm shadow-blue-900/5 transition-colors hover:border-blue-200 hover:bg-blue-50/40"
+              aria-label={`Abrir curso ${course.code} ${course.name}, ${course.resourcesCount || 0} recursos disponibles`}
+              className="group rounded-2xl border border-blue-100 bg-white/85 p-6 shadow-sm shadow-blue-900/5 transition-colors hover:border-blue-200 hover:bg-blue-50/40 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2"
             >
               <div className="flex items-start justify-between mb-4">
                 <div className="flex items-center gap-3 flex-1 min-w-0">
                   <div className="flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-xl bg-blue-100">
-                    <BookOpen className="w-6 h-6 text-blue-600" />
+                    <BookOpen aria-hidden="true" className="w-6 h-6 text-blue-600" />
                   </div>
                   <div className="flex-1 min-w-0">
                     <h3 className="mb-1 font-semibold text-slate-900 transition-colors group-hover:text-blue-700">
@@ -155,7 +157,7 @@ export function CourseNavigation() {
                     <p className="text-sm text-slate-600">{course.code}</p>
                   </div>
                 </div>
-                <ChevronRight className="mt-1 h-5 w-5 flex-shrink-0 text-slate-400 transition-colors group-hover:text-blue-600" />
+                <ChevronRight aria-hidden="true" className="mt-1 h-5 w-5 flex-shrink-0 text-slate-400 transition-colors group-hover:text-blue-600" />
               </div>
               <div className="border-t border-blue-100 pt-4">
                 <p className="text-sm font-medium text-slate-700">

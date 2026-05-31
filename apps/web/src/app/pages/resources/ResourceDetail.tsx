@@ -117,6 +117,7 @@ export function ResourceDetail() {
   const [commentDraft, setCommentDraft] = useState("");
   const [submittingComment, setSubmittingComment] = useState(false);
   const [downloading, setDownloading] = useState(false);
+  const commentHelpId = "resource-comment-help";
 
   useEffect(() => {
     let active = true;
@@ -382,6 +383,11 @@ export function ResourceDetail() {
             <div className="flex flex-wrap gap-3 mb-6">
               <Button
                 variant="primary"
+                aria-label={
+                  isExternalResource
+                    ? `Abrir link externo del recurso ${resource.title}`
+                    : `Descargar archivo del recurso ${resource.title}`
+                }
                 className="flex min-w-[200px] flex-1 items-center justify-center gap-2 rounded-full bg-blue-600 shadow-lg shadow-blue-600/15 hover:bg-blue-700"
                 onClick={handleDownload}
                 disabled={downloading}
@@ -395,10 +401,11 @@ export function ResourceDetail() {
               </Button>
               <Button
                 variant="secondary"
+                aria-label={`Compartir enlace del recurso ${resource.title}`}
                 className="flex items-center gap-2 rounded-full border-blue-100 hover:bg-blue-50"
                 onClick={handleShare}
               >
-                <Share2 className="w-4 h-4" />
+                <Share2 aria-hidden="true" className="w-4 h-4" />
                 Compartir
               </Button>
             </div>
@@ -420,7 +427,9 @@ export function ResourceDetail() {
             </div>
 
             <div className="mt-6 border-t border-blue-100 pt-6">
-              <h2 className="mb-3 text-lg font-semibold text-slate-900">Calificar este recurso</h2>
+              <h2 className="mb-3 text-lg font-semibold text-slate-900">
+                Calificar este recurso: {resource.title}
+              </h2>
               <div className="flex items-center gap-3">
                 <RatingStars rating={userRating} size={24} interactive onRate={handleRate} />
                 <span className="text-sm text-slate-600">
@@ -443,12 +452,16 @@ export function ResourceDetail() {
               </h2>
             </div>
 
-            <form onSubmit={handleComment} className="mb-6">
+            <form onSubmit={handleComment} className="mb-6" aria-describedby={commentHelpId}>
               <label htmlFor="comment" className="mb-2 block text-sm font-medium text-slate-900">
                 Dejá tu comentario
               </label>
+              <p id={commentHelpId} className="sr-only">
+                Escriba un comentario sobre este recurso. El boton Comentar se activa cuando hay texto.
+              </p>
               <textarea
                 id="comment"
+                aria-describedby={commentHelpId}
                 value={commentDraft}
                 onChange={(event) => setCommentDraft(event.target.value)}
                 rows={3}
@@ -478,9 +491,9 @@ export function ResourceDetail() {
           </section>
         </div>
 
-        <aside className="lg:col-span-1">
+        <aside className="lg:col-span-1" aria-labelledby="resource-info-title">
           <div className="rounded-2xl border border-blue-100 bg-white/85 p-6 shadow-sm shadow-blue-900/5 lg:sticky lg:top-20">
-            <h3 className="mb-4 font-semibold text-slate-900">Información del recurso</h3>
+            <h3 id="resource-info-title" className="mb-4 font-semibold text-slate-900">Información del recurso</h3>
 
             <div className="space-y-4">
               <AuthorRow author={resource.author} authorId={resource.authorId} />
@@ -526,7 +539,7 @@ export function ResourceDetail() {
 function InfoRow({ icon, label, value }: { icon: React.ReactNode; label: string; value: string }) {
   return (
     <div className="flex items-start gap-3">
-      {icon}
+      <span aria-hidden="true">{icon}</span>
       <div>
         <p className="text-sm text-slate-500">{label}</p>
         <p className="font-medium text-slate-900">{value}</p>
@@ -538,10 +551,14 @@ function InfoRow({ icon, label, value }: { icon: React.ReactNode; label: string;
 function AuthorRow({ author, authorId }: { author: string; authorId: string }) {
   return (
     <div className="flex items-start gap-3">
-      <User className="w-5 h-5 text-blue-400" />
+      <User aria-hidden="true" className="w-5 h-5 text-blue-400" />
       <div>
         <p className="text-sm text-slate-500">Subido por</p>
-        <Link to={`/app/users/${authorId}`} className="font-medium text-blue-600 hover:text-blue-800">
+        <Link
+          to={`/app/users/${authorId}`}
+          aria-label={`Ver perfil de ${author}`}
+          className="font-medium text-blue-600 hover:text-blue-800 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2"
+        >
           {author}
         </Link>
       </div>

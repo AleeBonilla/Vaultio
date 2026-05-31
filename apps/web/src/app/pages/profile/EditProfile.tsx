@@ -27,8 +27,10 @@ export function EditProfile() {
   const photoInputRef = useRef<HTMLInputElement | null>(null);
   const careerSearchId = useId();
   const careerListboxId = useId();
+  const careerHelpId = useId();
   const courseSearchId = useId();
   const courseListboxId = useId();
+  const courseHelpId = useId();
 
   useEffect(() => {
     Promise.all([catalogApi.careers(), catalogApi.courses(), usersApi.courses()])
@@ -194,7 +196,11 @@ export function EditProfile() {
                 className="sr-only"
                 onChange={(event) => setPhotoFile(event.target.files?.[0] || null)}
               />
-              {photoFile && <p className="mt-2 text-xs text-slate-500">{photoFile.name}</p>}
+              {photoFile && (
+                <p className="mt-2 text-xs text-slate-500" role="status" aria-live="polite">
+                  Foto seleccionada: {photoFile.name}
+                </p>
+              )}
             </div>
           </div>
 
@@ -252,17 +258,34 @@ export function EditProfile() {
                 label="Buscar carrera"
                 value={careerQuery}
                 onChange={(event) => setCareerQuery(event.target.value)}
+                onKeyDown={(event) => {
+                  if (event.key === "Escape") {
+                    event.stopPropagation();
+                    setCareerQuery("");
+                  }
+                }}
                 placeholder="Buscar por codigo o nombre..."
                 role="combobox"
                 aria-autocomplete="list"
                 aria-expanded={Boolean(careerQuery.trim())}
                 aria-controls={careerQuery.trim() ? careerListboxId : undefined}
+                aria-describedby={careerHelpId}
               />
+              <p id={careerHelpId} className="sr-only">
+                Escriba parte del codigo o nombre de la carrera. Use Tab para recorrer las opciones
+                y Enter para seleccionar. Presione Escape para cerrar la lista.
+              </p>
               {careerQuery.trim() && (
                 <div
                   id={careerListboxId}
                   role="listbox"
                   aria-label="Opciones de carrera"
+                  onKeyDown={(event) => {
+                    if (event.key === "Escape") {
+                      event.stopPropagation();
+                      setCareerQuery("");
+                    }
+                  }}
                   className="mt-3 grid max-h-72 grid-cols-1 gap-2 overflow-y-auto"
                 >
                   {matchingCareers.map((career) => (
@@ -318,17 +341,35 @@ export function EditProfile() {
                 label="Buscar curso"
                 value={courseQuery}
                 onChange={(event) => setCourseQuery(event.target.value)}
+                onKeyDown={(event) => {
+                  if (event.key === "Escape") {
+                    event.stopPropagation();
+                    setCourseQuery("");
+                  }
+                }}
                 placeholder="Buscar por codigo o nombre..."
                 role="combobox"
                 aria-autocomplete="list"
                 aria-expanded={Boolean(courseQuery.trim())}
                 aria-controls={courseQuery.trim() ? courseListboxId : undefined}
+                aria-describedby={courseHelpId}
               />
+              <p id={courseHelpId} className="sr-only">
+                Escriba parte del codigo o nombre del curso. Use Tab para recorrer las opciones
+                y Enter para seleccionar. Los cursos seleccionados aparecen antes del buscador y se
+                pueden quitar con Enter. Presione Escape para cerrar la lista.
+              </p>
               {courseQuery.trim() && (
                 <div
                   id={courseListboxId}
                   role="listbox"
                   aria-label="Opciones de curso"
+                  onKeyDown={(event) => {
+                    if (event.key === "Escape") {
+                      event.stopPropagation();
+                      setCourseQuery("");
+                    }
+                  }}
                   className="mt-3 grid max-h-72 grid-cols-1 gap-2 overflow-y-auto sm:grid-cols-2"
                 >
                   {matchingCourses.map((course) => (
@@ -372,15 +413,14 @@ export function EditProfile() {
           </div>
 
           <div className="flex gap-3 border-t border-blue-100 pt-4">
-            <Link to="/app/profile" className="flex-1">
-              <Button
-                type="button"
-                variant="secondary"
-                className="w-full rounded-full border-blue-100 hover:bg-blue-50"
-              >
-                Cancelar
-              </Button>
-            </Link>
+            <Button
+              type="button"
+              variant="secondary"
+              onClick={() => navigate("/app/profile")}
+              className="flex-1 rounded-full border-blue-100 hover:bg-blue-50"
+            >
+              Cancelar
+            </Button>
             <Button
               type="submit"
               variant="primary"

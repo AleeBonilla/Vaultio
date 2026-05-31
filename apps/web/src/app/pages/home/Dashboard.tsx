@@ -73,6 +73,7 @@ export function Dashboard() {
       <div className="mb-12">
         <Link
           to="/app/resources"
+          aria-label="Explorar todos los recursos academicos disponibles"
           className="group flex items-center justify-between rounded-2xl border border-blue-100 bg-gradient-to-r from-blue-600 to-cyan-500 p-6 text-white shadow-xl shadow-blue-600/15 transition-colors hover:from-blue-700 hover:to-cyan-600"
         >
           <div className="flex items-center gap-4">
@@ -90,15 +91,19 @@ export function Dashboard() {
         </Link>
       </div>
 
-      <section className="mb-12">
+      <section className="mb-12" aria-labelledby="dashboard-careers-title">
         <div className="flex items-center justify-between mb-8">
           <div className="flex items-center gap-3">
             <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-blue-100 text-blue-600">
               <BookOpen className="w-5 h-5" />
             </div>
-            <h2 className="text-2xl font-bold text-slate-900">Explorar por carrera</h2>
+            <h2 id="dashboard-careers-title" className="text-2xl font-bold text-slate-900">Explorar por carrera</h2>
           </div>
-          <Link to="/app/courses" className="font-medium text-blue-600 transition-colors hover:text-blue-800">
+          <Link
+            to="/app/courses"
+            aria-label="Ver todas las carreras"
+            className="font-medium text-blue-600 transition-colors hover:text-blue-800"
+          >
             Ver todas
           </Link>
         </div>
@@ -116,6 +121,7 @@ export function Dashboard() {
               <Link
                 key={career.id}
                 to={`/app/courses/${career.id}`}
+                aria-label={`Abrir carrera ${career.name}, plan ${career.studyPlan}, ${careerCounts[career.id] ?? 0} recursos disponibles`}
                 className="group rounded-2xl border border-blue-100 bg-white/85 p-6 shadow-sm shadow-blue-900/5 transition-colors hover:border-blue-200 hover:bg-blue-50/40"
               >
                 <div className="flex items-start gap-4">
@@ -139,7 +145,7 @@ export function Dashboard() {
       </section>
 
       {popular.length > 0 && (
-        <section className="mb-12">
+        <section className="mb-12" aria-label="Recursos mas descargados">
           <div className="flex items-center gap-3 mb-8">
             <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-cyan-100 text-cyan-600">
               <TrendingUp className="w-5 h-5" />
@@ -168,7 +174,7 @@ export function Dashboard() {
         </section>
       )}
 
-      <section>
+      <section aria-label="Recursos subidos recientemente">
         <div className="flex items-center gap-3 mb-8">
           <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-indigo-100 text-indigo-600">
             <Clock className="w-5 h-5" />

@@ -27,6 +27,7 @@ export class StorageService implements OnApplicationBootstrap {
 
   readonly provider = config.storage.provider;
   readonly bucket = config.storage.bucket;
+  private readonly autoCreateBucket = config.storage.autoCreateBucket;
   private bucketReady = false;
 
   constructor(@Inject(AuthService) private readonly auth: AuthService) {}
@@ -37,7 +38,7 @@ export class StorageService implements OnApplicationBootstrap {
       this.bucketReady = true;
     } catch (error) {
       console.warn(
-        `MinIO no está disponible en ${config.storage.endpoint}; se omitió la creación automática del bucket ${this.bucket}.`,
+        `Storage ${this.provider} no esta disponible en ${config.storage.endpoint}; no se pudo verificar el bucket ${this.bucket}.`,
       );
     }
   }
@@ -54,7 +55,7 @@ export class StorageService implements OnApplicationBootstrap {
         await this.ensureBucket();
         this.bucketReady = true;
       } catch (error) {
-        badRequest("Storage no está disponible. Verifica que MinIO esté corriendo.");
+        badRequest("Storage no esta disponible. Verifica la configuracion del bucket y credenciales.");
       }
     }
 
@@ -113,13 +114,22 @@ export class StorageService implements OnApplicationBootstrap {
 
   publicObjectUrl(storageKey: string) {
     const endpoint = config.storage.publicEndpoint.replace(/\/+$/, "");
-    return `${endpoint}/${this.bucket}/${storageKey}`;
+    const encodedKey = storageKey
+      .split("/")
+      .map((part) => encodeURIComponent(part))
+      .join("/");
+    return config.storage.publicIncludeBucket
+      ? `${endpoint}/${this.bucket}/${encodedKey}`
+      : `${endpoint}/${encodedKey}`;
   }
 
   private async ensureBucket() {
     try {
       await this.client.send(new HeadBucketCommand({ Bucket: this.bucket }));
     } catch {
+      if (!this.autoCreateBucket) {
+        throw new Error(`Bucket ${this.bucket} no disponible o sin permisos para HeadBucket`);
+      }
       await this.client.send(new CreateBucketCommand({ Bucket: this.bucket }));
       try {
         await this.client.send(

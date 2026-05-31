@@ -1,5 +1,5 @@
 import { ArrowLeft, BookOpen, ChevronRight, SlidersHorizontal } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useEffect, useId, useState } from "react";
 import { Link, useParams } from "react-router";
 import { FilterPanel, type FilterValues } from "../../components/filters/FilterPanel";
 import { SortSelect } from "../../components/filters/SortSelect";
@@ -45,6 +45,7 @@ export function CourseResources() {
   const [error, setError] = useState<string | null>(null);
   const [filters, setFilters] = useState<FilterValues>(EMPTY_FILTERS);
   const [sort, setSort] = useState<SortMode>("recent");
+  const filtersPanelId = useId();
 
   useEffect(() => {
     let active = true;
@@ -97,7 +98,9 @@ export function CourseResources() {
   if (loading) {
     return (
       <div className="max-w-7xl mx-auto">
-        <p className="text-slate-600">Cargando recursos del curso...</p>
+        <p className="text-slate-600" role="status" aria-live="polite">
+          Cargando recursos del curso...
+        </p>
       </div>
     );
   }
@@ -115,19 +118,19 @@ export function CourseResources() {
   return (
     <div className="max-w-7xl mx-auto">
       <div className="mb-10">
-        <nav className="flex items-center gap-2 text-sm text-slate-600 mb-4 flex-wrap">
+        <nav aria-label="Ruta de navegacion del curso" className="flex items-center gap-2 text-sm text-slate-600 mb-4 flex-wrap">
           <Link to="/app" className="hover:text-blue-700">
             Inicio
           </Link>
-          <ChevronRight className="w-4 h-4" />
+          <ChevronRight aria-hidden="true" className="w-4 h-4" />
           <Link to="/app/courses" className="hover:text-blue-700">
             Carreras
           </Link>
-          <ChevronRight className="w-4 h-4" />
+          <ChevronRight aria-hidden="true" className="w-4 h-4" />
           <Link to={`/app/courses/${careerId}`} className="hover:text-blue-700">
             {career.name}
           </Link>
-          <ChevronRight className="w-4 h-4" />
+          <ChevronRight aria-hidden="true" className="w-4 h-4" />
           <span className="font-medium text-slate-900">{course.name}</span>
         </nav>
 
@@ -135,13 +138,13 @@ export function CourseResources() {
           to={`/app/courses/${careerId}`}
           className="mb-6 inline-flex items-center gap-2 text-blue-600 transition-colors hover:text-blue-800"
         >
-          <ArrowLeft className="w-4 h-4" />
+          <ArrowLeft aria-hidden="true" className="w-4 h-4" />
           Volver a {career.name}
         </Link>
 
         <div className="flex items-start gap-4">
           <div className="flex h-16 w-16 flex-shrink-0 items-center justify-center rounded-2xl bg-blue-100">
-            <BookOpen className="h-8 w-8 text-blue-600" />
+            <BookOpen aria-hidden="true" className="h-8 w-8 text-blue-600" />
           </div>
           <div>
             <h1 className="mb-2 text-3xl font-bold text-slate-900">{course.name}</h1>
@@ -156,10 +159,12 @@ export function CourseResources() {
         <Button
           variant="secondary"
           size="sm"
+          aria-expanded={showFilters}
+          aria-controls={filtersPanelId}
           onClick={() => setShowFilters((current) => !current)}
           className="flex items-center gap-2 rounded-full border-blue-100 hover:bg-blue-50"
         >
-          <SlidersHorizontal className="w-4 h-4" />
+          <SlidersHorizontal aria-hidden="true" className="w-4 h-4" />
           {showFilters ? "Ocultar filtros" : "Mostrar filtros"}
         </Button>
 
@@ -168,7 +173,7 @@ export function CourseResources() {
 
       <div className="flex flex-col lg:flex-row gap-6">
         {showFilters && (
-          <aside className="w-full lg:w-80 flex-shrink-0">
+          <aside id={filtersPanelId} className="w-full lg:w-80 flex-shrink-0" aria-label="Filtros del curso">
             <div className="lg:sticky lg:top-20">
               <FilterPanel
                 typeOptions={typeOptions}

@@ -6,11 +6,21 @@ import { VaultioLogo } from "../ui/VaultioLogo";
 import { useAuth } from "../../lib/auth-context";
 
 const NAV_ITEMS = [
-  { icon: Home, label: "Inicio", path: "/app" },
-  { icon: BookOpen, label: "Carreras", path: "/app/courses" },
-  { icon: Upload, label: "Subir", path: "/app/upload" },
-  { icon: Bookmark, label: "Guardados", path: "/app/saved" },
-  { icon: User, label: "Perfil", path: "/app/profile" },
+  { icon: Home, label: "Inicio", path: "/app", ariaLabel: "Ir al inicio del estudiante" },
+  {
+    icon: BookOpen,
+    label: "Carreras y cursos",
+    path: "/app/courses",
+    ariaLabel: "Explorar carreras y cursos disponibles",
+  },
+  { icon: Upload, label: "Subir recurso", path: "/app/upload", ariaLabel: "Subir un recurso academico" },
+  {
+    icon: Bookmark,
+    label: "Recursos guardados",
+    path: "/app/saved",
+    ariaLabel: "Ver mis recursos guardados",
+  },
+  { icon: User, label: "Mi perfil", path: "/app/profile", ariaLabel: "Ver y editar mi perfil de estudiante" },
 ];
 
 interface SidebarProps {
@@ -66,6 +76,17 @@ export function Sidebar({ mobileOpen = false, onCloseMobile }: SidebarProps) {
     return location.pathname.startsWith(path);
   };
 
+  const focusMainContent = () => {
+    window.setTimeout(() => {
+      document.getElementById("main-content")?.focus();
+    }, 0);
+  };
+
+  const handleNavigation = () => {
+    onCloseMobile?.();
+    focusMainContent();
+  };
+
   const handleSignOut = async () => {
     try {
       await signOut();
@@ -97,7 +118,11 @@ export function Sidebar({ mobileOpen = false, onCloseMobile }: SidebarProps) {
         }`}
       >
         <div className="flex items-center justify-between border-b border-blue-100/80 p-6">
-          <Link to="/" className="flex items-center gap-2">
+          <Link
+            to="/"
+            aria-label="Volver a la pagina principal de Vaultio"
+            className="flex items-center gap-2 rounded-sm focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2"
+          >
             <VaultioLogo textClassName="text-2xl" iconClassName="h-9 w-9" />
           </Link>
           {mobileOpen && (
@@ -108,18 +133,29 @@ export function Sidebar({ mobileOpen = false, onCloseMobile }: SidebarProps) {
               onClick={onCloseMobile}
               className="rounded-md p-1 text-slate-600 hover:bg-blue-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2 lg:hidden"
             >
-              <X className="w-5 h-5" />
+              <X aria-hidden="true" className="w-5 h-5" />
             </button>
           )}
         </div>
 
-        <nav aria-label="Navegación principal" className="flex-1 p-4">
+        <nav aria-label="Navegación principal" aria-describedby="main-navigation-hint" className="flex-1 p-4">
+          <p id="main-navigation-hint" className="sr-only">
+            Active una opcion con Enter para abrirla. Tambien puede presionar flecha derecha desde la
+            navegacion para ir al contenido principal de la pantalla actual.
+          </p>
           <ul className="space-y-1">
             {NAV_ITEMS.map((item) => (
               <li key={item.path}>
                 <Link
                   to={item.path}
-                  onClick={onCloseMobile}
+                  onClick={handleNavigation}
+                  onKeyDown={(event) => {
+                    if (event.key === "ArrowRight") {
+                      event.preventDefault();
+                      focusMainContent();
+                    }
+                  }}
+                  aria-label={item.ariaLabel}
                   aria-current={isActive(item.path) ? "page" : undefined}
                   className={`flex items-center gap-3 rounded-xl px-4 py-2.5 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2 ${
                     isActive(item.path)
@@ -138,6 +174,7 @@ export function Sidebar({ mobileOpen = false, onCloseMobile }: SidebarProps) {
         <div className="border-t border-blue-100/80 p-4">
           <button
             type="button"
+            aria-label="Cerrar sesion actual"
             onClick={handleSignOut}
             className="flex w-full items-center gap-3 rounded-xl px-4 py-2.5 text-slate-600 transition-colors hover:bg-blue-50/70 hover:text-slate-900 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2"
           >

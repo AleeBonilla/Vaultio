@@ -1,5 +1,5 @@
 import { AlertTriangle, Calendar, Mail, Star, Upload } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useEffect, useId, useState } from "react";
 import { Link, useParams } from "react-router";
 import { toast } from "sonner";
 import { ResourceCard } from "../../components/resources/ResourceCard";
@@ -24,6 +24,8 @@ export function PublicProfile() {
   const [showReport, setShowReport] = useState(false);
   const [reason, setReason] = useState("");
   const [submittingReport, setSubmittingReport] = useState(false);
+  const reportFormId = useId();
+  const reportHelpId = useId();
 
   useEffect(() => {
     let active = true;
@@ -118,12 +120,12 @@ export function PublicProfile() {
               <p className="mb-3 text-sm font-semibold text-blue-600">@{user.username}</p>
               <div className="mb-3 flex flex-wrap items-center gap-3 text-slate-600">
                 <span className="inline-flex items-center gap-2">
-                  <Mail className="h-4 w-4" />
+                  <Mail aria-hidden="true" className="h-4 w-4" />
                   {user.email}
                 </span>
                 <span className="hidden text-slate-300 sm:inline">•</span>
                 <span className="inline-flex items-center gap-2">
-                  <Calendar className="h-4 w-4" />
+                  <Calendar aria-hidden="true" className="h-4 w-4" />
                   Reputación: {user.reputationScore}
                 </span>
               </div>
@@ -141,10 +143,11 @@ export function PublicProfile() {
 
           <div className="flex flex-wrap gap-2">
             {isOwnProfile ? (
-              <Link to="/app/profile/edit">
-                <Button variant="secondary" className="rounded-full border-blue-100 hover:bg-blue-50">
-                  Editar mi perfil
-                </Button>
+              <Link
+                to="/app/profile/edit"
+                className="rounded-full border border-blue-100 bg-white px-4 py-2 font-medium text-blue-700 transition-colors hover:bg-blue-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2"
+              >
+                Editar mi perfil
               </Link>
             ) : (
               <Button
@@ -152,6 +155,7 @@ export function PublicProfile() {
                 variant="secondary"
                 className="flex items-center gap-2 rounded-full border-red-100 text-red-600 hover:bg-red-50"
                 aria-expanded={showReport}
+                aria-controls={showReport ? reportFormId : undefined}
                 onClick={() => setShowReport((current) => !current)}
               >
                 <AlertTriangle aria-hidden="true" className="h-4 w-4" />
@@ -163,15 +167,27 @@ export function PublicProfile() {
 
         {showReport && (
           <form
+            id={reportFormId}
             onSubmit={handleReport}
             aria-label={`Reportar usuario ${user.firstName} ${user.lastName}`}
+            aria-describedby={reportHelpId}
+            onKeyDown={(event) => {
+              if (event.key === "Escape") {
+                event.stopPropagation();
+                setShowReport(false);
+              }
+            }}
             className="mt-6 rounded-2xl border border-red-100 bg-red-50/60 p-4"
           >
             <label htmlFor="reportReason" className="mb-2 block text-sm font-semibold text-slate-900">
               Motivo del reporte
             </label>
+            <p id={reportHelpId} className="sr-only">
+              Escriba el motivo del reporte. Use Escape para cerrar este formulario sin enviarlo.
+            </p>
             <textarea
               id="reportReason"
+              aria-describedby={reportHelpId}
               value={reason}
               maxLength={255}
               onChange={(event) => setReason(event.target.value)}
@@ -249,7 +265,7 @@ function Stat({ label, value, icon }: { label: string; value: number | string; i
   return (
     <div className="rounded-2xl border border-blue-100 bg-blue-50/40 p-4 text-center">
       <div aria-hidden="true" className="mb-2 flex items-center justify-center">
-        {icon}
+        <span aria-hidden="true">{icon}</span>
       </div>
       <div className="text-2xl font-bold text-blue-600">{value}</div>
       <div className="text-sm text-slate-600">{label}</div>

@@ -43,6 +43,7 @@ export function CommentBlock({
   const [replyDraft, setReplyDraft] = useState("");
   const replyInputId = useId();
   const replyFormId = useId();
+  const replyHelpId = useId();
   const initial = author?.[0]?.toUpperCase() || "?";
 
   const handleReply = async (event: React.FormEvent) => {
@@ -87,7 +88,11 @@ export function CommentBlock({
         <div className="min-w-0 flex-1">
           <div className="mb-1 flex flex-wrap items-center gap-2">
             {authorId && !isDeleted ? (
-              <Link to={`/app/users/${authorId}`} className="font-medium text-slate-900 hover:text-blue-700">
+              <Link
+                to={`/app/users/${authorId}`}
+                aria-label={`Ver perfil de ${author}`}
+                className="font-medium text-slate-900 hover:text-blue-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2"
+              >
                 {author}
               </Link>
             ) : (
@@ -137,6 +142,7 @@ export function CommentBlock({
                 onClick={() => setReplying((current) => !current)}
                 aria-expanded={replying}
                 aria-controls={replying ? replyFormId : undefined}
+                aria-label={`Responder al comentario de ${author}`}
                 className="inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-xs font-medium text-blue-600 hover:bg-blue-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2"
               >
                 <MessageCircle aria-hidden="true" className="h-3.5 w-3.5" />
@@ -160,13 +166,24 @@ export function CommentBlock({
             <form
               id={replyFormId}
               onSubmit={handleReply}
+              aria-describedby={replyHelpId}
+              onKeyDown={(event) => {
+                if (event.key === "Escape") {
+                  event.stopPropagation();
+                  setReplying(false);
+                }
+              }}
               className="mt-3 rounded-2xl border border-blue-100 bg-blue-50/30 p-3"
             >
               <label htmlFor={replyInputId} className="sr-only">
                 Respuesta para {author}
               </label>
+              <p id={replyHelpId} className="sr-only">
+                Escriba una respuesta al comentario. Use Escape para cerrar el formulario sin responder.
+              </p>
               <textarea
                 id={replyInputId}
+                aria-describedby={replyHelpId}
                 value={replyDraft}
                 onChange={(event) => setReplyDraft(event.target.value)}
                 rows={2}

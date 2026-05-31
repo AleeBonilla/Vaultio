@@ -53,8 +53,38 @@ export function UserProfile() {
   }, []);
 
   useEffect(() => {
-    if (resourceToDelete) deleteDialogRef.current?.focus();
-  }, [resourceToDelete]);
+    if (!resourceToDelete) return;
+    const dialog = deleteDialogRef.current;
+    dialog?.focus();
+
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === "Escape" && !deletingResource) {
+        setResourceToDelete(null);
+        return;
+      }
+      if (event.key !== "Tab" || !dialog) return;
+
+      const focusable = Array.from(
+        dialog.querySelectorAll<HTMLElement>(
+          'a[href], button:not([disabled]), input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])',
+        ),
+      );
+      if (focusable.length === 0) return;
+
+      const first = focusable[0];
+      const last = focusable[focusable.length - 1];
+      if (event.shiftKey && document.activeElement === first) {
+        event.preventDefault();
+        last.focus();
+      } else if (!event.shiftKey && document.activeElement === last) {
+        event.preventDefault();
+        first.focus();
+      }
+    };
+
+    document.addEventListener("keydown", handleKeyDown);
+    return () => document.removeEventListener("keydown", handleKeyDown);
+  }, [deletingResource, resourceToDelete]);
 
   if (!profile) return null;
 
@@ -104,12 +134,12 @@ export function UserProfile() {
               <p className="mb-3 text-sm font-semibold text-blue-600">@{profile.username}</p>
               <div className="mb-3 flex flex-wrap items-center gap-3 text-slate-600">
                 <span className="inline-flex items-center gap-2">
-                  <Mail className="w-4 h-4" />
+                  <Mail aria-hidden="true" className="w-4 h-4" />
                   {profile.email}
                 </span>
                 <span className="hidden text-slate-300 sm:inline">•</span>
                 <span className="inline-flex items-center gap-2">
-                  <Calendar className="w-4 h-4" />
+                  <Calendar aria-hidden="true" className="w-4 h-4" />
                   Reputación: {profile.reputationScore}
                 </span>
               </div>
@@ -138,14 +168,12 @@ export function UserProfile() {
               </div>
             </div>
           </div>
-          <Link to="/app/profile/edit">
-            <Button
-              variant="secondary"
-              className="flex min-w-40 items-center justify-center gap-2 whitespace-nowrap rounded-full border-blue-100 hover:bg-blue-50"
-            >
-              <Edit className="w-4 h-4" />
-              Editar perfil
-            </Button>
+          <Link
+            to="/app/profile/edit"
+            className="flex min-w-40 items-center justify-center gap-2 whitespace-nowrap rounded-full border border-blue-100 bg-white px-4 py-2 font-medium text-blue-700 transition-colors hover:bg-blue-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2"
+          >
+            <Edit aria-hidden="true" className="w-4 h-4" />
+            Editar perfil
           </Link>
         </div>
 
@@ -176,7 +204,9 @@ export function UserProfile() {
       <section className="rounded-2xl border border-blue-100 bg-white/85 p-6 shadow-sm shadow-blue-900/5">
         <h2 className="mb-6 text-xl font-semibold text-slate-900">Mis recursos subidos</h2>
         {loading ? (
-          <p className="text-slate-600">Cargando...</p>
+          <p className="text-slate-600" role="status" aria-live="polite">
+            Cargando...
+          </p>
         ) : uploads.length === 0 ? (
           <p className="text-slate-600">
             Todavía no has subido recursos.{" "}
@@ -217,13 +247,19 @@ export function UserProfile() {
             role="dialog"
             aria-modal="true"
             aria-labelledby={deleteDialogTitleId}
+            onKeyDown={(event) => {
+              if (event.key === "Escape" && !deletingResource) {
+                event.stopPropagation();
+                setResourceToDelete(null);
+              }
+            }}
             tabIndex={-1}
             className="w-full max-w-md rounded-3xl border border-blue-100 bg-white p-6 shadow-2xl shadow-blue-950/20"
           >
             <div className="mb-5 flex items-start justify-between gap-4">
               <div className="flex items-start gap-3">
                 <span className="flex h-11 w-11 flex-shrink-0 items-center justify-center rounded-2xl bg-red-50 text-red-600">
-                  <AlertTriangle className="h-5 w-5" />
+                  <AlertTriangle aria-hidden="true" className="h-5 w-5" />
                 </span>
                 <div>
                   <h3 id={deleteDialogTitleId} className="text-lg font-semibold text-slate-900">
@@ -241,7 +277,7 @@ export function UserProfile() {
                 className="rounded-full p-1 text-slate-400 hover:bg-blue-50 hover:text-slate-700"
                 disabled={deletingResource}
               >
-                <X className="h-5 w-5" />
+                <X aria-hidden="true" className="h-5 w-5" />
               </button>
             </div>
             <div className="mb-6 rounded-2xl border border-blue-100 bg-blue-50/40 p-4">
@@ -279,7 +315,7 @@ function Stat({ label, value, icon }: { label: string; value: number | string; i
   return (
     <div className="rounded-2xl border border-blue-100 bg-blue-50/40 p-4 text-center">
       <div aria-hidden="true" className="mb-2 flex items-center justify-center">
-        {icon}
+        <span aria-hidden="true">{icon}</span>
       </div>
       <div className="text-2xl font-bold text-blue-600">{value}</div>
       <div className="text-sm text-slate-600">{label}</div>

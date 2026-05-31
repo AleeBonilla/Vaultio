@@ -94,7 +94,9 @@ export function EditResource() {
   if (loading) {
     return (
       <div className="max-w-3xl mx-auto">
-        <p className="text-slate-600">Cargando recurso...</p>
+        <p className="text-slate-600" role="status" aria-live="polite">
+          Cargando recurso...
+        </p>
       </div>
     );
   }
@@ -113,9 +115,9 @@ export function EditResource() {
     <div className="max-w-3xl mx-auto">
       <Link
         to="/app/profile"
-        className="mb-6 inline-flex items-center gap-2 text-blue-600 hover:text-blue-800"
+        className="mb-6 inline-flex items-center gap-2 rounded-sm text-blue-600 hover:text-blue-800 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2"
       >
-        <ArrowLeft className="h-4 w-4" />
+        <ArrowLeft aria-hidden="true" className="h-4 w-4" />
         Volver al perfil
       </Link>
 
@@ -131,7 +133,7 @@ export function EditResource() {
 
         <form onSubmit={handleSubmit} className="space-y-5">
           {error && (
-            <div className="rounded-xl border border-red-200 bg-red-50 p-3 text-sm text-red-700">{error}</div>
+            <div className="rounded-xl border border-red-200 bg-red-50 p-3 text-sm text-red-700" role="alert">{error}</div>
           )}
 
           <Input label="Titulo" value={title} onChange={(event) => setTitle(event.target.value)} required />
@@ -198,22 +200,21 @@ export function EditResource() {
           />
 
           <div className="flex gap-3 border-t border-blue-100 pt-5">
-            <Link to="/app/profile" className="flex-1">
-              <Button
-                type="button"
-                variant="secondary"
-                className="w-full rounded-full border-blue-100 hover:bg-blue-50"
-              >
-                Cancelar
-              </Button>
-            </Link>
+            <Button
+              type="button"
+              variant="secondary"
+              onClick={() => navigate("/app/profile")}
+              className="flex-1 rounded-full border-blue-100 hover:bg-blue-50"
+            >
+              Cancelar
+            </Button>
             <Button
               type="submit"
               variant="primary"
               className="flex-1 rounded-full bg-blue-600 hover:bg-blue-700"
               disabled={submitting}
             >
-              <Save className="h-4 w-4" />
+              <Save aria-hidden="true" className="h-4 w-4" />
               {submitting ? "Guardando..." : "Guardar cambios"}
             </Button>
           </div>
