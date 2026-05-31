@@ -158,7 +158,7 @@ export class ResourcesService {
     if (!resourceType) badRequest("Tipo de recurso inválido");
 
     const externalUrl = typeof input.externalUrl === "string" ? input.externalUrl.trim() : "";
-    if (externalUrl) await this.ensureResourceModelConstraints();
+    await this.ensureResourceModelConstraints();
     let parsedExternalUrl: URL | null = null;
     if (externalUrl) {
       try {
@@ -540,7 +540,7 @@ export class ResourcesService {
     await this.prisma.$executeRawUnsafe(`
       ALTER TABLE resources
       ADD CONSTRAINT chk_resources_storage_provider
-      CHECK (storage_provider IN ('firebase_storage', 'minio', 'local', 's3', 'external'))
+      CHECK (storage_provider IN ('firebase_storage', 'minio', 'local', 's3', 'r2', 'external'))
     `);
     await this.prisma.$executeRawUnsafe(`
       ALTER TABLE resources
