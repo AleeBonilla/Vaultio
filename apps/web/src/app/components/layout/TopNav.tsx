@@ -1,6 +1,7 @@
 import { Menu, User } from "lucide-react";
 import { useState } from "react";
 import { Link, useNavigate } from "react-router";
+import { HighContrastToggle } from "../ui/HighContrastToggle";
 import { SearchBar } from "../ui/SearchBar";
 import { useAuth } from "../../lib/auth-context";
 
@@ -49,6 +50,7 @@ export function TopNav({ onOpenMobileMenu }: TopNavProps) {
         </form>
 
         <div className="flex items-center gap-2">
+          <HighContrastToggle compact />
           <Link
             to="/app/profile"
             className="flex items-center gap-2 rounded-full px-3 py-2 transition-colors hover:bg-blue-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2"

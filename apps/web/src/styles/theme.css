@@ -179,3 +179,141 @@
     line-height: 1.5;
   }
 }
+
+html.high-contrast {
+  color-scheme: dark;
+  --background: #000000;
+  --foreground: #ffffff;
+  --card: #000000;
+  --card-foreground: #ffffff;
+  --popover: #000000;
+  --popover-foreground: #ffffff;
+  --primary: #ffff00;
+  --primary-foreground: #000000;
+  --secondary: #ffffff;
+  --secondary-foreground: #000000;
+  --muted: #000000;
+  --muted-foreground: #ffffff;
+  --accent: #ffff00;
+  --accent-foreground: #000000;
+  --destructive: #ff4d4d;
+  --destructive-foreground: #000000;
+  --border: #ffffff;
+  --input-background: #000000;
+  --ring: #ffff00;
+  --sidebar: #000000;
+  --sidebar-foreground: #ffffff;
+  --sidebar-primary: #ffff00;
+  --sidebar-primary-foreground: #000000;
+  --sidebar-accent: #000000;
+  --sidebar-accent-foreground: #ffffff;
+  --sidebar-border: #ffffff;
+  --sidebar-ring: #ffff00;
+}
+
+html.high-contrast body,
+html.high-contrast [class*="bg-slate-"],
+html.high-contrast [class*="bg-white"],
+html.high-contrast [class*="bg-blue-50"],
+html.high-contrast [class*="bg-cyan-"],
+html.high-contrast [class*="bg-indigo-"],
+html.high-contrast [class*="bg-purple-"],
+html.high-contrast [class*="bg-emerald-"],
+html.high-contrast [class*="bg-green-"],
+html.high-contrast [class*="bg-orange-"],
+html.high-contrast [class*="bg-red-"] {
+  background-color: #000000 !important;
+  color: #ffffff !important;
+}
+
+html.high-contrast [class*="bg-blue-600"],
+html.high-contrast [class*="from-blue-600"],
+html.high-contrast [class*="to-cyan-500"] {
+  background: #ffff00 !important;
+  background-color: #ffff00 !important;
+  color: #000000 !important;
+}
+
+html.high-contrast [class*="text-slate-"],
+html.high-contrast [class*="text-gray-"],
+html.high-contrast [class*="text-white"] {
+  color: #ffffff !important;
+}
+
+html.high-contrast a,
+html.high-contrast [class*="text-blue-"],
+html.high-contrast [class*="text-cyan-"],
+html.high-contrast [class*="text-indigo-"],
+html.high-contrast [class*="text-purple-"],
+html.high-contrast [class*="text-green-"],
+html.high-contrast [class*="text-emerald-"],
+html.high-contrast [class*="text-orange-"],
+html.high-contrast [class*="text-red-"] {
+  color: #ffff00 !important;
+}
+
+html.high-contrast .text-transparent,
+html.high-contrast [class*="bg-clip-text"] {
+  background: none !important;
+  color: #ffffff !important;
+  -webkit-text-fill-color: #ffffff !important;
+}
+
+html.high-contrast [class*="border"],
+html.high-contrast [class*="ring-"] {
+  border-color: #ffffff !important;
+  --tw-ring-color: #ffff00 !important;
+}
+
+html.high-contrast button,
+html.high-contrast input,
+html.high-contrast textarea,
+html.high-contrast select {
+  background-color: #000000 !important;
+  border-color: #ffffff !important;
+  color: #ffffff !important;
+}
+
+html.high-contrast button[aria-pressed="true"],
+html.high-contrast [aria-current="page"],
+html.high-contrast [class*="bg-blue-600"] {
+  background-color: #ffff00 !important;
+  color: #000000 !important;
+}
+
+html.high-contrast button[aria-pressed="true"] *,
+html.high-contrast [aria-current="page"] *,
+html.high-contrast [class*="bg-blue-600"] * {
+  color: #000000 !important;
+}
+
+html.high-contrast input::placeholder,
+html.high-contrast textarea::placeholder {
+  color: #ffffff !important;
+  opacity: 1;
+}
+
+html.high-contrast *:focus-visible {
+  outline: 3px solid #ffff00 !important;
+  outline-offset: 3px !important;
+  box-shadow: none !important;
+}
+
+html.high-contrast [class*="shadow"],
+html.high-contrast [class*="blur"],
+html.high-contrast [class*="backdrop-blur"] {
+  box-shadow: none !important;
+  filter: none !important;
+  backdrop-filter: none !important;
+}
+
+html.high-contrast [class*="bg-gradient"],
+html.high-contrast [class*="from-"],
+html.high-contrast [class*="via-"],
+html.high-contrast [class*="to-"] {
+  background-image: none !important;
+}
+
+html.high-contrast svg {
+  forced-color-adjust: auto;
+}

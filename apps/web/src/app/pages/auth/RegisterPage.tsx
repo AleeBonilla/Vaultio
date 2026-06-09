@@ -3,6 +3,7 @@ import { useEffect, useState } from "react";
 import { Link, Navigate, useNavigate } from "react-router";
 import { toast } from "sonner";
 import { Button } from "../../components/ui/Button";
+import { HighContrastToggle } from "../../components/ui/HighContrastToggle";
 import { Input } from "../../components/ui/Input";
 import { VaultioLogo } from "../../components/ui/VaultioLogo";
 import { catalogApi, type Career } from "../../lib/api";
@@ -150,6 +151,9 @@ export function RegisterPage() {
     <div className="relative flex min-h-screen items-center justify-center overflow-hidden bg-slate-50 p-6 text-slate-900">
       <div className="absolute left-1/2 top-0 h-[420px] w-[700px] -translate-x-1/2 rounded-full bg-blue-400/20 blur-[120px]" />
       <div className="absolute -right-64 top-1/3 h-[420px] w-[420px] rounded-full bg-cyan-300/20 blur-[110px]" />
+      <div className="absolute right-6 top-6 z-20">
+        <HighContrastToggle />
+      </div>
 
       <div className="relative z-10 w-full max-w-md">
         <div className="mb-10 text-center">
